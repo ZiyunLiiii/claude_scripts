@@ -1,13 +1,11 @@
 # 4D Reconstruction — Skills
 
-## Required Skills for This Project
-<!-- What technical/domain knowledge is needed? -->
+## Methods
+- MACE, qGGMRF denoising, DCT-I temporal filtering
+- Cone-beam CT forward/back projection (mbirjax)
+- Multi-GPU JAX (configure_devices, ThreadPoolExecutor)
 
-## Skills I Have
-<!-- What you're already comfortable with -->
+## Tools
+- `mbirjax`, `jax`, `scipy.fft`
 
-## Skills to Learn / Improve
-<!-- Gaps to fill -->
-
-## Resources
-<!-- Papers, courses, tools, repos that are useful -->
+## To Learn

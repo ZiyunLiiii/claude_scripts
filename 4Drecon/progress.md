@@ -1,16 +1,13 @@
-# 4D Reconstruction — Progress Log
+# 4D Reconstruction — Progress
 
-## Current Status
-- Sub-project 1 (4D MACE): Working multi-GPU implementation. DCT dejittering integrated. Investigating null-space projection.
-- Sub-project 2 (Single-view): Literature search in progress.
+## Status
+- 4D MACE: working multi-GPU implementation, DCT dejittering integrated, null-space projection under investigation
+- Single-view: literature search in progress
 
----
-
-## Log (newest first)
+## Log
 
 ### 2026-08-07
-- Shared full 4D MACE script with Claude; architecture and dejitter logic documented in `4D_MACE.md`
-- Active investigation: null-space projection dejittering — x + (I - A⁺A)(Px - x)
-- Single-view project scoped: plume in pork belly, fixed-angle acquisition + steady-state CBCT reference
-- Created Claude_scripts/4Drecon tracking folder
-- Lilly proposal draft started in Overleaf (main.tex — Introduction section pending)
+- 4D MACE script shared; DCT-I dejittering (period=6, harmonics) applied in forward + prior agents
+- Issue identified: direct dejitter may violate AX = y → null-space projection idea: x + (I - A⁺A)(Px - x)
+- Single-view project scoped: plume in pork belly, fixed-angle + steady-state CBCT reference
+- Created Claude_scripts/4Drecon tracking folder; Lilly proposal draft started in Overleaf
