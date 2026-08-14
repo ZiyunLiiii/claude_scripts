@@ -2,7 +2,7 @@
 
 ## Setup
 - **Object**: plume injected into pork belly tissue
-- **Acquisition**: scans from a single fixed angle (not a full CT rotation)
+- **Acquisition**: scans from a single fixed angle (not a full CT rotation); 10000 - 32000 projections
 - **Reference**: full CBCT scan of the final steady-state plume (available as prior)
 - **Goal**: reconstruct the 4D evolution of the plume from single-view data
 
