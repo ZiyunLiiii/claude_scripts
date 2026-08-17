@@ -6,6 +6,13 @@
 
 ## Log
 
+### 2026-08-17
+- Added `compute_bin_params(data_path, angle_span_per_recon, angle_overlapping)` to `utils.py`
+  - Finds the `.nsipro` file via glob, parses `<angleStep>` from `<Object Radiograph>` section (same approach as mbirjax NSI preprocess)
+  - Returns `views_per_bin = round(span/step)`, `stride = round((span-overlap)/step)`
+  - Replaces hardcoded `views_per_bin=48, stride=24` in both `Lilly_recon.py` and `dev_recon.py`
+  - Validated: 120° span, 60° overlap, 2.5°/view → views_per_bin=48, stride=24 ✓
+
 ### 2026-08-07
 - 4D MACE script shared; DCT-I dejittering (period=6, harmonics) applied in forward + prior agents
 - Issue identified: direct dejitter may violate AX = y → null-space projection idea: x + (I - A⁺A)(Px - x)
