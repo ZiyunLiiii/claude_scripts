@@ -8,4 +8,7 @@
 ## Tools
 - `mbirjax`, `jax`, `scipy.fft`
 
+## Visualization
+- Use `mbirjax.slice_viewer` (interactive, blocks until closed) over ThinLinc/X11 rather than building a substitute viewer — see 4D_MACE/skills.md for details.
+
 ## To Learn
