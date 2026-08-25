@@ -4,11 +4,37 @@ Goal: writing that is easy to parse on first read.  Optimize reader effort,
 not word count.  This style is inspired by Michael Alley's *The Craft of
 Scientific Writing*.
 
-Where it applies.  Apply this style most strictly to durable records: findings
-pages, reports, figure captions, and plan documents.  Apply it equally to the
-summary that closes a chain of work — the message that explains what was found
-after a long tool or analysis sequence.  Intermediate narration during such a
-chain does not need this level of care; short status lines are fine there.
+This applies to everything written: chats, findings pages, reports, figure
+captions, plan documents, program comments, and docstrings.
+
+Where it applies most strictly.  Apply this style most strictly to durable
+records: findings pages, reports, figure captions, and plan documents.  Apply
+it equally to the summary that closes a chain of work — the message that
+explains what was found after a long tool or analysis sequence.  Intermediate
+narration during such a chain does not need this level of care; short status
+lines are fine there.
+
+Keep all written material succinct, to-the-point, clear, and correct.  Think
+carefully before you write.
+
+**Write plan entries and status reports in plain English.**
+Technical terms are fine to use when their definition is understood by the
+broad community.  If a term is not widely understood, define it.  Do not use
+invented or undefined jargon (for example, "merge hygiene").
+
+Make sure to write sentences with subjects and verbs.  Do not communicate with
+sentence fragments and "bag of words" — a randomly ordered set of words used
+to communicate an idea.
+
+**No metaphors or idioms in technical statements — state the literal fact.**
+Example of the failure: describing a helper function in the same repository
+as "sitting next door."
+
+**Do not use a word without fully understanding its precise meaning.**
+Example of the failure: a "fresh" thread pool.  "Fresh" applies to things
+whose quality degrades with time, so "stale information" is legitimate and
+"fresh pool" is not.  Say the literal fact: a new ThreadPoolExecutor is
+constructed, used once, and destroyed.
 
 ## Structure
 
@@ -69,3 +95,12 @@ Write:
 
 The second version is longer, and it takes less time to read and understand.
 That trade is the point.
+
+## Docstrings
+
+Docstrings are meant to be read by humans; their purpose is to explain how a
+function or method is to be used, and what it does.
+
+Docstrings should be succinct and to-the-point.  They should not contain long
+meandering sentences about obscure details of the inner workings of the
+function or method.
