@@ -3,8 +3,12 @@
 ## Status
 - 4D MACE: working multi-GPU implementation, DCT dejittering integrated, null-space projection under investigation
 - Single-view: literature search in progress
+- MAR + multi-slice fusion: pipeline validated end to end on two real Lilly datasets; see `mar_fusion/progress.md`
 
 ## Log
+
+### 2026-08-27 to 2026-08-31
+- Built and validated the MAR + multi-slice fusion pipeline (new sub-project) on `Autoinjector_HighRes_Horizontal` and `Connected_Autoinjector_Vertical`. Full log, gotchas, and open questions in `mar_fusion/{progress,rules,goal}.md`.
 
 ### 2026-08-17
 - Added `compute_bin_params(data_path, angle_span_per_recon, angle_overlapping)` to `utils.py`
