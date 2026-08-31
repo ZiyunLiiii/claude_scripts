@@ -8,28 +8,67 @@
 ## Log
 
 ### 2026-08-31
-- Merged the 4D MACE code into mbirjax, following `4DCT/plans/mbirjax_merge_plan.md`
-  - `mbirjax/mace4d.py`: `MACE4DModel(ParameterHandler)`. Constructor takes `ct_model` + frame
-    params (no data); `recon(sinogram, weights=None, init_recon=None, max_iterations=10,
-    stop_threshold_change_pct=0.2, init_dir=None, log_dir=None)` returns `(recon, recon_dict)`
-  - `mbirjax/utilities.py`: `construct_time_frame_models` (model-only primitive) and
-    `construct_time_frames` (wrapper that also slices the sinogram); new
-    `save_4d_volume_as_gif(volume, filename, slice_axis=1, slice_index=None, ...)` — axis 0 is
-    time, `slice_axis` picks the fixed spatial plane. `save_volume_as_gif` is left unchanged:
-    its axis 0 is spatial, so folding the 4D behavior into it would mislead 3D callers
-  - `mbirjax/parameter_handler.py`: loggers are now per instance, not per class — fixes a real
-    race when models run concurrently in threads. Replaces the old `_silence_model_logging` hack
-  - `weight_type` is gone from the model: `weights=None` means unit weights, and
-    `transmission_root` is applied by the caller with one `gen_weights` call
-  - 41 CPU tests added across `test_mace4d.py`, `test_utilities.py`, `test_logging.py`
-  - 4DCT `recon_4d.py` now drives `mj.MACE4DModel`; `--max_mace_itr` renamed to
-    `--max_iterations`, and `--weight_type` added (default `transmission_root`)
-- Two defects found by the port: a constant `init_recon` divided by zero inside the qGGMRF
-  setup (now reports the cause), and the pre-merge prior-weight test compared floats exactly
-- Still unverified: multi-GPU concurrency (tested only on 2 virtual CPU devices), agreement
-  with a pre-merge full-resolution reference, and whether the new default
-  `stop_threshold_change_pct=0.2` stops a production run before 10 iterations
-- Sphinx docs plan written to `4DCT/plans/mbirjax_docs_plan.md`; not yet implemented
+Merged the 4D MACE code into **mbirjax**, following `4DCT/plans/mbirjax_merge_plan.md`.
+mbirjax branch `4DCT_for_merging` (6 commits, `ba42ee6`..`a9e13e8`); 4DCT branch
+`refactor_for_mbirjax` (7 commits, `1f07db6`..`d76fd42`).
+
+**What moved**
+- `mbirjax/mace4d.py`: `MACE4DModel(ParameterHandler)`. Operator in the constructor
+  (`ct_model` + `frames_per_rotation`, `frame_overlap_factor`, `num_frames`), data at
+  `recon(sinogram, weights=None, init_recon=None, max_iterations=10,
+  stop_threshold_change_pct=0.2, init_dir=None, log_dir=None)` -> `(recon, recon_dict)`.
+  `configure_devices()` replaces the old `devices=` argument to `recon`.
+- `mbirjax/utilities.py`: `construct_time_frame_models(model, ...)` (model-only primitive,
+  returns models + view slices) and `construct_time_frames(sinogram, model, ...)` (wrapper
+  that also slices the sinogram, as NumPy views).
+- `mbirjax/utilities.py`: new `save_4d_volume_as_gif(volume, filename, slice_axis=1,
+  slice_index=None, ...)`. Axis 0 is time; `slice_axis` picks the fixed spatial plane.
+  `save_volume_as_gif` is left **unchanged** — its axis 0 is spatial and shown transposed,
+  so folding the 4D behavior into it would have misled existing 3D callers. This reversed
+  Step 4 of the merge plan.
+- `mbirjax/parameter_handler.py`: model loggers are now per instance, not per class. Fixes a
+  real race — concurrent models rebuilt each other's handlers, and one thread could close a
+  log file another was writing to. Replaces the old `_silence_model_logging` hack.
+
+**Interface changes that break old commands**
+- `--max_mace_itr` -> `--max_iterations`; new `--stop_threshold_change_pct` (default 0.2, so
+  a run can now stop before 10 iterations — pass 0 to force all of them).
+- `weight_type` is gone from the model: `weights=None` means unit weights, as in
+  `TomographyModel.recon`. The driver applies `transmission_root` itself via the new
+  `--weight_type` flag, so defaults reproduce the old behavior.
+- Init cache renamed `init_image.npy` -> `init_recon.npy`. An old cache is not found and is
+  recomputed (15-20 min) unless renamed.
+
+**Defects found by the port**
+- A constant `init_recon` (e.g. all zeros) gave a zero noise estimate that divided through to
+  the qGGMRF forward-model constant — surfaced as `ZeroDivisionError` three calls deep.
+  `recon` now checks and names the cause.
+- The pre-merge prior-weight test compared floats exactly; `[0.1, 0.2, 0.3]` normalizes to
+  `0.3999999999999999`.
+- `num_frames=0` emptied the frame list and failed later on `model_list[0]`. Rejected at
+  construction now.
+
+**Verification**
+- 44 new CPU tests; 58 pass across `test_mace4d.py` (29), `test_utilities.py` (25, 11 new),
+  `test_logging.py` (4).
+- Threaded multi-device path runs on 2 virtual CPU devices, asserting both devices ran tasks.
+- `recon_4d.py`'s `main()` runs end to end against a stubbed NSI preprocessor.
+- Full mbirjax suite: 394 pass, 4 fail. The 4 failures (`test_qggmrf` alpha_derivative /
+  loss_and_gradient, `test_pallas_kernels` cone_fwd_matches_xla x2) reproduce identically at
+  base commit `b74ffc8` — pre-existing, not from this work.
+
+**Still unverified** — see `4DCT/plans/cluster_test_prompt.md` for the staged cluster plan
+- Multi-GPU concurrency: only 2 virtual CPU devices tested, and the deadlock that the device
+  pinning prevents cannot occur on CPU.
+- Agreement with a pre-merge full-resolution reference recon.
+- Whether the new default `stop_threshold_change_pct=0.2` ends a production run early.
+
+**Docs**
+- `4DCT/plans/lilly_interface.md` updated to the merged interface (it still described
+  `--max_mace_itr`, `init_image.npy`, and a weighting fixed inside the model).
+- Sphinx docs plan written to `4DCT/plans/mbirjax_docs_plan.md`; **not yet implemented**.
+- `4DCT/mace4d.py` and `4DCT/tests/` are now dead code, kept and labeled in the README;
+  deletion is an open decision.
 
 ### 2026-08-27 to 2026-08-31
 - Built and validated the MAR + multi-slice fusion pipeline (new sub-project) on `Autoinjector_HighRes_Horizontal` and `Connected_Autoinjector_Vertical`. Full log, gotchas, and open questions in `mar_fusion/{progress,rules,goal}.md`.
