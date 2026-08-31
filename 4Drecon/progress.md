@@ -13,8 +13,10 @@
     params (no data); `recon(sinogram, weights=None, init_recon=None, max_iterations=10,
     stop_threshold_change_pct=0.2, init_dir=None, log_dir=None)` returns `(recon, recon_dict)`
   - `mbirjax/utilities.py`: `construct_time_frame_models` (model-only primitive) and
-    `construct_time_frames` (wrapper that also slices the sinogram); `save_volume_as_gif` gained
-    `titles` and `fps`
+    `construct_time_frames` (wrapper that also slices the sinogram); new
+    `save_4d_volume_as_gif(volume, filename, slice_axis=1, slice_index=None, ...)` — axis 0 is
+    time, `slice_axis` picks the fixed spatial plane. `save_volume_as_gif` is left unchanged:
+    its axis 0 is spatial, so folding the 4D behavior into it would mislead 3D callers
   - `mbirjax/parameter_handler.py`: loggers are now per instance, not per class — fixes a real
     race when models run concurrently in threads. Replaces the old `_silence_model_logging` hack
   - `weight_type` is gone from the model: `weights=None` means unit weights, and
