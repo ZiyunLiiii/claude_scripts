@@ -7,6 +7,52 @@
 
 ## Log
 
+### 2026-09-01
+Validated the mbirjax merge on real data and real GPUs. **The merge is sound: the
+reconstruction is numerically unchanged and there is no performance regression.** The one
+thing still not established is voxel-level agreement with the pre-merge output.
+
+**What passed.** mbirjax's own tests (58, on CPU); the real NSI preprocessing path at
+25 frames on one H100; multi-GPU concurrency at 25 frames on four H100s (`task_log.csv`
+shows 4 distinct devices with work spread 12/16/14/14 over 56 tasks, no hang); and full
+resolution, 99 frames, 10 iterations.
+
+**The performance scare was node contention, not code.** Three full-resolution runs of the
+same commit gave steady-state denoise times of 421 s (`h004`), 752 s (`h013`, sharing the
+node with four other jobs), and 312-329 s (`h011`, `--exclusive`) against the Aug-25
+reference's 272 s. `prox` stayed flat at 194-206 s across all of them, and within the
+contended run denoise swung 594-1188 s while prox held to a 2% spread — a variation no
+source-level difference can produce. On the exclusive node the run finished in 1:04:37
+against the reference's 1:00:34, with makespan 147-158 s against 152-160 s. Denoise is the
+phase exposed to a shared node because of its memory traffic; prox stays resident on its
+own GPU.
+
+A code audit agreed independently: `qggmrf.py` and `tomography_model.py` are untouched
+since v0.7.1, and comparing the two `mace4d.py` files at AST level (docstrings stripped)
+found the entire denoise path and task scheduler byte-identical — 11 functions including
+`_get_qggmrf_denoiser`, `_configure_denoiser`, `_batched_hyperplane_denoise`,
+`_denoiser_wrapper`, `_run_denoise_task`, `_run_task_set`, `_assign_tasks`. The 13
+functions that do differ differ only in accessor style (`self.x` -> `get_params('x')`),
+renames, and the sinogram-at-`recon()` API split.
+
+**Frame count differs from the reference: 99 now, 97 then.** Both from the same 2400-view
+sinogram. The scanner metadata (`.nsipro`: `angleStep 2.5`, `Rotation range 6000`,
+`Number of projections 2400`) gives 2.5 deg/view over 16.7 revolutions, so
+`frames_per_rotation=6` + `frame_overlap_factor=2.0` is a 120 deg / 48-view frame and 99
+frames. 97 frames requires 96 views/frame, i.e. an effective overlap factor of 4.0 — a
+240 deg frame. **2.0 is the value consistent with the scanner geometry and with both
+drivers' defaults; the reference run's 97 remains unexplained**, since its own
+`run_info.txt` recorded a 120 deg span and the frame-construction arithmetic is identical
+in every version of the code. Consequence: the two recons cannot be differenced, so the
+NRMSE comparison against the pre-merge output was never done.
+
+**Still open**
+- Voxel-level agreement with the pre-merge recon (needs matched frame geometry).
+- Which overlap factor is intended for production — 2.0 halves the temporal integration
+  window relative to the Aug-25 reference. This is a modelling decision, not a bug.
+- Full-resolution peak RSS is ~484 GiB against a 503 GiB limit at 56 CPUs (~4% headroom),
+  measured on two completed runs. More frames or less `auto_crop` will OOM, hours in.
+
 ### 2026-08-31
 Merged the 4D MACE code into **mbirjax**, following `4DCT/plans/mbirjax_merge_plan.md`.
 mbirjax branch `4DCT_for_merging` (6 commits, `ba42ee6`..`a9e13e8`); 4DCT branch

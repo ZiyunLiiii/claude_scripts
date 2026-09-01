@@ -1,9 +1,51 @@
 # 4D MACE — Progress Log
 
 ## Current Status
-Repo refactored to NSI-style structure with MACE4DModel class. Lilly production scripts ready. Multi-GPU implementation fully preserved. Null-space projection under investigation.
+Merged into mbirjax as `mj.MACE4DModel` and validated on real data and real GPUs: tests,
+NSI path, multi-GPU concurrency and full-resolution timing all pass, with no performance
+regression. Voxel-level agreement with the pre-merge recon is still unverified (frame
+counts differ, 99 vs 97). Null-space projection still under investigation.
 
 ## Log (newest first)
+
+### 2026-09-01
+
+- Cluster validation of the mbirjax merge. Outcome and the contention finding are written
+  up in `4Drecon/progress.md`; the MACE-specific findings are below.
+- **`imageio` was an undeclared dependency, and the failure mode is silent.** Both
+  `save_volume_as_gif` and `save_4d_volume_as_gif` catch the `ImportError`, print a note
+  and `return` without writing a file. It was declared nowhere — not `pyproject.toml`,
+  `environment.yml` or `pixi.toml` — so rebuilding the conda env dropped it and every run
+  produced no GIF while reporting success. Only the 4D writer has tests, which is why it
+  surfaced there (3 failures) and not for the 3D writer, which has none. Declared in
+  `pyproject.toml` (mbirjax `f6262ca`). The silent `return` is still there; making both
+  writers raise would be the real fix.
+- **The DCT-I dejitter destroys the reconstruction at small frame counts.** With
+  `frames_per_rotation=6` the removed periods are `[6, 3, 2]` and each zeroes
+  `k0 +/- band_width` around `k_center = 2(N-1)/p`. Always exactly 8 bins for N >= 12, not
+  9: the period-2 band centers at `k0 = 2(N-1)/2 = N-1` identically — the last DCT-I index —
+  so its upper neighbour is clipped, giving 3+3+2. For small N the bands overlap and
+  swallow the spectrum: N=25 keeps 17, N=20 keeps 12, N=12 keeps 4, and **N <= 5 keeps
+  nothing, returning an identically zero recon**. Measured: a 3-frame smoke run produced a
+  healthy init (max 7.22, 874052 nonzero) and a final recon with 0 nonzero voxels and a
+  5 KB blank GIF, having passed every check — completed normally, correct shape, all
+  finite, all four log artifacts and the GIF written. Only the value range revealed it.
+  Dejitter is applied both to the assembled prox stack and to every prior agent's input,
+  so all four agents sit in the operator's null space. Not a merge regression — the
+  pre-merge `mace4d.py` has identical math. No guard added, by decision; smoke tests use
+  25 frames instead.
+- Removed the `LD_LIBRARY_PATH` re-exec from `Lilly_recon.py` and `recon_4d.py`
+  (mbirjax_applications `3479b41`; the 4DCT copy is still uncommitted). It re-exec'd the
+  interpreter on every run to strip a system CUDA that does not exist on Gautschi — the
+  variable holds only spack openmpi/gcc and thinlinc entries on both login and compute
+  nodes. Measured on an H100 node: importing jax and mbirjax with the variable intact
+  versus stripped gives byte-identical output (615 bytes either way), the same
+  `[CudaDevice(id=0)]`, and the same warnings. It cost an interpreter re-exec, silently
+  dropped interpreter flags (`python -u` lost its `-u`), and — sitting at module scope
+  rather than under `__main__` — killed any process that imported the module.
+- Correction to an earlier note: this dataset does **not** sweep 122.5 deg. That number was
+  `angles[-1] - angles[0]` on angles stored mod 360, so it is an artifact of the wrap. The
+  real acquisition is 6000 deg over 2400 views at 2.5 deg/view, about 16.7 revolutions.
 
 ### 2026-08-25
 
