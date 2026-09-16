@@ -1,11 +1,13 @@
 # Connecting to Gautschi from a Local Terminal
 
-Skill doc for logging in to Purdue RCAC's **Gautschi** community cluster from a Mac terminal.
+Skill doc for logging in to Purdue RCAC's **Gautschi** community cluster from a local terminal (written for the Mac; the commands are the same on Linux, only `pbcopy`/XQuartz/Homebrew differ).
+
+If you are *already* on Gautschi — `hostname` prints `login0X.gautschi.rcac.purdue.edu` — skip this doc and go straight to [submit_jobs.md](submit_jobs.md).
 
 - **User:** `li5273`
 - **Login host:** `gautschi.rcac.purdue.edu`
   (This name load-balances across 8 front-ends, `login00.gautschi`–`login07.gautschi`; each login lands on a random one. Files/home are shared across all of them, so it doesn't matter which one you get.)
-- **Scheduler:** Slurm. Login nodes are for editing/compiling/light work only — run real work through `sbatch`/`salloc` (see the job-submission doc).
+- **Scheduler:** Slurm. Login nodes are for editing/compiling/light work only — run real work through `sbatch`/`salloc`. See [submit_jobs.md](submit_jobs.md) for job submission and [storage_layout.md](storage_layout.md) for where files go.
 
 ---
 
@@ -89,7 +91,7 @@ Requires **XQuartz** installed on the Mac (`brew install --cask xquartz`, then l
 **scp** (single files / small trees):
 ```bash
 # local -> Gautschi
-scp ./run.py gautschi:~/Claude_scripts/
+scp ./run.py gautschi:~/Desktop/claude_scripts/
 # Gautschi -> local
 scp gautschi:/home/li5273/Desktop/data/output/2026/0903/mace4d/recon.npy ./
 ```
@@ -120,11 +122,12 @@ From there: **Clusters → Gautschi Shell Access** gives an in-browser terminal,
 
 ## 7. My environment on Gautschi (quick reference)
 
-- **Python env:** the `mbirjax` virtual environment (updated mbirjax installed manually).
-- **Data:** `/home/li5273/Desktop/data/Phantom_30s_Run1_Dec2024`
+- **Python env:** the `mbirjax` conda env at `/home/li5273/.conda/envs/mbirjax` (updated mbirjax installed manually). Activate with `module load conda && conda activate mbirjax`, or call `/home/li5273/.conda/envs/mbirjax/bin/python` directly.
+- **Experiment code:** `/home/li5273/PycharmProjects/lilly_exp/nsi/<year>/<MMDD>/` (home fs, 25 GB quota).
+- **Data / outputs:** `/home/li5273/Desktop/data` is a **symlink to `/scratch/gautschi/li5273/data`** — put every large file there, not on home. Source datasets live on `/depot/bouman/data/Lilly/`.
 - **4D MACE outputs:** `/home/li5273/Desktop/data/output/2026/0903/mace4d/`
-- **Claude scripts (remote):** `~/Claude_scripts` — sync with `git pull` / `git add -A && git commit -m "update" && git push` (repo: https://github.com/ZiyunLiiii/Claude_scripts).
-- **GPUs:** request e.g. `--gres=gpu:h100:4`; reference timings are on 4× H100.
+- **Claude scripts (remote):** `~/Desktop/claude_scripts` — sync with `git pull` / `git add -A && git commit -m "update" && git push` (repo: git@github.com:ZiyunLiiii/claude_scripts.git).
+- **GPUs:** `ai` partition, 8× H100 and 112 cores per node (14 cores per GPU); request e.g. `--gpus-per-node=4 -n56`. Reference timings are on 4× H100.
 
 ---
 

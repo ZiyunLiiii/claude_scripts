@@ -31,14 +31,22 @@
   (Greg commits from PyCharm). Each stage stops for Greg's review.
 
 ## Cluster (Gautschi)
-- Login: `ssh li5273@gautschi.rcac.purdue.edu` (BoilerKey: `PIN,push`). Connect how-to: ~/Desktop/Claude_scripts/gautschi/connect.md
-- 4DCT dataset: /home/li5273/Desktop/data/Phantom_30s_Run1_Dec2024
+- Login: `ssh li5273@gautschi.rcac.purdue.edu` (BoilerKey: `PIN,push`). Skill docs in `claude_scripts/gautschi/`:
+  `connect.md` (logging in), `submit_jobs.md` (Slurm), `storage_layout.md` (where files go).
+- Slurm: account `bouman`, partition `ai` (20 nodes, 8x H100 + 112 cores each -> 14 cores per GPU),
+  QOS `normal`. A 4-GPU job asks for `-N1 -n56 --gpus-per-node=4`.
+- Experiment code: /home/li5273/PycharmProjects/lilly_exp/nsi/<year>/<MMDD>/ (home fs, 25 GB quota --
+  code and small logs only)
+- Outputs: /home/li5273/Desktop/data/output/<year>/<MMDD>/<run_name>/ -- `Desktop/data` is a symlink to
+  /scratch/gautschi/li5273/data (200 TB, not backed up). All .npy/.h5 volumes go here.
+- Shared reusable volumes (init images, FDK recons): /home/li5273/Desktop/data/output/2026/4D_shared/
+- Source datasets: /depot/bouman/data/Lilly/ (e.g. 4DCT/Phantom_30s_Run1_Dec2024)
 - 4D MACE outputs: /home/li5273/Desktop/data/output/2026/0903/mace4d/
-- Python environment: the `mbirjax` virtual environment (updated mbirjax installed manually)
-- GPUs: request with e.g. `--gres=gpu:h100:4`; reference timings are on 4x H100
+- Python environment: `mbirjax` conda env at /home/li5273/.conda/envs/mbirjax
+  (`module load conda && conda activate mbirjax`)
 
 ## Claude Scripts
 - Local (Mac): /Users/a124601/Desktop/Claude_scripts
-- Remote (Gautschi): ~/Claude_scripts
-- GitHub: https://github.com/ZiyunLiiii/Claude_scripts
+- Remote (Gautschi): /home/li5273/Desktop/claude_scripts
+- GitHub: git@github.com:ZiyunLiiii/claude_scripts.git
 - Sync: git pull / git add -A && git commit -m "update" && git push
