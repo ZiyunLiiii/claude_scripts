@@ -41,6 +41,9 @@
   /scratch/gautschi/li5273/data (200 TB, not backed up). All .npy/.h5 volumes go here.
 - Shared reusable volumes (init images, FDK recons): /home/li5273/Desktop/data/output/2026/4D_shared/
 - Source datasets: /depot/bouman/data/Lilly/ (e.g. 4DCT/Phantom_30s_Run1_Dec2024)
+- Scratch copies of those datasets get partially purged (the purge goes by access time and eats
+  the .tif radiographs, leaving the folder). Check with `claude_scripts/gautschi/check_datasets.sh`;
+  repair per `gautschi/restore_datasets.md`. Rerunning `download_and_extract` does NOT repair it.
 - 4D MACE outputs: /home/li5273/Desktop/data/output/2026/0903/mace4d/
 - Python environment (mbirtorch): `/home/li5273/.conda/envs/mbirtorch/bin/python` -- Python 3.11.16,
   torch 2.14.0+cu130, mbirtorch installed EDITABLE against `~/PycharmProjects/mbirtorch`.
