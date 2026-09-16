@@ -42,8 +42,17 @@
 - Shared reusable volumes (init images, FDK recons): /home/li5273/Desktop/data/output/2026/4D_shared/
 - Source datasets: /depot/bouman/data/Lilly/ (e.g. 4DCT/Phantom_30s_Run1_Dec2024)
 - 4D MACE outputs: /home/li5273/Desktop/data/output/2026/0903/mace4d/
-- Python environment: `mbirjax` conda env at /home/li5273/.conda/envs/mbirjax
-  (`module load conda && conda activate mbirjax`)
+- Python environment (mbirtorch): `/home/li5273/.conda/envs/mbirtorch/bin/python` -- Python 3.11.16,
+  torch 2.14.0+cu130, mbirtorch installed EDITABLE against `~/PycharmProjects/mbirtorch`.
+  Created 2026-09-16 with `module load conda` (conda 26.1.0). Rebuild with
+  `dev_scripts/clean_install_all.sh`, which removes and recreates the env of the same name.
+- Repo checkout: `/home/li5273/PycharmProjects/mbirtorch`, branch `mace_4d_dev`, remote
+  `https://github.com/cabouman/mbirtorch.git` (HTTPS). `~/PycharmProjects/mbirjax` is on `main` at v0.7.3.
+- The `mbirjax` CONDA ENV no longer exists on Gautschi; `dev_scripts/deep_clean.sh` wipes `~/.conda`,
+  and `~/.conda/envs` now holds only `mbirtorch`. jax and mbirjax are not installed anywhere there,
+  so the opt-in `goldens` parity tests cannot run on the cluster.
+- The `bouman` account has NO grant on the `cpu` partition: a job submitted there is refused with
+  `AssocGrpGRES`, with or without `--gres=hp_cpu`. Even a CPU-only run goes on `ai` with a GPU.
 
 ## Claude Scripts
 - Local (Mac): /Users/a124601/Desktop/Claude_scripts
