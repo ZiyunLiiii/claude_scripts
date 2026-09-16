@@ -80,8 +80,10 @@ OUTPUT (scratch, big, disposable)
     *.png / *.gif
 ```
 
-`<MMDD>` is the **Monday of the work week** (`0716`, `0723`, `0730`, `0806`, `0813`), which
-is why the year folders read as a weekly lab notebook. A week with several distinct
+`<MMDD>` is the **Thursday of the work week**, the day of the group meeting (`0903`,
+`0910`, `0917`).  Folders from before that convention carry the Monday instead
+(`0716`, `0723`, `0730`, `0806`, `0813`), so both appear in the tree.  Either way the
+year folders read as a weekly lab notebook. A week with several distinct
 experiments gets subfolders on the code side — `0716/v6/`, `0716/mar_ps_sweep/`,
 `0716/jitter_fdk_phantom/` — each with its own `slurm_logs/` and its own README.
 
@@ -241,7 +243,7 @@ run: exact command, status, timings, what it showed. It is what makes a folder f
 ## 5. Checklist for a new experiment
 
 ```bash
-DATE=0915            # Monday of the work week
+DATE=0917            # Thursday of the work week, the meeting day
 EXP=my_experiment
 CODE=/home/li5273/PycharmProjects/lilly_exp/nsi/2026/$DATE/$EXP
 OUT=/home/li5273/Desktop/data/output/2026/$DATE/$EXP        # -> scratch
