@@ -35,8 +35,15 @@
   `connect.md` (logging in), `submit_jobs.md` (Slurm), `storage_layout.md` (where files go).
 - Slurm: account `bouman`, partition `ai` (20 nodes, 8x H100 + 112 cores each -> 14 cores per GPU),
   QOS `normal`. A 4-GPU job asks for `-N1 -n56 --gpus-per-node=4`.
-- Experiment code: /home/li5273/PycharmProjects/lilly_exp/nsi/<year>/<MMDD>/ (home fs, 25 GB quota --
-  code and small logs only)
+- Experiment code: /home/li5273/PycharmProjects/scripts/<year>/<MMDD>/ (home fs, 25 GB quota --
+  code and small logs only). Own repo, remote git@github.com:ZiyunLiiii/scripts.git, branch `main`.
+  Weekly dirs sit at the repo root; run from there so `import mar_utils` resolves. Run artifacts
+  (`logs/`, `slurm_logs/`, `*.err`, `*.out`, `*.npy`, images) are gitignored -- on disk, never committed.
+  Moved out of cabouman/lilly_exp on 2026-09-17, where it had been untracked, and the `nsi/` level
+  was dropped in the move.
+- Demo data: /home/li5273/PycharmProjects/lilly_exp/nsi/demo_data stayed behind in lilly_exp. It is a
+  symlink to /scratch/gautschi/li5273/data, so no data moved, but ~400 scripts hardcode that absolute
+  path. It is the only remaining coupling between the two repos -- do not delete lilly_exp.
 - Outputs: /home/li5273/Desktop/data/output/<year>/<MMDD>/<run_name>/ -- `Desktop/data` is a symlink to
   /scratch/gautschi/li5273/data (200 TB, not backed up). All .npy/.h5 volumes go here.
 - Shared reusable volumes (init images, FDK recons): /home/li5273/Desktop/data/output/2026/4D_shared/

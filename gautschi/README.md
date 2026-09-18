@@ -17,7 +17,7 @@ hostname          # login0X.gautschi... -> you're on the cluster, just sbatch
                   # otherwise: ssh gautschi   (password = <PIN>,push)
 
 # code on home (25 GB quota), outputs on scratch via the Desktop/data symlink
-CODE=/home/li5273/PycharmProjects/lilly_exp/nsi/2026/<MMDD>/<exp>
+CODE=/home/li5273/PycharmProjects/scripts/2026/<MMDD>/<exp>
 OUT=/home/li5273/Desktop/data/output/2026/<MMDD>/<exp>     # -> /scratch/gautschi/li5273/data
 mkdir -p "$CODE/slurm_logs" "$OUT"
 
@@ -40,5 +40,5 @@ Four things that bite, each covered in detail in the docs:
    2026-09-16.
 
 Facts here were read off the cluster on 2026-09-15 (datasets, 2026-09-16) and off the real scripts in
-`/home/li5273/PycharmProjects/lilly_exp/nsi`. Re-check the live ones with `sinfo`,
+`/home/li5273/PycharmProjects/scripts`. Re-check the live ones with `sinfo`,
 `myquota`, and `sacctmgr show assoc user=li5273`.

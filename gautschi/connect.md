@@ -123,7 +123,7 @@ From there: **Clusters → Gautschi Shell Access** gives an in-browser terminal,
 ## 7. My environment on Gautschi (quick reference)
 
 - **Python env:** the `mbirjax` conda env at `/home/li5273/.conda/envs/mbirjax` (updated mbirjax installed manually). Activate with `module load conda && conda activate mbirjax`, or call `/home/li5273/.conda/envs/mbirjax/bin/python` directly.
-- **Experiment code:** `/home/li5273/PycharmProjects/lilly_exp/nsi/<year>/<MMDD>/` (home fs, 25 GB quota).
+- **Experiment code:** `/home/li5273/PycharmProjects/scripts/<year>/<MMDD>/` (home fs, 25 GB quota).
 - **Data / outputs:** `/home/li5273/Desktop/data` is a **symlink to `/scratch/gautschi/li5273/data`** — put every large file there, not on home. Source datasets live on `/depot/bouman/data/Lilly/`.
 - **4D MACE outputs:** `/home/li5273/Desktop/data/output/2026/0903/mace4d/`
 - **Claude scripts (remote):** `~/Desktop/claude_scripts` — sync with `git pull` / `git add -A && git commit -m "update" && git push` (repo: git@github.com:ZiyunLiiii/claude_scripts.git).

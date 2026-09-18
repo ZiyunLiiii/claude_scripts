@@ -1,7 +1,7 @@
 # Submitting Jobs on Gautschi
 
 Slurm how-to for the Purdue RCAC **Gautschi** cluster, as actually used in
-`/home/li5273/PycharmProjects/lilly_exp/nsi`. Covers both cases:
+`/home/li5273/PycharmProjects/scripts`. Covers both cases:
 
 - **A — from a Gautschi shell** (login node terminal, OnDemand shell, or a Claude Code
   session already running on `login0X.gautschi`). You are on the cluster; just `sbatch`.
@@ -48,7 +48,7 @@ asking for more cores than your GPU share entitles you to just makes the job que
 
 ## 2. The sbatch header I actually use
 
-Two equivalent styles are in the repo; both work. **Short style** (most of `nsi/2026`):
+Two equivalent styles are in the repo; both work. **Short style** (most of `2026/`):
 
 ```bash
 #!/bin/bash
@@ -59,8 +59,8 @@ Two equivalent styles are in the repo; both work. **Short style** (most of `nsi/
 #SBATCH -q normal
 #SBATCH -p ai
 #SBATCH -t 08:00:00
-#SBATCH -o /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813/slurm_logs/%j.out
-#SBATCH -e /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813/slurm_logs/%j.err
+#SBATCH -o /home/li5273/PycharmProjects/scripts/2026/0813/slurm_logs/%j.out
+#SBATCH -e /home/li5273/PycharmProjects/scripts/2026/0813/slurm_logs/%j.err
 ```
 
 **Long style** (`0730/optimize_4d`, `0903`), same meaning, more readable:
@@ -95,7 +95,7 @@ Rules that matter:
 ```bash
 set -x
 
-SCRIPT_DIR="/home/li5273/PycharmProjects/lilly_exp/nsi/2026/MMDD/expname"
+SCRIPT_DIR="/home/li5273/PycharmProjects/scripts/2026/MMDD/expname"
 cd "$SCRIPT_DIR"
 
 module load conda
@@ -154,7 +154,7 @@ sbatch --job-name="matrix_${JOB_TAG}" $EXCLUDE_ARG "$SCRIPT_DIR/submit_matrix.sb
 ## 4. Submitting, watching, killing
 
 ```bash
-cd /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813
+cd /home/li5273/PycharmProjects/scripts/2026/0813
 sbatch submit_4D_MACE_v6_p_new_new.sbatch        # -> "Submitted batch job 15595834"
 
 squeue -u li5273                                  # my queue
@@ -198,7 +198,7 @@ disconnect, so run it inside `tmux`/`screen` on the login node if the link is fl
 Nothing special. You are already on `login0X.gautschi`:
 
 ```bash
-cd /home/li5273/PycharmProjects/lilly_exp/nsi/2026/MMDD/expname
+cd /home/li5273/PycharmProjects/scripts/2026/MMDD/expname
 mkdir -p slurm_logs
 sbatch submit_expname.sbatch
 squeue -u li5273
@@ -217,16 +217,16 @@ With the `gautschi` host alias from `connect.md`:
 **Interactive** — the normal way:
 ```bash
 ssh gautschi
-cd /home/li5273/PycharmProjects/lilly_exp/nsi/2026/MMDD/expname
+cd /home/li5273/PycharmProjects/scripts/2026/MMDD/expname
 sbatch submit_expname.sbatch
 ```
 
 **One-shot, without keeping a session** (needs the SSH key, or you'll get a Duo push per
 command):
 ```bash
-ssh gautschi 'cd /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813 && sbatch submit_4D_MACE_v6_p_new_new.sbatch'
+ssh gautschi 'cd /home/li5273/PycharmProjects/scripts/2026/0813 && sbatch submit_4D_MACE_v6_p_new_new.sbatch'
 ssh gautschi 'squeue -u li5273'
-ssh gautschi 'tail -n 50 /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813/slurm_logs/15595834.out'
+ssh gautschi 'tail -n 50 /home/li5273/PycharmProjects/scripts/2026/0813/slurm_logs/15595834.out'
 ```
 
 **Full local-edit → remote-run loop:**
@@ -234,14 +234,14 @@ ssh gautschi 'tail -n 50 /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813/sl
 # 1. push the experiment folder up (code only -- outputs live on scratch, see storage_layout.md)
 rsync -avz --progress \
     --exclude '__pycache__' --exclude 'slurm_logs' --exclude '*.npy' --exclude '*.h5' \
-    ./0813/ gautschi:/home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813/
+    ./0813/ gautschi:/home/li5273/PycharmProjects/scripts/2026/0813/
 
 # 2. submit
-ssh gautschi 'cd /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813 && mkdir -p slurm_logs && sbatch submit_4D_MACE_v6_p_new_new.sbatch'
+ssh gautschi 'cd /home/li5273/PycharmProjects/scripts/2026/0813 && mkdir -p slurm_logs && sbatch submit_4D_MACE_v6_p_new_new.sbatch'
 
 # 3. watch
 ssh gautschi 'squeue -u li5273 -o "%.10i %.20j %.8T %.10M %R"'
-ssh gautschi 'tail -f /home/li5273/PycharmProjects/lilly_exp/nsi/2026/0813/slurm_logs/15595834.out'
+ssh gautschi 'tail -f /home/li5273/PycharmProjects/scripts/2026/0813/slurm_logs/15595834.out'
 
 # 4. pull just the small results back (never the whole recon volume by accident)
 rsync -avz --progress \

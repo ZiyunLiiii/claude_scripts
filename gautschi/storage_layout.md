@@ -1,7 +1,7 @@
 # Where to Store Things on Gautschi — and the One-Folder-Per-Experiment Rule
 
 The filesystem layout and naming conventions used in
-`/home/li5273/PycharmProjects/lilly_exp/nsi` and `/home/li5273/Desktop/data/output`.
+`/home/li5273/PycharmProjects/scripts` and `/home/li5273/Desktop/data/output`.
 Read this before creating a new experiment; the two halves are **which filesystem** and
 **how to name the folder so nothing gets overwritten**.
 
@@ -66,7 +66,7 @@ Every experiment exists in **two places with the same date stem**:
 
 ```
 CODE   (home, git-tracked, small)
-/home/li5273/PycharmProjects/lilly_exp/nsi/<YEAR>/<MMDD>/[<subexp>/]
+/home/li5273/PycharmProjects/scripts/<YEAR>/<MMDD>/[<subexp>/]
     <experiment>.py
     submit_<experiment>.sbatch
     slurm_logs/            <- %j.out / %j.err, created before the first sbatch
@@ -245,7 +245,7 @@ run: exact command, status, timings, what it showed. It is what makes a folder f
 ```bash
 DATE=0917            # Thursday of the work week, the meeting day
 EXP=my_experiment
-CODE=/home/li5273/PycharmProjects/lilly_exp/nsi/2026/$DATE/$EXP
+CODE=/home/li5273/PycharmProjects/scripts/2026/$DATE/$EXP
 OUT=/home/li5273/Desktop/data/output/2026/$DATE/$EXP        # -> scratch
 
 mkdir -p "$CODE/slurm_logs" "$OUT"
