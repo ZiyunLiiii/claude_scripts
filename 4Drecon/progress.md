@@ -1,15 +1,466 @@
 # 4D Reconstruction — Progress
 
 ## Status
-- 4D MACE: merged into mbirjax as `mj.MACE4DModel` (branch `4DCT_for_merging`); multi-GPU implementation, DCT dejittering integrated, null-space projection under investigation
+- 4D MACE: merged into mbirjax as `mj.MACE4DModel` (branch `4DCT_for_merging`); multi-GPU implementation, DCT dejittering integrated. 2026-09-24: the rotating jitter of Phantom_30s_Run1 is a det_channel_offset error of -1.28 channels (confirmed by a calibration sweep); removing null-space content hurts (static test), so "null-space projection dejittering" is not the way to remove it; 2026-09-25: with no filter, correcting only the offset takes the 4D wobble from 0.720 to 0.059 voxel (nominal + DCT 0.126), with no harmonic-1 error left on static edges; write-up `offset_justification.tex` complete (no placeholders); convergence: interior consensus stable in all arms, agent states drift only with a filter in the loop, end axial slices grow in every arm (open)
+- 2026-09-28 DIRECTION (Charlie): the offset is PARKED.  Charlie does not consider it an issue: the estimate is
+  hacky and needs data, the current method works well, and the task is to FORMULATE the current method, not to
+  improve it.  Do not propose calibration as the next step.  See the 09-28 log entry (the current filter placement
+  has no equilibrium; H on the consensus point gives one, equal to the constrained minimizer).  Refined the same
+  day: they are happy with what the DCT filter ACHIEVES, but the filter is hacky; the goal is to reformulate the
+  theory into something more general that achieves the same.  Ziyun is sending their materials to review.
+- Sensor Orthogonal Reconstruction note: rewritten 2026-09-24 (theory + three tests), see the 09-24 log entry
+- Sensor Orthogonal Reconstruction -- Theory (new Overleaf project, 2026-09-28): Ziyun's handwritten notes verified and transcribed as written (nothing added, on request); see the 09-28 log entry
 - Single-view: literature search in progress
 - MAR + multi-slice fusion: pipeline validated end to end on two real Lilly datasets; see `mar_fusion/progress.md`
 - MACE4D port to mbirtorch (Greg's plan, `mbirtorch_plans/plans/features/mace4d/mace4d_migration_plan_v2.md`):
   Stages 0, 2, 3, 4, 5 done and pushed to `mace_4d_dev`; the decided questions of 2026-09-15 are being
   implemented in four increments, of which two are pushed (last commit `364e5d0`, 2026-09-16);
   Group 1 (questions 13 and 17) and Stages 6 to 8 wait for Greg's review
+- 4D viewer (mbirtorch branch `4D_viewer`): design decided 2026-09-29 (`4d_viewer/decisions.md`); step 1
+  implemented the same day as the new module `mbirtorch/viewers/slice_figure4d.py` (`mbirtorch.slice_viewer4d`),
+  with the 3D viewer untouched; not committed; see the 09-29 log entry
 
 ## Log
+
+### 2026-09-29 (4D viewer: design decided, step 1 implemented)
+Ziyun and I went through the fifteen choices and the design; every decision, alternative, and reason is in
+`4d_viewer/decisions.md`.  Ziyun's rule: the 3D viewer is kept as it is, so the 4D viewer is a new module,
+`mbirtorch/viewers/slice_figure4d.py`, that subclasses `VolumeStack` and `SliceViewer` (`VolumeStack4D`,
+`SliceViewer4D`, entry point `slice_viewer4d`, exported as `mbirtorch.slice_viewer4d`).  Step 1: 4D input
+`(t, x, y, z)`, a frame slider with Play (space; comma and period step), a plot of the ROI mean against frame,
+3D volumes fixed in time, frame index mapping with a shorter volume holding its last frame, whole-volume differences
+including 4D minus 3D, and Load of a 4D file as one volume.  Checks: `slice_figure.py` byte-identical; 13 new tests
+and the 5 existing viewer tests pass; every name in `mbirtorch.__all__` resolves.  A real `macosx` window played two
+260 x 260 panels at 15.2 fps (30 requested; default 5), with the images kept in the drawn buffer.  Not committed;
+waiting for Ziyun's go.  Step 2 (space-time planes, differences in time, Save movie) is not started.
+
+### 2026-09-28 (4D viewer: five designs built on the slice viewer)
+Ziyun asked for ways to build a 4D viewer from `mbirtorch/viewers/slice_figure.py`, design first.  Nothing was
+written in the repository.  Facts found:
+(1) The viewer has one shared slice position, so it cannot hold a time position and a space position at once.
+(2) `VolumeStack.load_array` splits a 4D array along its LAST axis into separate volumes.  MACE4D returns
+`(num_frames, nx, ny, nz)` with time first, so loading one through the menu gives one `(T, nx, ny)` volume per z.
+(3) The full recon (99, 260, 260, 728) float32 is 19.5 GB and the Mac has 16 GB of RAM, so on the Mac only slices,
+slabs, or a memory-mapped file.  All six planes of a 1.7 GB in-RAM slab (64 z) extract in under 10 ms (t-x slowest, 7 ms).
+(4) Agg timing on the Mac (scratch scripts, not saved): one frame step of the current viewer costs 35 / 55 / 80 ms for
+1 / 2 / 3 panels, and the partial redraw is no faster, because every panel changes.  Drawing only the two image artists
+costs 10 ms at dpi 100 and 20 ms at dpi 200.  The viewer uses its partial redraw only on Agg and TkAgg, so on-screen
+playback speed on `macosx` is untested.
+(5) Today's viewer already shows a space-time image: on a `(T, nx, ny)` stack, slice axis 1 or 2 displays (t, y) or
+(t, x).  Checked on a synthetic square shifting +-2 px with period 6; the edges show the zigzag.
+Designs: 1 linked windows plus playback on the current npz slices; 2 a frame slider in `slice_viewer`; 3 any two axes
+of a 4D array, with a slider per hidden axis (space-time planes); 4 orthogonal views over time, as a new module; 5
+napari (not installed).  Recommended: 1 now, then 3 or 4.  Open for Ziyun: where the viewer runs, 3 or 4, package
+feature (Greg's review) or research tool, frame mapping between runs, and the meaning of Load for 4D files.
+
+### 2026-09-28 (Theory note: Ziyun's handwritten notes verified and transcribed)
+New Overleaf project `Sensor Orthogonal Reconstruction -- Theory/main.tex` (was the empty template).  Ziyun asked to
+verify two pages of handwritten notes and write them down with nothing extra.  Content: y = Ax (A is M x N, M << N);
+xhat = A^t (A A^t)^-1 y; xhat = P x, xtilde = P^perp x; R_xhat = P R_x P^t; with F the unitary DFT,
+Lambda = F R_x F^H and Lambda_hat = F R_xhat F^H = F P F^H Lambda F P^t F^H.  All steps correct (numpy check in the
+session scratchpad, not saved: pinv identity, P symmetric and idempotent, R_xhat by Monte Carlo, the two Lambda_hat
+expressions agree).  Added only the definitions P = A^t (A A^t)^-1 A, P^perp = I - P and "F unitary DFT"; F^* is
+written F^H throughout.  Raised with Ziyun, not in the note: A^t (A A^t)^-1 needs full row rank (else A^+); Lambda is
+diagonal only for a circulant R_x; Lambda_hat is not diagonal in general (random A: 90% of its energy off the
+diagonal) and is diagonal only when Range(A^t) is spanned by Fourier vectors (P circulant).
+
+### 2026-09-28 (offset parked on Charlie's direction; the current filter placement has no equilibrium)
+Ziyun relayed Charlie's view: the offset is not an issue (the estimate is hacky and needs data), what we have works,
+and what is needed is to formulate it, not to improve it.  Ziyun's argument: even if the jitter comes from the
+offset, the general formulation would solve it.  Assessment given: right about the jitter, because the constraint
+X in S^perp removes a first-harmonic shift whatever its cause; the cost under a wrong axis is a blur instead of a
+shift, and it is small here (z364 sharpness of frame 0, corrected/nominal: 1.014 with DCT, 1.008 with no filter;
+the DCT filter itself costs about 5%: nominal no filter 1.051 of nominal DCT).
+New check `.../0924/Claude outputs/theory_checks/placement/` (README): linear MACE models with three denoisers whose
+space-time coupling differs.  Current placement (H o F, G_k o H): no equilibrium in 300/300, spectral radius > 1 in
+293/300.  Reason: with H before a denoiser, an equilibrium needs that prior's gradient to have no Null(H) component,
+one condition per denoiser on one unknown.  The parts of the denoiser states that H removes never reach the
+denoisers, so they can grow without changing the consensus, which matches the 09-25 drift.  H applied once to the
+consensus point (W_k += 2 rho (H z - X_k)): equilibrium in 300/300, equal to argmin over S^perp of
+mu_0 D + sum mu_k R_k to 1e-11.  Also: the DCT filter's range excludes every static stack, so the formulation
+needs H_per.  Proposed to Ziyun (not started): a short formulation note (new file, main.tex untouched), and two
+wrapper runs at the nominal offset (convergence arm, 99-frame run) with H on the consensus point.
+
+### 2026-09-25 11:40 (where the nominal offset comes from: the Geometry Report replacement)
+The nominal det_channel_offset is not a field of the .nsipro file: `nsi.load_scans_and_params` computes it from the
+.nsipro geometry after replacing the first-detector-pixel coordinate r_r[0:2] with the Geometry Report value
+(offset_correction=True, the default; nsi.py:197).  `offset_sources.py` (geometry + two radiographs, login node):
+Phantom_30s_Run1 report on -1.33845 ALU (r_r x 36.637), report off -1.65645 ALU (r_r x 36.319) -> the .nsipro-only
+value is within 0.03 channel of the data estimate -1.66393; the report replacement moves it 1.25 channels (0.318 mm).
+Static demo scan: report on -1.79391, off -1.66690 (1.0 native channel apart); the data estimate agrees with the
+report-on value (0.2 native channel).  So neither file is reliable alone; estimate from the data.  Also checked for
+Ziyun: the corrected-offset runs differ from the nominal ones ONLY in det_channel_offset (set after
+get_sino_and_model; set_params stores it and rebuilds the projectors; sinogram (2400, 728, 260) and grid identical;
+the FDK init does not depend on the filter: baseline and control nominal inits identical).  For the MBIR, the denoiser
+sigma_x estimated from the init differs as a consequence (0.000592 nominal vs 0.000620 corrected).  Opened
+slice_viewer on the FDK results (`view_fdk_offset.py`).  Not yet in offset_justification.tex.
+
+### 2026-09-25 08:30 (control run done: the offset alone removes the rotating shift)
+Job 16674482 (nominal offset, no filter, 27 min, confirmed in its log: offset -1.33845, FILTER none, --no_dejitter).
+Final: wobble 0.720, first-harmonic shift 1.220 (init 1.29: MACE keeps the shift); every frame ~1 voxel from the mean
+in every turn; static-edge line ratios k1 244, k2 5.2, k3 22 (k3 absent in the init).  Against corrected no filter
+(0.059, 0.020; k1 1.3, k2 3.9, k3 0.9): wobble 12x, first-harmonic shift 61x lower with only the offset changed.
+Sharpness 1.051 vs 1.059.  offset_justification.tex: control written into Section 8 (new first paragraph of "The
+finals", table row, moving-parts sentence), abstract and summary now quote 0.720 -> 0.059; no \pending left; synced to
+Overleaf (12 pp).  Outputs folder and README updated.
+
+### 2026-09-25 07:00 (interior convergence reruns done: the filter placement question answered)
+Jobs 16674461/62/63 (62-64 min each, started early).  Interior = axial slices without the first/last 10%.  Consensus
+image interior norm stable in all arms (31.2-31.6 from iteration 10 to 150).  Agent states W interior: DCT 65.5 ->
+174.3 (2.7x, accelerating), cycle-avg 64.3 -> 84.2 (1.3x), no filter 65.7 -> 67.1 (flat).  So with a filter inside the
+loop (H o F, G_k o H) W drifts although the consensus does not; without a filter W has a fixed point in the interior
+(matches the theory note's warning).  End slices of the consensus grow in every arm, ~linearly with no filter (8 ->
+150); all of the no-filter whole-volume growth is there.  dW_interior floor ~1 after iteration 100 even with no filter:
+the data-fit agent draws a new random VCD subset order per iteration (`rng_for(iteration)`, mace.py:739) and warm-starts
+from its own previous output, so it is not a fixed map.  Figure `results/convergence/fig_convergence_interior.png`
+(`plot_convergence.py`), copied to `Claude outputs/sor_stage1/`.  Not yet written into experiment_status.tex.
+
+### 2026-09-25 later morning (offset justification Section 8 filled; Stage 1 results saved)
+Analysis job 16672782 ran early (04:19).  Nominal DCT baseline 16664243 on z364: wobble 0.126, first-harmonic shift
+0.140; corrected DCT 0.076 / 0.021; cycle-avg 0.029 / 0.013; no filter 0.059 / 0.020.  FDK init first-harmonic shift
+1.29 -> 0.125.  New measurement (`justify/justify_4d.py`): temporal spectra over two masks (static edges, moving parts;
+from the cycle-avg final).  Init static edges: harmonic-1 line ratio 296 -> 2.7, harmonic-2 line 238 vs 253 (unchanged
+= frame construction, offset-independent).  Finals static edges: energy at 0.8-1.2 cycles/turn 0.065 (corrected DCT)
+and 0.082 (corrected, no filter) of the nominal DCT; corrected no filter has no harmonic-1 line (1.3) and a small
+harmonic-2 line (3.9).  Moving parts: continuous spectrum = object motion; filters remove part of it (cycle-avg 0.64,
+DCT 1.09, no filter 1.45 of nominal DCT).  Nominal DCT keeps a rotating shift up to 0.65 voxel in the first turn (DCT
+end effect); corrected runs within 0.07.  Sharpness corrected/nominal 1.012-1.059.  Harmonic shares now computed inside
+a disc of radius 0.45 N (corners of FDK frames have large artifacts): FDK init k1 12% -> 1.6%, k2 83% -> 92% (demo
+static 5.9/94).  offset_justification.tex updated (12 pp, Section 8 + table + 3 figures, abstract, summary; the
+control row is a red \pending) and synced to Overleaf.  Results saved in `4DCT/Slides/2026/0924/Claude outputs/sor_stage1/`
+(README).  Still queued: control 16674482 (est. 09-27), interior convergence reruns 16674461/62/63.
+
+### 2026-09-25 morning (4D runs at the corrected offset done; convergence growth is in the end slices)
+Jobs 16672777/78/79 done (27, 26, 26 min).  Preliminary metrics on the center axial slice z364 of the corrected runs
+(`analysis_prelim/metrics_z_corrected.json`, script `prelim_z.py`): wobble DCT 0.076, cycle-averaging blocks of 12 0.029,
+no filter 0.059 voxel.  At the nominal offset the earlier runs gave DCT 0.129 and block H_per 0.063, so the offset
+correction ALONE (no filter) leaves less wobble than any filter at the nominal offset.  First-harmonic shift of the finals
+0.021 / 0.013 / 0.020; of the corrected FDK init 0.125 (the 24-frame sweep at the nominal offset gave 1.69).  The baseline
+job 16664243 z slice is not yet read: the analysis job 16672782 (ai partition; cpu/highmem/smallgpu closed to the
+account) was expected to start 07:18.  Vertical slices x130/y130 (`prelim_xy.py`, baseline slices exist): in-plane x
+first harmonic of the final 0.133 (nominal DCT) -> 0.006 (corrected DCT) / 0.006 (no filter) / 0.001 (cycle-avg); the
+in-plane y component and the axial one keep ~1 voxel of half-turn displacement on x130, which the local real motion of the
+phantom explains (it is not a rotating shift; y130 does not show it).
+Convergence: the growth of ||W|| in all three arms (dct, cycleavg12, nofilter_full = job 16673975, 62 min) sits in the end
+axial slices z=0 and z=181 (z=0 RMS 0.135 DCT, 0.095 cycle-avg, 0.282 no filter, vs 0.064 in the init; max 2-3.7);
+interior slices stable, center-slice mean ~0.003 in all arms.  Independent of the filter placement.  The wrapper now also
+logs interior-slice norms (INTERIOR_MARGIN 0.1); reruns 16674461/62/63 (RUN=dct/cycleavg12/nofilter, SUFFIX=_interior,
+1 GPU each, parallel).
+ALSO: all arms drop sharply at iteration 100.  Cause: the data-fit agent starts its 3 VCD iterations at entry
+floor(iteration * prox_partition_advance) of the model's partition_sequence (default `[2,4,6] + [7,8,9,10]*25`, 103
+entries, `mbirtorch/_utils.py:95`); beyond the end the last entry repeats.  So up to iteration ~100 F cycles through
+four 128-subset partitions (a different map each iteration, the residual cannot go to zero), and from ~101 it is one
+fixed map.  Only iterations 101-150 test the fixed point of a stationary operator; there DCT dW rises 3.5 -> 4.4,
+no filter flat 3.66, cycle-avg 2.7 -> 3.0.  A clean test would set prox_partition_advance = 0 (not a driver option;
+would need the wrapper) -- not submitted, to discuss with Ziyun.
+Control added: job 16674482, 99-frame run at the NOMINAL offset with no filter (4d_nominal_nofilter), so that the
+offset is the only difference to 4d_corrected_nofilter.  analyze_stage1.py updated to include it, the nofilter_full
+arm and the interior reruns; figure script for the justification doc Section 8: `scratchpad/justify/justify_4d.py`
+(harmonic-1/2 amplitude maps over 96 frames, shift traces, numbers_4d.json).
+
+### 2026-09-25 early (FDK sweep done; first convergence arm shows drift)
+FDK offset sweep job 16673415 (2.5 min): V fit h = sqrt((s(d-d0))^2 + c^2) over d = -3..+3 channels, first 24 frames:
+phantom d0 -1.28 (s 2.24, floor 0.46), Kwikpen_4D_2mms -0.58 (2.29, 0.13), Tella_15cP -0.34 (2.31, 1.00; view comparison
+said -0.84, biased by motion; harmonic-1 shift 0.70 -> 0.23 at -0.5), Tella_30cP -0.43 (2.31, 0.54).  All four scans have
+a nonzero offset error; slopes within 5% of 2beta = 2.34.  Added to offset_justification.tex (figure justify_offset_sweep.png).
+Convergence job 16672780: DCT arm (binning 4, 24 frames, corrected offset, 150 its, 65 min) does NOT converge: ||W|| grows
+79 -> 276, ||xbar|| 38 -> 70, per-iteration change stays 1.7-5.5 %, dW plateau ~7 then ~4.  cycleavg12 arm running; the
+nofilter arm would be cut by the 2.5 h limit, so it was resubmitted alone as job 16673975 (convergence/nofilter_full).
+4D run 16672777 (corrected, DCT) started 02:06.
+
+### 2026-09-25 (offset justification draft in Overleaf; survey done; FDK sweep submitted)
+Survey job 16672781 done: offset estimate minus nominal (channels) phantom -1.28 (FDK half-turn 2.91->0.15), Kwikpen_4D_2mms
+-0.56 (consistent over 27 turns; 1.28->0.10), Tella_15cP -0.84 but unreliable (outlier turns -12; FDK 1.30->1.54 worse),
+Tella_30cP -0.40 unreliable (outliers -19/+2.9; 1.15->0.42).  Tella_30cP restored from depot tgz.  Kwikpen/Tella folders
+have no Geometry Report (loader skips the report's offset correction, as the driver does).  On Ziyun's suggestion added an
+FDK-only offset sweep (-3..+3 channels, job 16673415, `offset_sweep.py`, V-fit h = sqrt((s(d-d0))^2 + c^2)).
+New doc `offset_justification.tex` in the Overleaf folder (DRAFT, red placeholders for the sweep and the 4D runs), framed
+per Ziyun as: frame construction = direct cause of the period-6 jitter, axis offset = fundamental cause; NO null-space
+wording (Ziyun: "dont mention anything about null yet").  New figures justify_{jitter_pattern,patterns,harmonics}.png
+(script `scratchpad/justify/justify_figs.py`; copy to static_tests when finalizing).  Key numbers: frames t and t+3
+deviation correlation +0.89 (static demo, correct geometry) vs -0.46 (moving phantom); harmonic-1 share 0.0% (Shepp-Logan),
+5.8% (demo FDK), 72.7% (moving-phantom MBIR init, slab mean); rigid shift 1.3-1.7 voxels (slab-mean estimate).
+
+### 2026-09-24 late (Stage 1 of the sensor-orthogonal plan submitted, on Ziyun's go-ahead)
+Items 1-3 of Stage 1.  Code `~/PycharmProjects/lilly_exp/nsi/2026/0924/sor_stage1/` (wrapper `run_4d_stage1.py` sets
+det_channel_offset via a patched get_sino_and_model, swaps the filter for H_per blocks of 12, records ||W_i - W_(i-1)|| by
+patching MACE.step, and saves center slices of every saved 4D array; nothing in mbirtorch or mbirtorch_applications
+changed).  Outputs `~/Desktop/data/output/2026/0924/sor_stage1/` (one folder per run + analysis/ + slurm_logs/).
+Corrected offset -1.66393 ALU (nominal -1.33845).  Jobs: 16672776 smoke test (binning 8, 12 frames, 2 its); 16672777/78/79
+full 99-frame 4D runs at the corrected offset with DCT / cycle-averaging blocks of 12 / no filter (branch fdk_init_4dmace,
+driver defaults, baseline = job 16664243 at the nominal offset with DCT, same code); 16672780 convergence check (binning 4,
+24 frames, 150 its, three filters); 16672781 offset survey (phantom_30s, Kwikpen_4D_2mms, Tella_15cP, Tella_30cP restored
+from depot; Kwikpen_4D_0.5mms skipped: no archive on depot 4DCT); 16672782 analysis (afterany).  Full runs and
+convergence depend afterok on the smoke test.
+
+### 2026-09-24 (Sensor Orthogonal Reconstruction note rewritten; axis-offset cause of the jitter confirmed; static null-space test)
+UPDATE: on Ziyun's request added `experiment_status.tex` (18 pp) to the same Overleaf folder: 13 experiments E1-E13 (wedge parts 1-5, real-data diagnosis, 99-frame filters, full 4D runs, calibration sweep, static per-frame and MACE4D null tests, numpy checks, linear MACE models), each with What / Purpose / What we learned / Supporting figure / Status and files, plus a summary table and the list of experiments not yet run.  New figures in `figures/`: realdata_shift, part5_center_offset, final_dct_vs_cycleavg (relabeled from final_dct_vs_tsa by `real_data/full99/compare_finals_cycleavg.py`), init_comparison_fdk_vs_mbir, theory_checks_harmonics.  A numbers/clarity check led to two corrections in main.tex too: the constraint-inside-prox convergence holds only with plain denoisers (with G_k o H kept: no fixed point in 200/200), and the demo axis offset is 0.025 mm at the detector.
+Ziyun asked for a full rewrite of `Overleaf/Sensor Orthogonal Reconstruction/` around the idea "x independent of the sensor
+and the system matrix": status/settings/frames first, then the DCT filter and the cycle-averaging dejitter (H_per.tex
+merged in), then theory incl. what A and A^T give, then formulations/methods; plus a static-object test of null-space
+removal (demo data; `/depot/bouman/data/Lilly/demo_data_nsi.npz` does not exist, the `.tgz` of 200 radiographs of the
+static JB-033 artifact phantom was used).  New main.tex (24 pp) + figures `static_nullspace.png`, `calib_sweep.png`; copies of the test outputs, job and plot scripts in `4DCT/Slides/2026/0924/Claude outputs/static_tests/` (README there).
+Backups of the old main.tex and H_per.tex in the session scratchpad (`backup_2026-09-24`).  H_per.tex left in place.
+THEORY (all propositions checked in independent numpy models, `.../0924/Claude outputs/theory_checks/`): exact error
+split xhat-x = A+Ex (mismatch) + A+n - A+r (residual) + Q(xhat-x) (null); sensor independence + data consistency needs
+frame coupling; removal of the null component helps iff the null fill is worse than zero; data-preserving maps
+(P xhat + Q z, McKinnon-Bates) cannot remove a range-space jitter; axis error delta -> each 120-deg frame shifted by
+beta*delta along its central view, beta = 1.170 (explains 97% in the continuous model), pure first harmonic; parallel-beam
+parity: null term even harmonics, odd-order mismatch odd harmonics (at delta~1 the even part of the mismatch is 30-60%);
+space-time sampling (Willis-Bresler): per-direction Nyquist = turn frequency.  H o F and G o H are NOT firmly nonexpansive:
+in small linear models of the MACE loop the current placement diverged slowly in 82% of instances / no fixed point in
+75/200; constraint inside the prox converged always (a warning, not a prediction for production).  The earlier
+"1.7-voxel full-turn shift" of wedge part 5 is most likely a cross-correlation estimator artifact (ring-shaped peak).
+TESTS (Gautschi, code `~/PycharmProjects/lilly_exp/nsi/2026/0924/static_nullspace/`, outputs `~/Desktop/data/output/2026/0924/`):
+(1) static per-frame test, jobs 16665554 (ds8+ds4, 12 min): per-frame MBIR null fill error = 0.83 of zero fill (central
+slab); removing it 0.172 -> 0.208 NRMSE; FDK frames have ~no null content; null from the frame mean 0.076.
+(2) static MACE4D test, job 16666651 (ds8, 3 identical turns, 17 frames): null fill error 0.24-0.26 of zero fill in the
+central slab (caveat: the reference x_ref shares data, noise and prior with the frames); removing it 0.083/0.067 -> 0.205/0.195; no filter beat the DCT
+filter on this static case (0.067 vs 0.083; frame deviation 4.8% vs 6.4%).
+(3) calibration, job 16665608: estimate_det_channel_offset per turn on Phantom_30s_Run1 = -1.24..-1.45 channels from the
+nominal -1.3385 ALU (median -1.281; channel 0.254, magnification 2.124, 1 channel = 1.00 voxel at iso); FDK sweep of 24
+frames: half-turn displacement 2.91 -> 0.15 voxels, first-harmonic shift 1.69 -> 0.13 at the estimate, slope 2.1-2.2
+vs predicted 2.34.  Demo data offset is fine (-0.10 channel).  The 4D run with the corrected offset has NOT been done.
+Reviews: three review workflows (technical/numbers/style/completeness); fixes applied (the '3/4 recovered' wording, the 1.65/1.23 ratio inference and the H_per sinusoid claim were corrected).  Runs table now includes job 16664243.  Mac MPS debug run caught a
+get_params('angles') bug before the cluster jobs ran.  NOTE: the literature subagent sent Ziyun's email once as the
+Crossref 'mailto' parameter (reported to Ziyun).
+
+### 2026-09-24 (Gautschi: branch fdk_init_4dmace checked out, job 16664243 submitted)
+Gautschi checkout `~/PycharmProjects/mbirtorch` switched from `mace_4d_dev` (7a80bbe, clean) to `fdk_init_4dmace` (157deaa);
+editable install imports the recon_direct init.  Job 16664243 (ai, 4 H100, 1.5 h,
+`~/PycharmProjects/scripts/2026/1001/submit_fdk_init_branch.sbatch`): part 1 the full-size 99-frame run of Phantom_30s_Run1
+with the unmodified driver (mbirtorch_applications 4dct_script 9a965ed, defaults, downsampling 1, 10 iterations); part 2
+`pytest tests` serially.  Recon first so the suite cannot cost it the time limit.  Output, logs, init cache, pytest log and
+slurm logs all in `/home/li5273/Desktop/data/output/2026/1001/` (new, so the FDK init is computed there).  CAUTION: the
+package on this branch differs from 7a80bbe in 43 files (main/prerelease changes, ~450 changed lines in mace4d.py/mace.py),
+so this is NOT a one-factor comparison with job 16626806 (09-23).  Previous suite: 38 min on 1 GPU at 7a80bbe.
+DONE 17:35 (47 min, h001, exit 0).  Recon 0.46 h: FDK init computed in 28.8 s, 'init source = computed (99 frames, direct reconstruction)'; init BIT-IDENTICAL to the 09-23 wrapper's FDK init (x130 and y130 slices, max diff 0); sigma 0.005993, sigma_x 0.000608 (same as 09-23); 10 iterations, change 57.5% -> 1.15%, steady iterations 160-190 s.  Final vs 09-23 final: 0.39% (x130) and 0.36% (y130) relative RMS, max abs 0.0036; cause not separated (different seed and the 43-file package difference).  pytest: 277 passed in 17.9 min on 4 GPUs, 0 failed.  Figures fdk_init_vs_final_{x130,y130}.png and center_slices_x130_y130.npz (539 MB) in the 1001 folder.  Gautschi checkout still on fdk_init_4dmace.
+
+### 2026-09-24 (mbirtorch branch fdk_init_4dmace: the computed 4D init is now a direct reconstruction)
+On Ziyun's request, `MACE4DModel._compute_init_recon` now calls `agent.model.recon_direct(agent.sinogram)` per frame
+(FDK for cone beam, FBP for parallel beam) in place of `recon(..., max_iterations=15)`.  Caching (`init_dir/init_recon.npy`,
+same name, option (a): an existing cache of either kind is loaded), worker grouping and the rest of recon unchanged.
+`_INIT_ITERATIONS` removed; run_info 'init source' now 'computed (N frames, direct reconstruction)'; weights unused by the init.
+Ziyun's reason: FDK and MBIR inits give the same final recon (09-23 comparison, 1.3% RMS), FDK is much faster.
+New test `test_computed_init_is_the_direct_reconstruction_of_each_frame`; tests/test_mace4d.py 7 passed on cpu+mps.
+`prox_stop_threshold` kept as an accepted no-effect parameter (docstring says so, dropped from run_info), because the Lilly driver in mbirtorch_applications (4dct_script, 9a965ed; same on Gautschi and in mbirtorch_applications_4dct) always passes it and Ziyun does not want that repo touched; deleting it would make set_params raise.  Driver's set_params call verified; tests 7 passed.  Committed and pushed as 157deaa to origin/fdk_init_4dmace.
+
+### 2026-09-23 (deck: the filter is now the Turn-Matched Dejitter, TMD; slide 5 introduces the block form directly)
+Ziyun simplified the deck to 12 slides (port slides removed, serif body font) and asked slide 5 to introduce the block
+form and to rename the filter again.  New name: Turn-Matched Dejitter (TMD): frames matched by their position in the turn,
+the matched pair's mean is what is subtracted; blocks of two turns.  Slide 5 rewritten in their Times New Roman 14/13 pt;
+"TSA" -> "TMD" in 20 runs on the other slides.  Backup of their version in the scratchpad (Ziyun_26_0924_user_v1_backup).
+Ziyun rejected TMD; FINAL NAME (Ziyun's choice): the cycle-averaging dejitter, written out, no acronym (CAD is taken);
+'cycle averaging' as the short form in running text.  Applied through the deck (12 runs) on top of Ziyun's concurrent
+edits (deck now 10 slides, their simplified wording on slides 5 and 6).  Backups in the scratchpad: _user_v1 (before TMD),
+_tmd (before the final rename).  Names so far: H_per (notes, code, legends) = TSA = TMD = cycle-averaging dejitter.
+H_per.tex still says H_per; the 99-frame slide's last bullet still says 'now running' and should carry the 09-22 result.
+
+### 2026-09-23 (FDK-initialized full run submitted, for comparing initializations)
+Job 16626806 (ai, 4 H100, 2 h): `scripts/2026/0923/submit_4dmace_fdk_init.sbatch` runs `run_with_fdk_init.py`, which replaces
+`MACE4DModel._compute_init_recon` with a copy whose per-frame call is `model.recon_direct(agent.sinogram)` (FDK) instead of
+`model.recon(..., max_iterations=15)`; caching, worker grouping, the DCT filter and every driver default unchanged, so
+against job 16484769 (09-17) the ONLY difference is the initialization.  Own init dir (no symlink): the FDK init is
+computed and cached at `output/2026/0923/phantom_mbirtorch_fdk_init/init/.../init_recon.npy` for later comparison with the
+MBIR init of 09-17.  Package tree untouched (7a80bbe).
+DONE 16:07: FDK init computed in 31 s (values -1.07 to 0.71, so negatives from the 120-degree FDK), denoiser sigma
+0.00599 and sigma_x 0.000608 (MBIR init gave 0.00713 and 0.000200), 10 iterations 108-156 s each, final change 1.15%
+(DCT/MBIR-init 0.99%, cycle-avg/MBIR-init 0.95%), 0.4 h.  Center slices of the FDK init and this final copied to
+`real_data/full99/center_slices_fdk.npz`; GIFs `final_fdkinit_dct_{x130,y130,z364}.gif`.
+COMPARISON (`compare_inits.py`, `init_comparison_fdk_vs_mbir.png`, z364): the two DCT finals differ by 1.3% RMS; wobble
+0.129 (MBIR init) vs 0.126 (FDK init), other shift 0.31 vs 0.32, sharpness 0.572 vs 0.581, intensity swing equal,
+negative voxels 24% vs 18%.  The initialization barely matters after 10 iterations; the filter matters more (cycle-avg
+final differs by 6.5% and halves the wobble).  FDK init: 32% negative voxels (120-degree short-scan FDK), values to -1.07,
+8.7x the gradient energy (noise).  CAUTION on the estimator: the adjacent-frame cross-correlation shift read 0.004 voxels
+on the raw FDK frames (noise/streaks dominate the correlation of neighbors); with smoothing + object mask it reads 1.1, and
+half-turn pairs read 2.9 voxels for FDK against 3.0 for MBIR, so the rotating shift IS in the FDK init and the axis-offset
+hypothesis stands.  The wobble is not created by the MBIR iterations.
+
+### 2026-09-23 (one-period variant submitted: TSA with blocks of 6 frames)
+Job 16625309 (`scripts/2026/0922/submit_4dmace_hper_block6.sbatch`, HPER_BLOCK=6, output
+`output/2026/0922/phantom_mbirtorch_hper_block6/`, same init symlink and settings as the block-12 run).  With one turn per
+block each group has one frame, so the filter replaces every frame by the mean of its turn: a block average, temporal
+resolution one turn, steps at block boundaries.  Told Ziyun before submitting; it is a reference point, not a dejitter.
+CANCELLED by li5273 at 10:50, 46 s after submission, before it ran; no logs, no output.  Not resubmitted.
+
+### 2026-09-22 (full-resolution 4D MACE run with H_per block-12 in place of the DCT filter, submitted)
+Job 16612533 on Gautschi (ai, 4 H100, 2 h): `~/PycharmProjects/scripts/2026/0922/submit_4dmace_hper_block12.sbatch` runs
+`run_with_hper.py`, a wrapper that sets `mbirtorch.mace4d.temporal_filter_matrix` to the block-12 H_per (same signature,
+extra args ignored) and then runs `mbirtorch_applications/nsi_4d/Lilly_recon_4d.py` with the 0917 defaults (99 frames,
+10 iterations, downsampling 1).  The mbirtorch tree stays at 7a80bbe, unmodified.  Init read through a symlink
+`output/2026/0922/phantom_mbirtorch_hper_block12/init` -> the 0917 cached init, so the ONLY difference from job 16484769
+(phantom_mbirtorch_full_slab2gb, 26 min) is the filter.  Output dir `output/2026/0922/phantom_mbirtorch_hper_block12/`,
+Slurm logs in `scripts/2026/0922/slurm_logs/`, run_info in `scripts/2026/0922/logs/`.  DONE 2026-09-22 23:04: 0.44 h, 10 iterations, change 49% -> 0.95%, log confirms "H_per in blocks of 12 frames ... dims kept 59".
+Compared with the 0917 DCT final on the z364 slice (`real_data/full99/compare_finals.py`, `final_dct_vs_tsa.png`,
+`final_center_slices.npz` has z364/x130/y130 of both finals): wobble (period-6 part of the frame-to-frame shift)
+init 1.30 -> DCT final 0.129 -> TSA final 0.063 voxels; non-periodic frame-to-frame shift 0.31 -> 0.16; sharpness of
+frame 0 identical (0.57 of the init, the loop's prior smooths both); the two finals differ by 6.5% RMS; total slice
+intensity swings 22% in both (real motion), with the DCT final 0.4% low at multiples of 6 and the TSA final 0.4% high
+there (block starts at 12k are a candidate; not yet separated).  New GIFs `final_tsa_block12_{x130,y130,z364}.gif`.
+
+### 2026-09-22 (the 09-24 deck: ten slides on the jitter and the TSA filter, single column)
+`Lilly/4DCT/Slides/2026/Ziyun_26_0924.pptx` modified in place (six-slide original backed up in the session scratchpad as
+Ziyun_26_0924_original_backup.pptx; `scratchpad/deck/build_slides2.py` rebuilds from it).  NAME: Ziyun asked for a real
+name; the filter is now the Turn-Synchronous Average (TSA) filter in the slides (H_per stays as the symbol in the notes
+and in plot legends, which the slides point out).  Ziyun's rules: one column top to bottom, bullets fine, under every plot
+say what each line/image is, what is compared, and the conclusion; method first, then what the DCT filter does not
+guarantee; the missing-wedge slide dropped ("everyone knows the missing wedge").  Slides 7-16: what we see; what we
+assume; the TSA idea; what DCT does not guarantee and TSA does (text); the constant-sequence plot; result 1 static
+phantom; result 2 real 24 frames; the real jitter is a rigid shift; an axis offset reproduces it; all 99 frames and the
+block form.  QA through PowerPoint's AppleScript PDF export (quit PowerPoint between exports).  H_per.tex not renamed yet.
+
+### 2026-09-22 (H_per.tex: locality section added)
+New Section 5 "Averaging over a shorter span: the block form" in `Overleaf/Sensor Orthogonal Reconstruction/H_per.tex`:
+why whole-scan averaging leaks the object's motion at the turn period as a displaced copy (99 frames, phantom moves tens of
+voxels), Definition of the block form (H_per inside consecutive blocks of B frames, B a multiple of P, last block takes the
+leftovers), its inherited properties (orthogonal projection, passes constants, removes P-1 dims per block; 59 of 99 kept at
+B = 12), the choice of B (B = 2P smallest useful), the sliding form as a diagnostic only (not symmetric), and the unmeasured
+seam.  Measurements section gained the 99-frame paragraph with the wobble numbers (1.30 / 0.26 / 0.14 / 0.08 voxels) and
+Figure fig:ghost = figures/full99_variants.png (copied into the Overleaf figures folder).  Abstract and implementation
+updated.  graphicx added to the preamble.  v2 kept in the scratchpad.
+
+### 2026-09-22 (Gautschi: DCT and H_per on all 99 init frames; motion ghosts; local H_per)
+Slurm job 16595683 (ai, 1 GPU, 7 min after fixing the slab axis; first try 16592987 cancelled: slabs along the fastest
+axis made 6.7M small reads per slab) applied temporal_filter_matrix(99,6) and H_per to the whole init
+(99,260,260,728) -> `~/Desktop/data/output/2026/0922/dejitter_init_compare/` (two 19 GB .npy, GIFs x130/y130/z364 with
+init|DCT|H_per, montage, summary).  FINDING: over 30 s the phantom moves by tens of voxels; the turn-period content of
+that real motion is put back as a GHOST (displaced copy of the object) by any filter averaging over all 99 frames:
+clear for full H_per, fainter for DCT.  Fix: form the groups locally.  On the z364 slice, wobble left (period-6 part of
+frame-to-frame shift; init 1.30 voxels): DCT 0.26, H_per all 0.14 (ghost), H_per sliding ±6 0.10 (no ghost, not a
+projector), H_per in blocks of 12 frames 0.08 (no ghost, orthogonal projector, passes constants).  Recommendation: block
+H_per over two turns; check block seams.  H_per.tex not yet updated with this (needs a "locality" section).
+Also answered: Slurm charges elapsed time x allocation for batch and interactive alike; batch ends when the script ends.
+Job 16598843 (9 min, limit cut to 30 min with scontrol) added the block-12 stack and remade the movies with
+mbirtorch.save_volume_as_gif (Ziyun found my side-by-side GIFs weird): 12 GIFs, 4 stacks x 3 axes, copied to
+`real_data/full99/`.  main.tex Section 3.3: 'window operator' (my term) replaced by a sentence defining R_Theta first.
+
+### 2026-09-22 (H_per.tex: the residue class projector as a standalone formulation)
+Wrote `Overleaf/Sensor Orthogonal Reconstruction/H_per.tex` (5 pages, compiles alone with the note's preamble): setting and
+the periodicity A_{t+P} = A_t; Definition of H_per = I - E(E^T E)^{-1}E^T + 11^T/T; Propositions with proofs (orthogonal
+projector removing P-1 dims, constants pass, every zero-mean period-P sequence removed incl. harmonics, non-harmonic
+frequencies pass when P | T, nonexpansive); relation to S_T and S_G; comparison with the DCT filter (leakage counts,
+constant response numbers at T=12 and 25, parameters); use in the Mann loop (drop-in matrix for apply_temporal_filter);
+what it cannot do (gantry-locked motion; non-multiple views per turn); evidence tables (phantom T=12, real init T=24,
+production dips at T=99); implementation snippet (requires T >= P, refuse otherwise).  Not yet in the note's main.tex;
+Ziyun may merge or keep separate.  paths.md not changed (same Overleaf folder).
+Rewritten the same day in plain language per writing_style_charlie.md on Ziyun's request: no 'trace' (now 'the sequence of
+a voxel'), no 'residue class' (frames sorted into P 'groups' by t mod P), no 'nonexpansive'/'leakage' (said in words); title
+'The filter H_per: removing the gantry period from a 4D reconstruction'; 6 pages, compiles clean.  v1 kept in the scratchpad.
+
+### 2026-09-22 (real data: what the 4D init jitter actually is)
+Ziyun asked for a real-data comparison of frame-axis filters on the jittered init of the 0917 run (24 frames, 64-slice
+slab around z=364; slabs cut on Gautschi at `~/Desktop/data/output/2026/0921/wedge_realdata/`, analysed on the Mac in
+`mbirtorch/Claude outputs/wedge_experiment/real_data/`, README there).  FINDING: the jitter is NOT a missing-wedge
+pattern.  It is a rigid shift of every frame by 1.2-1.6 voxels (0.17 mm) in a direction rotating 60 deg per frame,
+period-6 fraction 1.00; frames half a turn apart differ more than adjacent ones.  Part 5 simulation: a det_channel_offset
+error of 1.5 channels reproduces a rotating per-frame shift of 1.8 voxels with period 6.  Likely cause: a center of
+rotation error of about one detector pixel in the reconstruction geometry -> check with the calibration tools.
+The final MACE recon still wobbles 0.2 voxels and its total intensity dips 2% at t = 0, 6, 12, 18: the DCT filter's
+constant-response defect in production output.  Method table in the README: DCT baseline leaves 0.44 voxel shift, blurs
+12%, and changes frame intensities by 16% at T=24; H_per removes the wobble exactly (0.04 voxel) with 6% blur; wedge
+projectors do nothing (jitter not in the wedge); 3-frame blends smear; register + H_per is sharpest (0.98) with no
+periodic residual.  Open: what the phantom really does (any real period-6 motion is indistinguishable from the
+artifact by a filter); the unexplained full-turn shift in the part 5 simulation; run the geometry calibration.
+
+### 2026-09-21 (Sensor Orthogonal Reconstruction note: the wedge experiment written into the Overleaf note)
+On Ziyun's request the experiment is now in the note itself (`Overleaf/Sensor Orthogonal Reconstruction/main.tex`,
+20 pages): a paragraph in Section 5.3 (labelled `sec:temporal_projector`) on the transform filter not passing a
+constant sequence (0.79 at the end frames at T = 12; 0.914 at t = 6, 12, 18 at T = 25; 3.8 percent RMS), one sentence
+in the Summary, a closing note in Appendix B saying which checks were run, and a new Appendix C "The wedge experiment"
+(`app:experiment`) with four subsections, Table tab:part3 (the three filters), Table tab:part4 (the operator metric
+r_k by geometry and fan angle), and the four figures.  Figures copied to `Sensor Orthogonal Reconstruction/figures/`
+(part1_wedges, part2_jitter, part3_filters, part4_multiturn; 6 MB total).  Section 3.6 now points at the appendix.
+Compiled three passes, no errors, no undefined references, no overfull lines.  Backup `main.tex.before_2026-09-21_appendix`
+in the session scratchpad.  Overleaf sync is through Dropbox; if the link still misbehaves, main.tex AND the figures
+folder must be uploaded by hand.
+
+### 2026-09-21 (wedge experiment part 4: the wedge across turns with the real scan's angles)
+Added `wedge_part4.py` and `wedge_part4_checks.py` to `mbirtorch/Claude outputs/wedge_experiment/` (README has
+the numbers).  Angles as `nsi.py` stores them for Phantom_30s_Run1: (j x -2.5 deg) mod 360, 2400 views.
+`construct_time_frame_models` gives 99 frames / 48 views / stride 24 on them, as the note now states.
+Parallel slab, 13 frames (2.3 turns): the wedge axis measured from the spectrum is within 1 deg of the
+accumulated-angle prediction in every frame, including frames 0, 5, 6, 11, 12 where the stored angle restarts;
+||Q_{t+3} d - Q_t d||/||Q_t d|| and the k = 6 value are 1e-3 to 5e-3, equal to the floor from solving one frame
+twice (MPS kernels nondeterministic, CG amplifies), so the half-turn symmetry is exact to measurement.
+Cone beam (64 ch x 32 rows, source 128 from the axis, fan half angle 7.2 deg at the field edge): the
+difference-of-estimates metric read 0.70 even in the midplane, but that was CG convergence error plus empty end
+slices.  The operator metric r_k = ||A_k q||/||A_k d|| (q = Q_0 d) gives: parallel r_3 = floor; cone r_3 = 3.6%
+(7.2 deg), 1.3% (1.8 deg), 0.7% (0.4 deg) over a 0.5% floor, adjacent frames 10 to 12%.  So the half-turn symmetry
+fails in cone beam by an amount roughly proportional to the fan angle, midplane included.
+NOTE CORRECTED (Section 3.6): "except in the midplane" was wrong; the two fans share only the central ray, a ray at
+fan angle gamma is seen again from the source pi + 2 gamma farther on, and the sliver argument plus the measured
+numbers are now in the note.  Backup `main.tex.before_2026-09-21_conebeam` in the session scratchpad; compiled OK.
+Also: an energy-weighted wedge-axis estimator is biased 3 deg toward the vertical by the horizontal skull ellipse;
+dividing by the phantom spectrum fixes it.  Runtime: the first part 4 run took 1 h 38 min (kernel compilation for 20
+frame models, 12 s per cone projection pair during the run vs 0.02 s after); WEDGE_REPLOT=1 redraws from arrays.
+
+### 2026-09-21 (Sensor Orthogonal Reconstruction note: the scan description corrected)
+Ziyun flagged "the angle is a monotone function of the view index" as wrong, since a 4D scan takes many turns.
+Checked the dataset on Gautschi (`~/Desktop/data/Phantom_30s_Run1_Dec2024`, key login works without BoilerKey):
+2400 radiographs, angleStep 2.5 deg, Rotation range 6000 deg (16.7 turns), continuous, 80 fps, 12.5 ms integration,
+counter-clockwise, 30 s total (mtimes 16:32:25 to 16:32:57), 144 views per turn, no per-view angle in the .nsipro.
+`preprocess/nsi.py:335` assigns angles = (j * angle_step) % 360 with the step sign flipped for counter-clockwise, so the
+stored angle is a decreasing sawtooth restarting every 144 views.  With P = 6, overlap 2: stride 24 views (0.3 s), span
+48 views (0.6 s), 99 frames available, the runs so far used 25; 144 = 6 x 24 so Q_{t+6} = Q_t is exact in angle.
+Rewrote Section 2.1 of the note: the NSI table rotates (not a gantry; the note keeps "gantry" for the rotation seen from
+the object), accumulated angle vartheta_j = j Delta theta vs stored angle theta_j = vartheta_j mod 2pi (new eq:wrapped),
+frames defined by view index J_t with s and v rounded from the angles (eq:window), Theta_t as the stored angles of J_t,
+the dataset numbers, and a paragraph stating that Q_{t+P} = Q_t is exact only when views per turn is a multiple of P.
+Two downstream sentences fixed: the Section 3.2 window is contiguous modulo 2pi; Section 3.5 rotates by t s Delta theta.
+Backup of the previous main.tex in the session scratchpad.  Compiled with pdflatex, no errors, no undefined references.
+"gantry" still appears throughout (harmonics, period, locked to); a global rename to "turn" or "view direction" is
+Ziyun's call.
+
+### 2026-09-21 (Sensor Orthogonal Reconstruction note: the wedge experiment)
+Built a three-part phantom experiment on the missing wedge of the note
+(`Overleaf/Sensor Orthogonal Reconstruction/main.tex`), in `mbirtorch/Claude outputs/wedge_experiment/`
+(scripts, arrays, figures, README; untracked in git; nothing in the package changed).  Setting: parallel beam,
+360 views per rotation, 128x128x4 Shepp-Logan, P = 6, overlap 2, MPS.
+Part 1 splits the phantom into P_t d = A_t^+ A_t d (60 CG iterations) and Q_t d per frame: 94 to 96 percent of
+the spectrum energy of Q_t d lies in the predicted missing wedge (29 to 36 percent of the plane); in image space
+Q_t d is the two skull arcs tangent to the missing directions; the wedge repeats after 3 frames (parallel beam).
+Part 2 reconstructs a static phantom frame by frame (12 frames, init = full-scan recon, 15 iterations): the
+frame deviation is 8.3 percent of the static part, with its temporal spectrum peaked at period 3 only, as the
+note predicts for parallel beam (period 6 needs cone beam).
+Part 3 FINDING: `temporal_filter_matrix` does not pass a constant sequence.  Its orthonormal DCT-I weights the
+end frames by sqrt(2), so a constant has components in the removed modes.  At T = 12 the filtered constant is
+0.79 at the end frames; at T = 25 it dips to 0.914 at t = 6, 12, 18 and 0.939 at t = 0, 24 (3.8 percent RMS).
+The filter's range contains no static stack.  mbirjax `_dejitter_4d_dct` and the 4DCT original share the
+normalization.  On the part 2 stack the mace4d filter (band 1) left 15 percent of the jitter but changed the
+static part by 1.23x the jitter norm (frames 0 and 11 at NRMSE 0.26); the note's residue-class projector H_per
+left 3 percent of the jitter, changed the static part by zero, and cut the per-frame NRMSE from 0.115 to 0.084
+in every frame.  T = 12 is also a leakage case (2(T-1)/P = 3.67 not an integer; 8 of 12 modes removed).
+Open: measure whether the production consensus shows the dips at t = 0, 6, 12, 18, 24 (mean attenuation of a
+static region against t on an existing Gautschi recon); consider H_per in place of the DCT filter (needs Greg).
+
+### 2026-09-18 (mbirtorch MACE4D port, API deck revised after Greg's comments)
+Revised the Overleaf deck (`MBIRTorch_4DCT_API/main.tex`, now 22 frames) after Greg's 11 comments. Slide
+changes: a new slide "Devices, workers, and tasks: what they are and who owns them" (definitions plus a
+made-by/owned-by/lives-for table), the step-distribution slide reworded, "What an agent is" rewritten to
+explain tasks and fold_after_all in plain words, a new example slide with a SlabDenoiser agent that provides
+tasks, Sphinx-style signature boxes (tcolorbox) for MACE, Task, the three agents, MACE4DModel, and recon,
+the recon diagram's consensus box now spans all four agents, parameters shown as name=default, Pygments
+default colors for code, "makespan" defined on the log slide, band_width and the mirrored ends of the DCT-I
+filter explained, titles now say m4d.recon, imports as grouped bullets. Items 2 (coarse-to-fine partition
+setting) and 3 (jax vs torch memory) are discussion questions, not slide fixes; not addressed in the deck.
+Overleaf's Dropbox link misbehaved on 09-17 (upload then file removed); Ziyun uploads main.tex by hand.
+Later the same day: the deck gained a closing status slide with the 2026-09-17 timing on Phantom_30s_Run1 (25 frames,
+four H100s, 10 iterations): mbirtorch 25.8 min against mbirjax 68.0 min, 2.64x FASTER (earlier in this session I had
+read the other session's title as "2.6x over mbirjax" meaning slower; that was wrong). Per steady-state iteration:
+total 172.5 s vs 387.2 s, makespan 170.2 vs 201.6, denoise worker time 67.6 vs 421.8 (6.2x less), data-fit worker
+time 609.2 vs 202.4 (3x more), non-task overhead 2.3 s vs 185.6 s. Numbers from Ziyun's screenshot of the other
+session's summary. To-do on the slide is now docs and a demo only; Ziyun dropped the timing study for now.
+
+### 2026-09-17 (mbirtorch MACE4D port, API summary deck)
+Wrote a 19-frame beamer deck summarizing the MACE and MACE4DModel API, at
+`~/Library/CloudStorage/Dropbox/Apps/Overleaf/MBIRTorch_4DCT_API/main.tex` (Overleaf project, synced by
+Dropbox; pdfLaTeX, metropolis theme, same look as Greg's September update deck). Part 1: the consensus idea,
+the MACE class (two slides), what an agent is and the Task class, the three agents, the device pool, and two
+examples (one-call form; class form with a pool and a checkpoint). Part 2: the 4D problem, MACE4DModel
+(constructor and methods, two slides), the seven steps inside recon, the set_params table, a two-GPU
+example, the return value and log files, and the two filter functions. Every fact is from the docstrings on
+`mace_4d_dev` at 7a80bbe; no figures, tikz only. Compiled locally with no errors; each slide checked as an
+image. The user has not yet reviewed it.
 
 ### 2026-09-16 (mbirtorch MACE4D port, the decided questions: increments a and b, and the cluster)
 Went through the open questions in `mbirtorch_plans/plans/features/mace4d/decisions.md` with Ziyun and settled seven;

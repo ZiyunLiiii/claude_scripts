@@ -6,6 +6,17 @@
 
 ## Notable Projects
 - Lilly Proposal (LaTeX): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Proposal_4D_Lilly/main.tex
+- MACE/MACE4D API deck (beamer, Overleaf via Dropbox): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/MBIRTorch_4DCT_API/main.tex
+- Sensor Orthogonal Reconstruction note (LaTeX, Overleaf via Dropbox): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Sensor Orthogonal Reconstruction/main.tex
+- Wedge experiment for that note (scripts, arrays, figures, README): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/0924/Claude outputs/wedge_experiment — moved there from mbirtorch/Claude outputs (no longer in the repo); run with the mbirtorch env from that directory
+- Theory checks for that note (numpy exact-SVD parallel-beam checks, 2026-09-24): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/0924/Claude outputs/theory_checks
+  (subfolder `placement/`, 2026-09-28: where the filter H belongs in the MACE loop; README there)
+- Static-object and calibration tests for that note (copies of outputs, job scripts, plotting scripts, README): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/0924/Claude outputs/static_tests
+- Static-object null-space test and calibration sweep for that note (Gautschi): code `~/PycharmProjects/lilly_exp/nsi/2026/0924/static_nullspace/`, outputs `~/Desktop/data/output/2026/0924/static_nullspace/` and `.../0924/calib_offset/`; static data extracted to `~/Desktop/data/demo_data_nsi/` (from /depot/bouman/data/Lilly/demo_data_nsi.tgz — there is no .npz; 200 radiographs of the static JB-033 artifact phantom, one turn)
+- Offset justification doc (the period-6 jitter: frame construction direct cause, axis offset fundamental cause): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Sensor Orthogonal Reconstruction/offset_justification.tex (experiment log: experiment_status.tex in the same folder)
+- Offset slides (beamer, 3 slides with animate-package animations of the x130 slice): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Sensor Orthogonal Reconstruction/offset_slides.tex (frames in figures/anim/; set it as the main document in Overleaf to compile)
+- Stage 1 of the sensor-orthogonal plan (corrected-offset 4D runs, survey, sweep, convergence): code on Gautschi `~/PycharmProjects/lilly_exp/nsi/2026/0924/sor_stage1/`, outputs `~/Desktop/data/output/2026/0924/sor_stage1/`; copies of small outputs, scripts and README: /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/0924/Claude outputs/sor_stage1
+- Sensor Orthogonal Reconstruction -- Theory (LaTeX, Overleaf via Dropbox; Ziyun's own theory notes, started 2026-09-28): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Sensor Orthogonal Reconstruction -- Theory/main.tex
 - Code Review Schedule (website): /Users/a124601/Desktop/code-review-schedule — React+Vite+TS, remote git@github.com:ZiyunLiiii/code-review-schedule.git, live at https://ziyunliiii.github.io/code-review-schedule/ (GitHub Pages via Actions). Manages weekly Fri 3:30 PM Code Review meetings; semester config in src/utils/persistence.ts (DEFAULT_SEMESTER_CONFIG).
 
 ## 4DCT / mbirjax repos
