@@ -18,7 +18,10 @@
   Group 1 (questions 13 and 17) and Stages 6 to 8 wait for Greg's review
 - 4D viewer (mbirtorch branch `4D_viewer`): design decided 2026-09-29 (`4d_viewer/decisions.md`); step 1
   implemented the same day as the new module `mbirtorch/viewers/slice_figure4d.py` (`mbirtorch.slice_viewer4d`),
-  with the 3D viewer untouched; not committed; see the 09-29 log entry
+  with the 3D viewer untouched; committed as 0a9ea35 plus the Retina menu fix 9997a8d; step 2's space-time
+  planes, dialog fix, and slider layout committed as 677fa51, the tighter slider block as 68130fc, Save movie as 4223797; all pushed to origin/4D_viewer on
+  2026-09-29 after the full suite passed (214 passed, 92 skipped); differences in time are next;
+  see the 09-29 log entry
 
 ## Log
 
@@ -31,8 +34,18 @@ Ziyun and I went through the fifteen choices and the design; every decision, alt
 3D volumes fixed in time, frame index mapping with a shorter volume holding its last frame, whole-volume differences
 including 4D minus 3D, and Load of a 4D file as one volume.  Checks: `slice_figure.py` byte-identical; 13 new tests
 and the 5 existing viewer tests pass; every name in `mbirtorch.__all__` resolves.  A real `macosx` window played two
-260 x 260 panels at 15.2 fps (30 requested; default 5), with the images kept in the drawn buffer.  Not committed;
-waiting for Ziyun's go.  Step 2 (space-time planes, differences in time, Save movie) is not started.
+260 x 260 panels at 15.2 fps (30 requested; default 5), with the images kept in the drawn buffer.  Committed as
+0a9ea35 on Ziyun's go.  Ziyun then found that the right-click menu opened away from the cursor on a Retina
+screen.  The inherited in-figure menu divides the click position in physical pixels by the canvas size in
+logical pixels, so at a device pixel ratio of 2 it opened at twice the click's distance from the corner.
+Fixed in the 4D viewer only (commit 9997a8d, with a test).  The 3D viewer has the same bug and is left for
+Greg.  Neither commit is pushed.
+Later the same day: step 2's space-time planes (677fa51, with the dialog layout fix and the slider layout),
+the tighter slider block (68130fc), and Save movie (4223797).  For the demo, the init slab's mean over its 24
+frames was saved as `init_mean_f0-23_z332-396.npy` next to the slabs in
+`Slides/2026/0924/Claude outputs/wedge_experiment/real_data/` (README section added; that folder is not in git).
+All five commits were pushed to origin/4D_viewer after the full suite passed on the Mac (214 passed, 92 skipped,
+2 min 50 s).  Step 2 (space-time planes, differences in time, Save movie) is not started.
 
 ### 2026-09-28 (4D viewer: five designs built on the slice viewer)
 Ziyun asked for ways to build a 4D viewer from `mbirtorch/viewers/slice_figure.py`, design first.  Nothing was

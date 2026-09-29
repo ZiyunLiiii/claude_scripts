@@ -194,8 +194,49 @@ drawn buffer throughout, so the animated-artist path works on this backend.  The
 
 ## Step 1 status
 
-Implemented 2026-09-29 on `4D_viewer`, not committed.  `slice_figure.py` is byte-identical to before (md5
+Implemented 2026-09-29 on `4D_viewer` and committed as 0a9ea35.  The same day, Ziyun found that the right-click menu opened away from the cursor on a Retina screen.  The fix, in the 4D viewer only, is commit 9997a8d.  The 3D viewer has the same bug, in `_open_menu_dialog` of `slice_figure.py`, and it is left for Greg.  Neither commit is pushed.  `slice_figure.py` is byte-identical to before (md5
 db0f0e29a14461d5c4d1af6081aa7e7a).  Tests: `tests/test_viewer4d.py` (13 tests) and the 5 existing viewer tests
 pass.  Files: new `mbirtorch/viewers/slice_figure4d.py`, `tests/test_viewer4d.py`; additions to
 `mbirtorch/view_utils.py`, `mbirtorch/__init__.py`, `mbirtorch/viewers/__init__.py`.
 
+
+## Step 2 status
+
+Space-time planes implemented 2026-09-29 on `4D_viewer` and committed as 677fa51, together with the dialog layout fix below and the slider layout (the frame-row slider sits under the slice slider, so the two position sliders sit together, as Ziyun preferred to a third slider).  Not pushed.  A panel keeps its axes in the order rows,
+columns, slice axis, second axis.  In a spatial plane the second axis is t, as in step 1.  In a space-time plane
+(t-x, t-y, t-z) the frame-row slider moves the second hidden spatial axis.  The defaults are the ones proposed
+and approved: the buttons are labeled by plane (replacing choice 2's x, y, z labels); t goes to the frame-row
+slider whenever it is hidden, and the slice slider keeps its axis when it can; Play and the ROI plot are hidden in
+a space-time plane; a 3D volume is shown constant in time, and a shorter 4D volume shows only its own frames,
+lined up in time with the others; space-time images stretch to fill the panel.  Two further choices made in the
+implementation: a space-time plane is shown in every panel at once, because one frame-row slider serves all
+panels, and the slice slider is labeled with its axis name.  Tests: 7 new, 26 viewer tests pass;
+`slice_figure.py` is unchanged.  Differences in time and Save movie are not started.
+
+Dialog layout bug (found by Ziyun on 2026-09-29): in the 4D viewer the "Set intensity range" dialog drew its hint over
+the Min box.  The inherited in-figure dialogs place their parts at fixed fractions of the figure height, laid out
+for the slice viewer's 8-inch figure, and the 4D figure is 10.5 inches tall.  The data-dict, chooser, and file
+dialogs were shifted in the same way, and a full page of 11 files would run past the file panel.  The fix is in
+the 4D viewer only: a dialog is laid out as if the figure were 8 inches tall and mapped onto the taller figure, so
+it has the slice viewer's size and spacing in inches (a test compares the two).  The 3D viewer has the same fault
+when its window is made taller than 8 inches; that is left for Greg.
+
+Slider spacing (2026-09-29, Ziyun's request): the slice slider, the frame row, and the intensity slider are the rows
+of one block with small gaps, committed as 68130fc.  Not pushed.
+
+Save movie (choice 14b), implemented 2026-09-29 and committed as 4223797 (not pushed): the right-click item "Save movie" writes a panel's
+view as a GIF with `save_volume_as_gif`, which the mbirtorch wrapper passes in as `movie_fn`.  The movie plays along
+the frame-row slider's axis (t in a spatial plane, the second hidden spatial axis in a space-time plane) at the
+current slice, the displayed intensity range, and the viewer's fps.  A transposed panel keeps its orientation.  On
+macOS the native save panel asks for the file, with a default name such as init_x-y_z32.gif; other systems get an
+in-figure path box.  The item is left out when the panel has one movie frame, such as a 3D volume in a spatial
+plane.  Checks: a model test that every movie frame equals the panel image (spatial and space-time planes,
+transposed or not), a test with a recording writer, and an end-to-end GIF through `mbirtorch.slice_viewer4d`; 34
+viewer tests pass.  In a live macosx window a 24-frame GIF was written in 2.2 s and the viewer kept working.  A test
+script that closed the window from a timer sometimes left plt.show() running, with or without a movie; closing with
+the window's close button exits normally.
+
+Pushed (2026-09-29): commits 0a9ea35, 9997a8d, 677fa51, 68130fc, and 4223797 are on origin/4D_viewer, after the full
+mbirtorch suite passed on the Mac (214 passed, 92 skipped).  Remaining in step 2: differences in time (choice 11).
+Before a pull request: a trial with a full 4D volume on Gautschi, the macOS save panel, playback on a Retina screen,
+the TkAgg and Qt backends, and a docs page.
