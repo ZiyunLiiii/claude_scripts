@@ -253,3 +253,23 @@ build of a docs copy without sphinxext.opengraph (not installed here) reports no
 The first docs commit also carries the docstring sentence that Play steps through the frames and every panel shows
 the slice chosen with the plane buttons and the slice slider (Ziyun's request, 2026-09-29, folded into it; the two
 docs commits were rebuilt as 3b1cff8 and be2d2d4, and pushed to origin/4D_viewer on 2026-09-29).
+
+## Gautschi trial (2026-09-29)
+
+The trial runs the viewer on a Gautschi compute node and shows it in a browser on the Mac.  The job
+`serve_viewer4d.sbatch` opens the viewer with matplotlib's WebAgg backend on two full 4D MACE recons of
+Phantom_30s_Run1, without dejitter and with the DCT dejitter.  The browser reaches the page through an SSH tunnel
+through the login node.  Details are in the progress log entry of 2026-09-29 evening.
+
+Three faults of the 4D viewer were found in a browser window and fixed in commit 010043e (pushed):
+1. Playback marked the playing artists animated on every canvas.  On a canvas that cannot blit, such as the WebAgg
+   and notebook canvases, playback redraws the whole figure, and those redraws left the animated images out.  The
+   artists are now marked animated only on a canvas that can blit.
+2. A plane change moves the slice slider before the ROI plot is hidden, and the slider recomputed the plot for the
+   new plane.  In a space-time plane the frame means raised an error.  The plot is computed in a spatial plane
+   only, and the ROI circle stays through a plane change, as in the 3D viewer.
+3. Each recompute of the ROI plot took the next colors of matplotlib's color cycle.  Each volume keeps one color.
+
+WebAgg itself needed no change to the viewer.  Its mouse events give positions in physical pixels, as the macosx
+backend does, so the Retina fix of the right-click menu applies to it too.
+

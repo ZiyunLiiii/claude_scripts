@@ -74,6 +74,18 @@
   so the opt-in `goldens` parity tests cannot run on the cluster.
 - The `bouman` account has NO grant on the `cpu` partition: a job submitted there is refused with
   `AssocGrpGRES`, with or without `--gres=hp_cpu`. Even a CPU-only run goes on `ai` with a GPU.
+- SSH key login works without a prompt: `ssh -o BatchMode=yes li5273@gautschi.rcac.purdue.edu`. A compute
+  node that runs one of your jobs is reachable with `ssh -J li5273@gautschi.rcac.purdue.edu li5273@<node>`.
+  The nodes' host key is the ed25519 key under `# Gautschi` in the login node's /etc/ssh/ssh_known_hosts
+  (it covers h???, a???, and login??).
+- GUI windows from a compute node: matplotlib's WebAgg backend and an SSH tunnel to the node, as in
+  `claude_scripts/4Drecon/4d_viewer/serve_viewer4d.py`. tornado comes from
+  /apps/external/anaconda/2025.12/lib/python3.13/site-packages/tornado, linked into a folder on PYTHONPATH,
+  with TORNADO_EXTENSION=0 (its C extension fails under Python 3.11).
+- 4D viewer trial (2026-09-29): job files `~/PycharmProjects/scripts/2026/1001/4d_viewer_trial/`
+  (the viewer URL goes to its ignored `slurm_logs/viewer_url_<job>.txt`); run artifacts
+  `~/Desktop/data/output/2026/1001/4d_viewer_trial/` (package copy `mbirtorch_4dviewer/`, `vendor/tornado`
+  link, `smoke/` test volumes).
 
 ## Claude Scripts
 - Local (Mac): /Users/a124601/Desktop/Claude_scripts

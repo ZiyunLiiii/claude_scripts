@@ -21,11 +21,40 @@
   with the 3D viewer untouched; committed as 0a9ea35 plus the Retina menu fix 9997a8d; step 2's space-time
   planes, dialog fix, and slider layout committed as 677fa51, the tighter slider block as 68130fc, Save movie as 4223797; all pushed to origin/4D_viewer on
   2026-09-29 after the full suite passed (214 passed, 92 skipped); differences in time deferred (not needed for
-  now); docs committed as 3b1cff8 and be2d2d4 and pushed; next: a trial with a full 4D volume on Gautschi,
-  then a pull request for Greg;
-  see the 09-29 log entry
+  now); docs committed as 3b1cff8 and be2d2d4 and pushed; three viewer fixes found in a browser window committed
+  as 010043e and pushed; the Gautschi trial on two full 4D volumes is set up and waiting in the queue (job
+  16761899); next: that trial, then a pull request for Greg;
+  see the 09-29 log entries
 
 ## Log
+
+### 2026-09-29 evening (4D viewer served from a Gautschi compute node)
+Ziyun asked for the 4D viewer to run on Gautschi on full 4D recons.  The viewer runs on a compute node with
+matplotlib's WebAgg backend, which serves the viewer window as a web page.  The Mac opens the page in a browser
+through an SSH tunnel, with `ssh -J` through the login node to the node's loopback address.  No X server is
+needed, and nothing is installed.  WebAgg needs tornado, which the mbirtorch environment lacks, so the job links
+tornado 6.5.1 from the anaconda/2025.12 module.  That tornado's C extension was built for Python 3.13 and fails
+under the environment's Python 3.11, so the job turns it off with TORNADO_EXTENSION=0.  The page sits under a
+random URL prefix, so other users on the node cannot open it.
+The job files are `4d_viewer/serve_viewer4d.py` and `serve_viewer4d.sbatch` (claude_scripts commit 1a1d61f).
+They run from `~/PycharmProjects/scripts/2026/1001/4d_viewer_trial/` on Gautschi.  The run artifacts sit in
+`~/Desktop/data/output/2026/1001/4d_viewer_trial/`: a git archive of mbirtorch 010043e, the tornado link, and
+two small test volumes.
+The job shows two full (99, 260, 260, 728) recons of Phantom_30s_Run1 that differ in the dejitter only.  The
+first is `0924/sor_stage1/4d_nominal_nofilter` (job 16674482, --no_dejitter).  The second is
+`0917/phantom_mbirtorch_full_slab2gb` (job 16484769, DCT dejitter).  Both used mbirtorch 7a80bbe, 10 MACE
+iterations, and the nominal offset.
+A smoke test on a login node, with two (12, 48, 48, 24) test volumes, found three faults of the 4D viewer.
+Playback blanked the panels on a canvas that cannot blit, such as the WebAgg and notebook canvases.  Drawing an
+ROI and then choosing a space-time plane raised "repeated axis in transpose" on every backend.  The ROI plot's
+line colors changed each time the plot was recomputed.  The fixes are commit 010043e, with one test each that
+fails without its fix.  The full suite passed (216 passed, 92 skipped), and 010043e was pushed to origin/4D_viewer
+on Ziyun's go.  The smoke test also found that the job's --notes option consumed the volume paths, so the volumes
+became a named option.  Jobs 16761406 and 16761468 were cancelled before they started, for these fixes and for
+moving the package copy out of the scripts repository.
+The ai partition was fully allocated, with 239 jobs pending.  Job 16761899 (1 GPU, 14 cores, 3 hours) is pending,
+and Slurm estimated a start on 2026-10-04.  The bouman account has no grant on the cpu partition.  The highmem
+partition takes only jobs of more than 48 cores, smallgpu was full, and profiling is for hardware profiling.
 
 ### 2026-09-29 (4D viewer: design decided, step 1 implemented)
 Ziyun and I went through the fifteen choices and the design; every decision, alternative, and reason is in
