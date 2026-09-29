@@ -106,6 +106,8 @@ entry gives the decision, the alternatives considered, and the reason.
   too), and bool inputs raise a TypeError.  Float reconstructions are not affected (checked 2026-09-29).
 
 ### 11. Differences in time
+- Deferred (2026-09-29): Ziyun does not need this for now.  The ROI curve and the space-time planes already show
+  the period-6 jitter, and a k = 6 comparison can be made in a script.  Step 2 is complete without it.
 - Decision (2026-09-29): a panel can show frame t minus frame t - k of its own 4D volume, with k typed in.  This comes in
   a second step, after the first 4D version works.
 - Alternatives: include it in the first version; leave it out, so such differences are computed outside the
@@ -237,6 +239,17 @@ script that closed the window from a timer sometimes left plt.show() running, wi
 the window's close button exits normally.
 
 Pushed (2026-09-29): commits 0a9ea35, 9997a8d, 677fa51, 68130fc, and 4223797 are on origin/4D_viewer, after the full
-mbirtorch suite passed on the Mac (214 passed, 92 skipped).  Remaining in step 2: differences in time (choice 11).
+mbirtorch suite passed on the Mac (214 passed, 92 skipped).  Step 2 is complete; differences in time (choice 11) are deferred.
 Before a pull request: a trial with a full 4D volume on Gautschi, the macOS save panel, playback on a Retina screen,
 the TkAgg and Qt backends, and a docs page.
+
+Docs (2026-09-29), two commits on 4D_viewer, not pushed: 3b1cff8 adds the "4D Data Viewer" section to
+usr_utilities.rst, the slice_viewer4d entry to usr_api_overview.rst, "Viewing the Result" to usr_mace4d.rst, and
+fully qualified save_volume_as_gif references in view_utils.py.  be2d2d4 adds figs/slice_viewer4d.py, which draws
+two figures at build time (the x-y plane with an ROI and its curve, and the t-y plane) from a shifting Shepp-Logan
+phantom, and keeps the viewer's partial-redraw rectangle out of the layout so tight saves are not padded.  A local
+build of a docs copy without sphinxext.opengraph (not installed here) reports no warnings before or after.
+
+The first docs commit also carries the docstring sentence that Play steps through the frames and every panel shows
+the slice chosen with the plane buttons and the slice slider (Ziyun's request, 2026-09-29, folded into it; the two
+docs commits were rebuilt as 3b1cff8 and be2d2d4, and pushed to origin/4D_viewer on 2026-09-29).

@@ -20,7 +20,9 @@
   implemented the same day as the new module `mbirtorch/viewers/slice_figure4d.py` (`mbirtorch.slice_viewer4d`),
   with the 3D viewer untouched; committed as 0a9ea35 plus the Retina menu fix 9997a8d; step 2's space-time
   planes, dialog fix, and slider layout committed as 677fa51, the tighter slider block as 68130fc, Save movie as 4223797; all pushed to origin/4D_viewer on
-  2026-09-29 after the full suite passed (214 passed, 92 skipped); differences in time are next;
+  2026-09-29 after the full suite passed (214 passed, 92 skipped); differences in time deferred (not needed for
+  now); docs committed as 3b1cff8 and be2d2d4 and pushed; next: a trial with a full 4D volume on Gautschi,
+  then a pull request for Greg;
   see the 09-29 log entry
 
 ## Log
@@ -45,7 +47,12 @@ the tighter slider block (68130fc), and Save movie (4223797).  For the demo, the
 frames was saved as `init_mean_f0-23_z332-396.npy` next to the slabs in
 `Slides/2026/0924/Claude outputs/wedge_experiment/real_data/` (README section added; that folder is not in git).
 All five commits were pushed to origin/4D_viewer after the full suite passed on the Mac (214 passed, 92 skipped,
-2 min 50 s).  Step 2 (space-time planes, differences in time, Save movie) is not started.
+2 min 50 s).
+Docs: 3b1cff8 (pages, and the Play sentence in the docstrings) and be2d2d4 (figures drawn at build time), pushed
+after the full suite passed again (214 passed, 92 skipped).  While rebuilding those two commits, .git/index went
+missing, with a stale index.lock left and slice_figure4d.py on disk reverted to the 3b1cff8 version.  PyCharm had
+the project open, which is the likely cause.  Repaired with the lock moved aside, `git reset`, and the file restored
+from HEAD.  Nothing was lost, and the commits were correct throughout.  Step 2 (space-time planes, differences in time, Save movie) is not started.
 
 ### 2026-09-28 (4D viewer: five designs built on the slice viewer)
 Ziyun asked for ways to build a 4D viewer from `mbirtorch/viewers/slice_figure.py`, design first.  Nothing was
