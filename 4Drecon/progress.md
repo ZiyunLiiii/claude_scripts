@@ -54,10 +54,12 @@ The job files are `4d_viewer/serve_viewer4d.py` and `serve_viewer4d.sbatch` (cla
 They run from `~/PycharmProjects/scripts/2026/1001/4d_viewer_trial/` on Gautschi.  The run artifacts sit in
 `~/Desktop/data/output/2026/1001/4d_viewer_trial/`: a git archive of mbirtorch 010043e, the tornado link, and
 two small test volumes.
-The job shows two full (99, 260, 260, 728) recons of Phantom_30s_Run1 that differ in the dejitter only.  The
-first is `0924/sor_stage1/4d_nominal_nofilter` (job 16674482, --no_dejitter).  The second is
-`0917/phantom_mbirtorch_full_slab2gb` (job 16484769, DCT dejitter).  Both used mbirtorch 7a80bbe, 10 MACE
-iterations, and the nominal offset.
+The job shows two full (99, 260, 260, 728) recons of Phantom_30s_Run1 that differ in the dejitter and in the
+init.  The first is `0924/sor_stage1/4d_nominal_nofilter` (job 16674482, --no_dejitter, FDK init).  The second
+is `0917/phantom_mbirtorch_full_slab2gb` (job 16484769, DCT dejitter, MBIR init).  Both used mbirtorch 7a80bbe,
+10 MACE iterations, and the nominal offset.  Correction of 2026-10-02: this entry first said that the two recons
+differ in the dejitter only.  The run_info of job 16674482 gives the init source as "computed (99 frames, direct
+reconstruction)", and the two init files differ by 83% in relative norm on frames 0, 49, and 98.
 A smoke test on a login node, with two (12, 48, 48, 24) test volumes, found three faults of the 4D viewer.
 Playback blanked the panels on a canvas that cannot blit, such as the WebAgg and notebook canvases.  Drawing an
 ROI and then choosing a space-time plane raised "repeated axis in transpose" on every backend.  The ROI plot's

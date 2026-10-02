@@ -2,8 +2,9 @@
 # Serve the mbirtorch 4D viewer (4D_viewer branch) on two full 99-frame 4D MACE recons
 # of Phantom_30s_Run1, for viewing in a browser through an SSH tunnel to the node.
 # Both recons used mbirtorch 7a80bbe, 10 MACE iterations, and the nominal
-# det_channel_offset.  They differ in the dejitter only: job 16674482 (2026-09-25) ran
-# with --no_dejitter, and job 16484769 (2026-09-17) with the default DCT dejitter.
+# det_channel_offset.  They differ in the dejitter and in the init: job 16674482
+# (2026-09-25) ran with --no_dejitter from an FDK init, and job 16484769 (2026-09-17)
+# with the default DCT dejitter from an MBIR init.
 # The viewer needs no GPU.  The job asks for one because the ai partition runs GPU jobs.
 #SBATCH --job-name=viewer4d
 #SBATCH -A bouman
@@ -33,7 +34,7 @@ PYTHONPATH=$OUT/vendor /home/li5273/.conda/envs/mbirtorch/bin/python -u "$DIR/se
   --package "$OUT/mbirtorch_4dviewer" --url-file "$DIR/slurm_logs/viewer_url_$SLURM_JOB_ID.txt" --dpi 80 \
   --title "Phantom_30s_Run1: full 4D MACE recons, 99 frames" \
   --labels "no dejitter" "DCT dejitter" \
-  --notes "job 16674482, 2026-09-25: nominal offset, --no_dejitter, 10 iterations, mbirtorch 7a80bbe" \
-          "job 16484769, 2026-09-17: nominal offset, DCT dejitter, 10 iterations, mbirtorch 7a80bbe" \
+  --notes "job 16674482, 2026-09-25: nominal offset, --no_dejitter, FDK init, 10 iterations, mbirtorch 7a80bbe" \
+          "job 16484769, 2026-09-17: nominal offset, DCT dejitter, MBIR init, 10 iterations, mbirtorch 7a80bbe" \
   --volumes "$OUTPUT/2026/0924/sor_stage1/4d_nominal_nofilter/$RECON" \
             "$OUTPUT/2026/0917/phantom_mbirtorch_full_slab2gb/$RECON"
