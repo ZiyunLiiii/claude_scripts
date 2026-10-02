@@ -273,3 +273,32 @@ Three faults of the 4D viewer were found in a browser window and fixed in commit
 WebAgg itself needed no change to the viewer.  Its mouse events give positions in physical pixels, as the macosx
 backend does, so the Retina fix of the right-click menu applies to it too.
 
+## Playback and GIFs along either slider (2026-10-02)
+
+Ziyun asked for playback along any direction, with a button beside each Play button to save the GIF, and for
+playback in the space-time planes too.  A single right-click "Save movie" would be ambiguous once more than one
+axis can play.  The design, proposed and then built on 2026-10-02:
+1. The slice slider and the frame-row slider each have a Play button and a GIF button in the left cell of their
+   row.  The intensity slider has neither.  The left cell is wider (slider cells 2.5 : 8.0 : 2.0).
+2. Play steps that slider's axis and loops.  In x-y the slice row plays z at the current frame and the frame row
+   plays t.  In a space-time plane the frame row plays the second hidden spatial axis, for example x in t-y, so
+   the space-time image changes as its line sweeps through the volume.
+3. One row plays at a time: starting one stops the other.  Space pauses any playback, or plays the frame row.
+   Comma and period step the frame row.
+4. GIF writes the movie that the Play beside it shows, one GIF per panel that changes along that axis, into a
+   folder chosen in one dialog (the macOS folder panel, or an in-figure path box on other systems).  The names
+   give the label, plane, axis, and the position of the other hidden axis, for example
+   init_x-y_along-z_t3.gif.  A file that exists already is kept, and the new GIF gets a numbered name.  The
+   choice of one GIF per panel was the default of the proposal; a single side-by-side GIF was the alternative.
+5. "Save movie" left the right-click menu.
+6. During playback the titles and the ROI plot stay as they are, and they catch up when playback pauses.
+
+Measured in a macosx window on the full-z demo arrays (two (24, 260, 260, 728) volumes stored (t, z, x, y)):
+all four cases (frame row and slice row, in x-y and in t-y) played at 14.0 to 14.5 steps per second with 30
+asked.  Two 24-frame GIFs took 1.4 s (0.6 and 0.9 MB).
+
+Known limit: save_volume_as_gif draws each frame with square pixels in a 6.4 x 4.8 inch figure, so a GIF of a
+space-time plane with few frames is a thin strip, while the panel stretches it.  An optional aspect argument of
+save_volume_as_gif would fix this; it was not added, because that function is shared code.
+
+Committed as 17cd424 and pushed to origin/4D_viewer on 2026-10-02, after the full suite passed (225 passed, 92 skipped).

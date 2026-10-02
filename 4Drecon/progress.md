@@ -23,10 +23,24 @@
   2026-09-29 after the full suite passed (214 passed, 92 skipped); differences in time deferred (not needed for
   now); docs committed as 3b1cff8 and be2d2d4 and pushed; three viewer fixes found in a browser window committed
   as 010043e and pushed; the Gautschi trial on two full 4D volumes is set up and waiting in the queue (job
-  16761899); next: that trial, then a pull request for Greg;
+  16761899); next: that trial, then a pull request for Greg; 2026-10-02: playback and GIF buttons on both position sliders, also in space-time planes, committed as 17cd424 and pushed;
   see the 09-29 log entries
 
 ## Log
+
+### 2026-10-02 (4D viewer: playback and GIFs along either slider)
+Ziyun asked for playback along any direction and a GIF button beside each Play button, and for playback in the
+space-time planes.  The slice slider and the frame-row slider of `mbirtorch/viewers/slice_figure4d.py` now each
+have Play and GIF buttons.  Play steps that slider's axis in every panel, in spatial and space-time planes, and
+one row plays at a time.  GIF writes one GIF per panel that changes along the axis into a chosen folder.  "Save
+movie" left the right-click menu.  `VolumeStack4D.movie_view` and `movie_frame_count` take the axis.  The design
+and its reasons are in `4d_viewer/decisions.md`.  Tests: 40 4D viewer tests and the 5 3D viewer tests pass;
+`slice_figure.py` is unchanged (md5 db0f0e29a14461d5c4d1af6081aa7e7a).  In a macosx window on the full-z demo
+arrays, every row played at 14 to 14.5 steps per second (30 asked).  `gautschi_trial.py` now writes its test
+GIFs through the GIF button code.  The docstrings of `save_data_hdf5` and `load_data_hdf5` now say that they
+save and load 3D and 4D arrays (checked: 3D, 4D, and a strided 4D view round-trip exactly, and a 4D file from
+`save_data_hdf5` loads in the 4D viewer as one 4D volume).  Committed on Ziyun's go as 17cd424 (viewer) and
+ee0023a (docstrings), and pushed to origin/4D_viewer after the full suite passed (225 passed, 92 skipped).
 
 ### 2026-09-29 evening (4D viewer served from a Gautschi compute node)
 Ziyun asked for the 4D viewer to run on Gautschi on full 4D recons.  The viewer runs on a compute node with

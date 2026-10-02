@@ -28,7 +28,7 @@ The window stays open.  Please try these and note how responsive each one feels:
   1. Drag the t slider.  Press space to play, and space again to stop.
   2. Click t-y in the Plane buttons, then move the x and z sliders.
   3. Click x-y, then draw an ROI on an edge: left-click and drag.  Look at the ROI plot.
-  4. Right-click a panel and choose Save movie.  Save it in the output folder.
+  4. Click GIF beside the t slider.  Save the GIFs in the output folder.
   5. Right-click the first panel and choose Replace with difference image.  This holds
      one more volume in memory.
 Then close the window and paste the summary above to Claude.
@@ -158,10 +158,9 @@ def main():
         schedule(step_movie)
 
     def step_movie():
-        path = os.path.join(out, 'trial_movie.gif')
         start = time.perf_counter()
-        viewer._finish_movie(0, path)
-        note(f'Save movie wrote {viewer.stack.movie_frame_count(0)} frames to {path} in '
+        viewer._write_gifs('frame', out)
+        note(f'the GIF button of the t slider wrote one GIF per 4D panel to {out} in '
              f'{time.perf_counter() - start:.1f} s')
         schedule(step_difference if args.difference and len(volumes) > 1 else step_done)
 
