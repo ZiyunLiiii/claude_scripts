@@ -28,6 +28,16 @@
 
 ## Log
 
+### 2026-10-03 (4D viewer: checked for a pull request into prerelease)
+Greg merged prerelease into 4D_viewer (79528af); the branch merges cleanly into prerelease, the PR target per the CI
+config.  On the merged branch: full suite 226 passed, 92 skipped; docs build without warnings, with the three 4D viewer
+sections intact; TkAgg drove both rows in x-y and t-y (8 steps per second, 20 asked) and wrote GIFs with no errors.  Qt
+is untested (no Qt bindings installed).  Two faults fixed and pushed on Ziyun's go: the GIF folder dialog let a
+FileExistsError escape when the path named an existing file (c601c29, with a test), and the docs figures lacked the
+GIF buttons that the text describes (79d9600).  Left before opening the PR: one click on the GIF button's macOS
+folder panel in a real window, Ziyun's decision on the space-time GIF aspect, and the PR description (with the two
+3D viewer faults that the 4D viewer works around: the Retina menu position and dialogs in figures taller than 8 in).
+
 ### 2026-10-02 (4D viewer: playback and GIFs along either slider)
 Ziyun asked for playback along any direction and a GIF button beside each Play button, and for playback in the
 space-time planes.  The slice slider and the frame-row slider of `mbirtorch/viewers/slice_figure4d.py` now each
