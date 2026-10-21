@@ -21,6 +21,8 @@ Slurm how-to for the Purdue RCAC **Gautschi** cluster, as actually used in
 | Slurm account | `bouman` (`-A bouman`) |
 | QOS available | `normal`, `preemptible`, `standby` |
 | Usual partition | `ai` (H100) |
+| CPU-partition allocation | **0 cores** (`gres/hp_cpu=0`; `slist` shows CPU Total 0). A `cpu` job on QOS `normal` is rejected with `AssocGrpGRES` — use `-q standby` (4 h max) instead. Checked 2026-10-02. |
+| Memory per core | `cpu`: ~1.9 GB default, 2.0 GB max (128 GB needs ~64 cores). `ai`: 9.2 GB/core → 14 cores per GPU ≈ 129 GB per GPU. |
 | Conda env | `mbirjax` (`/home/li5273/.conda/envs/mbirjax`) |
 | Conda module | `module load conda` (currently resolves to conda 2026.03) |
 
