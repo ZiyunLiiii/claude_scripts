@@ -9,7 +9,15 @@
   day: they are happy with what the DCT filter ACHIEVES, but the filter is hacky; the goal is to reformulate the
   theory into something more general that achieves the same.  Ziyun is sending their materials to review.
 - Sensor Orthogonal Reconstruction note: rewritten 2026-09-24 (theory + three tests), see the 09-24 log entry
-- Sensor Orthogonal Reconstruction -- Theory (new Overleaf project, 2026-09-28): Ziyun's handwritten notes verified and transcribed as written (nothing added, on request); see the 09-28 log entry
+- Sensor Orthogonal Reconstruction -- Theory (new Overleaf project, 2026-09-28): Ziyun's handwritten notes verified and transcribed as written (nothing added, on request); see the 09-28 log entry.  2026-10-21: the theory in main.tex replaced by Ziyun's SVD-based constrained fitting (two slides); see the 10-21 log entry
+- SOR, the newest formulation (2026-10-27): blueprint pages at https://claude.ai/artifact/648swpno4LjUtjvxwcf8jS
+  (index, Theory, Theory 2, Software Architecture).  Theory removes from every voxel its least-squares fit to the
+  centered harmonics 1 to p of the frame angles: P = I - Q_B Q_B^t.  p = 2 is implemented first (decided 10-21), and
+  the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
+  placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  view_angle_filter_matrix in the fork
+  (svd_based_dejitter, d410389) already builds P.  Next: the random-center-angle test on SimRack-1, designed 10-27,
+  not yet approved, nothing run.  SOR is separate from dl4dct; the two share only the simulation datasets.  See the
+  10-27 log entries.
 - 4D beam hardening correction (2026-10-19, branch 4dbhc, uncommitted): option 1a (frame copies, theta per frame, metal rays only) cuts near-metal streaks ~12% on Tella ds2 24 frames; the 3D clamp at rays without metal causes haze and a 4% plastic drop; see the 10-17 and 10-19 log entries
 - Single-view: literature search in progress
 - MAR + multi-slice fusion: pipeline validated end to end on two real Lilly datasets; see `mar_fusion/progress.md`
@@ -28,6 +36,84 @@
   see the 09-29 log entries
 
 ## Log
+
+### 2026-10-27 later (SOR generalization test: a random center angle for each frame, designed)
+Ziyun wants to extend SOR to other sensor-induced artifacts and to test how it generalizes.  The first test gives
+each frame a random center angle, so that the artifact is aperiodic.  Ziyun also said that SOR has nothing to do
+with dl4dct.  dl4dct is a separate side project on the same problem, and the two share only the simulation datasets.
+Why this test: with a constant frame stride, cos(theta_t) is a sinusoid in time even at a non-integer fpr, so a
+temporal-frequency filter such as DCT can still remove it.  So this test replaces the 7.2 fpr test proposed earlier
+the same day.  With random centers the artifact is broadband in time, and only the knowledge of theta_t separates it
+from motion.
+Design (discussed with Ziyun, not yet approved, nothing run):
+- Data: four datasets, periodic or random centers (phi_t uniform on [0, 2 pi), fixed seed) crossed with exact
+  geometry or the 10-07 offset error (-1.66393 mm simulated, -1.33845 mm used to reconstruct).  Each frame keeps the
+  48 views and the view times of SimRack-1, and only its center angle changes.  The 99 arcs are simulated separately
+  and placed one after another in one sinogram of 4752 views.  MACE4DModel(..., frames_per_rotation=3,
+  frame_overlap_factor=1.0) then cuts out exactly these frames, with no change to mbirtorch.  The script calls the
+  simulator and the phantom that made SimRack-1 as a library.  Check: the per-frame MBIR of the periodic
+  exact-geometry dataset reproduces the SimRack-1 NRMSE of about 0.325.
+- Stage 1, the decisive one: per-frame MBIR of the four datasets, with the 99 x 99 Gram matrices X X^t, X G^t and
+  G G^t saved for the static and moving regions.  Filters applied on the Mac: no filter; DCT at period 6; SOR with the
+  true theta, p = 1 to 8; SOR with shuffled theta (20 permutations); a temporal low-pass with a swept DCT cutoff;
+  removal of the top-k principal components.  MBIR is used because the space-time denoisers of MACE4D already
+  suppress an artifact that jumps every frame.
+- Metrics: NRMSE against the truth at the center time (all, static, moving); the error at each harmonic m = 1 to 8 of
+  theta, whose knee gives p*; each filter applied to the truth (damage to the object); the ghost metric; cond(B_c).
+  Main figure: one trade-off curve per family of methods, with the damage to the moving truth against the static
+  error left at the harmonics of theta.
+- Predictions: (1) periodic: SOR with p = 3 is about equal to DCT, as on 10-20; (2) random: SOR removes at least 90%
+  of the static error up to harmonic p, and DCT and shuffled theta remove only about 2p/98 of it; (3) random: the
+  damage of SOR is about 2p/98 of the temporal variance, spread over all motion frequencies; (4) SOR removes less in
+  the moving region, where the artifact depends on both the angle and the object.
+- Stage 2: MACE4D on the two random datasets with no filter, SOR with p* and SOR with shuffled theta (6 runs).
+  sigma_noise and sigma_x are pinned per dataset, P sits at the code placement, and the mbirtorch code is that of the
+  SimRack-1 reference runs.  The periodic references are the existing 10-05, 10-20 and 10-07 runs.
+- Planned locations: code ~/PycharmProjects/scripts/2026/1027/sor_random_angle/, output
+  ~/Desktop/data/output/2026/1027/sor_random_angle/, local copies Slides/2026/1027/Claude outputs/sor_random_angle/.
+  Cost about 14 GPU-hours on ai: simulations 1.3, MBIR 4.3, MACE4D 8.4.
+- Open: where the new random-angle datasets live, next to SimRack-1 or in the SOR output folder.  The design keeps
+  the overlapping frame times of SimRack-1, so its data are not one physical scan.  The physical version (random
+  jumps between frames that do not overlap, 49 frames) is the fallback if a reviewer asks for it.
+
+### 2026-10-27 (SOR blueprints reviewed; next-step plan proposed)
+Ziyun shared the newest formulation as a set of blueprint pages: https://claude.ai/artifact/648swpno4LjUtjvxwcf8jS
+(index, Theory, Theory 2, Software Architecture).  Theory: P = I - Q_B Q_B^t from the centered harmonics 1 to p of the
+frame angles, with default p = 2 (decided 10-21).  P is applied after the data-fit agent and before each denoiser, and
+the placement is open (Q2).  Theory 2 removes d < 2p directions, chosen by the leading eigenvectors of
+K = Q_B^t X^t X Q_B, and it is parked.  Review points given to Ziyun:
+(1) Software Architecture is written for Theory 2 (fit on x0, G, K, slice fraction, defaults p = 4 and d = 4).  Theory
+Q1 implements d = 2p with p = 2 first, and that case needs only the angles.
+(2) SensorSubspace raises below 2p + 1 distinct angles.  The 4 fpr runs of 10-08 have 4 distinct angles, so p = 2
+would fail there.  A rank-revealing basis with a tolerance, as in view_angle_filter_matrix of the fork, handles this
+case.  The inverse in the Theory pseudo-code fails there too, and plain QR does not drop the dependent column.
+(3) frame_angles must be a circular mean computed in float64.  The angles are -2.5 deg x (24 t + 23.5), not
+t 2 pi / fpr.  Both give the same span and the same P.
+(4) The Architecture page cites "Theory 3.5", which does not exist.
+(5) Q2 has a theory answer from 09-28: only P on the consensus point has an equilibrium, and it equals the minimizer
+of mu_0 f + sum mu_k h_k over the complement of the sensor subspace.
+Proposed plan: edit the blueprints; run p = 2 with both placements on the real scan and SimRack-1 by wrapper; add a
+non-integer fpr test (SimRack-1 at 7.2 fpr, stride 20 views) and a top-d PCA baseline; then implement the chosen
+placement in mbirtorch.  Nothing was run.
+
+### 2026-10-21 (Theory note: SVD-based constrained fitting replaces the old theory)
+Ziyun asked to replace the theory in `Sensor Orthogonal Reconstruction -- Theory/main.tex` with their new
+formulation (two slides "SVD-based Formulation: Constrained Fitting").  The sections Pseudo-inverse reconstruction,
+Correlation matrices, and Fourier domain were removed.  Greg's opening paragraphs were kept.  The new section
+transcribes the slides: X in R^{Nv x Nt}; B = [cos k theta, sin k theta]_{k in K}; Q = orth(HB), H = I - 11^t/Nt;
+X = [Us Ur] blkdiag(Sigma_s, Sigma_r) [Q^t; Vr^t]; the constrained problem (constraints as on the slide, including
+Us^t Ur = 0); the split X = XQQ^t + X(I - QQ^t); output Xhat = X(I - QQ^t); Xhat Q = 0; the advantage over DCT.
+Added only definitions (N_v, theta vector, K, entrywise cos and sin) and the reason (I - QQ^t)Q = 0 next to the
+slide's V_r^t Q = 0.  Compiles locally with no errors or overfull lines (build in the session scratchpad only).
+Numpy check (random X, 6 fpr angles, K = {1, 2, 3}, not saved): Xhat = X(I - QQ^t) and Xhat Q = 0 to 1e-14;
+XQ = Us Sigma_s exactly only with Sigma_s a PSD (not diagonal) matrix, from the polar decomposition; the fitted
+Us and Ur give max |Us^t Ur| = 0.21.  Raised with Ziyun, not in the note: (1) the constraint Us^t Ur = 0 is not met
+by the stated solution, and the split into two independent problems holds only without it; (2) Us^t Us = I is not
+listed, and with Us orthonormal Sigma_s must be a full PSD matrix for XQ = Us Sigma_s; (3) k is both the harmonic
+and the size in I_k; (4) at 6 fpr with K = {1, 2, 3}, HB has rank 5 of 6, and plain QR does not drop the
+dependent column (the code uses scipy.linalg.orth with a rank tolerance).
+Ziyun's reply: no, the method must not assume that fpr is known.  The note was not changed.  Explained that m =
+rank(HB) is computed from theta alone, and that 6 fpr was only the example where the rank drops.
 
 ### 2026-10-20 (DCT and theta-basis filters applied to the per-frame MBIR of SimRack-1)
 Ziyun asked for both filters on the per-frame MBIR of the simulation, without MACE4D, because MACE4D itself reduces
