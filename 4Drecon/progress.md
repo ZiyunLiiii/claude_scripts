@@ -84,6 +84,22 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   of the same chain had been rejected by the cap).  Cancelled at Ziyun's request the same evening.  The Delta
   smoke and sim were not submitted yet, and the Delta `out/` and `slurm_logs/` were empty.
 
+- Moved to Delta the same night at Ziyun's request, because neither QOS passes the Gautschi cap (a two-minute burst
+  probe was blocked too and cancelled; the preemptible QOS overrides only the untyped half of the cap, which is set as
+  gres/gpu=3 and gres/gpu:h100=3).  The Gautschi chain stays queued on normal as the fallback.  Delta setup: code
+  copied with tar over ssh to /u/zli98/nmar_baseline/code/ (NMAR_reproduction and IPMR_simulation at 14e7913), the
+  sensitivity-sweep env /work/nvme/bjda/zli98/ipmr_six_rods_pet/env (mbirjax 0.6.15, jax 0.12 with CUDA, spekpy,
+  scikit-image) with the repo on PYTHONPATH, experiments/delta/submit_nmar.sbatch (gpuA100x4, one A100, 16 cores,
+  60 GB) and submit_nmar.sh (smoke 10 min, simulations 20, scans 45).  The NVMe work filesystem created files at
+  about one per minute that evening (the timing study's phantom tarball had 46 radiographs after 57 min; find, df and
+  rsync hung in D state) while dd read 665 MB/s and wrote 330 MB/s, so extract_scans.sh unpacks the two tarballs
+  into /u/zli98/nmar_baseline/data/ (home, 612 MB/s): board 142 s, phantom 287 s, 1801 radiographs each; a scan job
+  waits for the marker file.  The interactive partition holds one job per user (MaxSubmitPU=1, 1 h), so the chain
+  uses the batch partition.  The first smoke 23584836 failed because nmar is not installed in the shared env
+  (PYTHONPATH fixed); smoke 23585222 passed in 1 min 51 s, two minutes after submission, with the Mac's size-64
+  numbers (FDK 0.2935, LI 0.2007, LN = NMAR 0.1940, NMAR+MBIR 0.1721).  Jobs 23585223 two_rods, 23585224 six_rods,
+  23585225 nsi_phantom, 23585226 circuit_board; outputs /work/nvme/bjda/zli98/nmar_baseline/out/<dataset>/.
+
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
 `method/`, then the implementation, in the new repository `/Users/a124601/Desktop/Research_Purdue/repository/NMAR_reproduction`
