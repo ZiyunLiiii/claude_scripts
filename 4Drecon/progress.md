@@ -63,13 +63,26 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   `~/venvs/nmar` pins mbirjax 0.6.15, the version of the paper's Delta rerun.  The login node's proxy
   (squid.rcac.purdue.edu:3128) was down, so pip and conda only worked with the proxy variables unset, and conda's
   package cache was corrupted (readline), so the env is a plain venv of the conda module's python.  A separate
-  `~/venvs/mbirjax` build (mbirjax 0.7.3 with spekpy) was running on the login node at the same time; it is not mine.
+  `~/venvs/mbirjax` build (mbirjax 0.7.3 with spekpy) was running on the login node at the same time; it belongs to the IPMR timing study
+  (`scripts/2026/1105/ipmr_timing/make_env.sh`).
 - Both scan trees on scratch were hollow (1 and 0 radiographs left); restored from depot in 3 min each
   (1807 and 1867 tif), tarballs replaced by symlinks to depot, as in gautschi/restore_datasets.md.
 - Jobs submitted 2026-11-05 evening (ai, 1 H100, 14 cores each): 17821763 smoke (two_rods at 64 voxels, 10 min
   limit), then 17821764 two_rods and 17821765 six_rods (15 min) and 17821766 nsi_phantom and 17821767 circuit_board
-  (20 min), all afterok on the smoke.  Not mine in the same queue: ipmr_time_smoke 17821440 (pending with
-  AssocGrpGRES) and ipmr_time_sim 17821441, together with a `~/venvs/mbirjax` build on the login node.
+  (20 min), all afterok on the smoke.
+- Why they wait (checked the same evening): AssocGrpGRES is the bouman account's own cap, 3 H100 at once for the
+  whole group (`sacctmgr show assoc account=bouman`: GrpTRES gres/gpu=3), not a missing grant.  hdor, lin1311 and
+  jhouri held the three, and four longer bouman jobs were ahead in priority (queue age decides, and all ages grow
+  alike), so nothing of mine would start before about 4 am on 11-06, while 36 H100 of the ai partition were idle.
+  The account may also use QOS `preemptible` (no account cap, usage factor 0.25, priority 0, a normal job can
+  requeue it; seven such jobs of other groups were running on ai) and `burst` (priority 100000, never preempted,
+  up to 8 GPUs per account, usage factor 2, 8 h at most; unused by the group so far, buzzard's nightly is set to
+  it).  The QOS of a pending job can be changed with `scontrol update jobid=... qos=...`, which keeps the ids and
+  the dependencies.  Ziyun has not chosen yet.
+- ipmr_time_smoke 17821440 and ipmr_time_sim 17821441 in the same queue were the first attempt of the IPMR timing
+  study (submitted at 19:33 by its `submit.sh`, before that study moved to Delta; the 4-GPU phantom and board jobs
+  of the same chain had been rejected by the cap).  Cancelled at Ziyun's request the same evening.  The Delta
+  smoke and sim were not submitted yet, and the Delta `out/` and `slurm_logs/` were empty.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
