@@ -66,7 +66,10 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   `~/venvs/mbirjax` build (mbirjax 0.7.3 with spekpy) was running on the login node at the same time; it is not mine.
 - Both scan trees on scratch were hollow (1 and 0 radiographs left); restored from depot in 3 min each
   (1807 and 1867 tif), tarballs replaced by symlinks to depot, as in gautschi/restore_datasets.md.
-- Jobs: see the follow-up entry with the job ids.
+- Jobs submitted 2026-11-05 evening (ai, 1 H100, 14 cores each): 17821763 smoke (two_rods at 64 voxels, 10 min
+  limit), then 17821764 two_rods and 17821765 six_rods (15 min) and 17821766 nsi_phantom and 17821767 circuit_board
+  (20 min), all afterok on the smoke.  Not mine in the same queue: ipmr_time_smoke 17821440 (pending with
+  AssocGrpGRES) and ipmr_time_sim 17821441, together with a `~/venvs/mbirjax` build on the login node.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
