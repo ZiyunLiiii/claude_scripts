@@ -99,6 +99,18 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   (PYTHONPATH fixed); smoke 23585222 passed in 1 min 51 s, two minutes after submission, with the Mac's size-64
   numbers (FDK 0.2935, LI 0.2007, LN = NMAR 0.1940, NMAR+MBIR 0.1721).  Jobs 23585223 two_rods, 23585224 six_rods,
   23585225 nsi_phantom, 23585226 circuit_board; outputs /work/nvme/bjda/zli98/nmar_baseline/out/<dataset>/.
+- Results (2026-11-06): all four Delta jobs COMPLETED the same night, 2 to 4 min each on one A100 after queue waits of
+  15 min to 1 h, and the Gautschi fallback 17821763-67 was cancelled.  Plastic NRMSE / SSIM of two_rods: FDK 0.1871 /
+  0.9273 and MBIR 0.1526 / 0.9627 reproduce Table IV, LI 0.0979 / 0.9759, LN = NMAR 0.0981 / 0.9753, NMAR+MBIR 0.0750 /
+  0.9852, against IPMR 0.1264 / 0.9717 in the paper: NMAR is 22% below IPMR and NMAR+MBIR 41% below.  six_rods: FDK
+  1.2412 / 0.9551 and MBIR 1.1517 / 0.9700 match the PET rerun of 2026-11-03 (1.2409, 1.1399), LI 1.0550 / 0.9760,
+  LN = NMAR 1.0721 / 0.9711, NMAR+MBIR 1.0754 / 0.9709, against IPMR 0.8833 / 0.9751 of that rerun: NMAR is 21% above
+  IPMR.  The one-material phantoms favor NMAR because its prior is the exact plastic support, and the plastic metric
+  is dominated by the voxels next to metal.  Scans: the phantom (748x748x804) took 3 min 41 s (NMAR 56 s, FDK 18 s)
+  and the board (363x363x251) 49 s; they have no ground truth, so the record is the slice figures.  Local copy with
+  the tables: Lilly/MAR/IPMR_paper/nmar_baseline/ (README.md, scripts/, delta_report/).  The per-dataset metrics,
+  settings, slices.png and logs still have to be fetched, because the Delta ControlMaster socket expired at 00:30
+  and a new login needs Duo.  The volumes stay on Delta's NVMe only.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
