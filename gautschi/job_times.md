@@ -215,4 +215,6 @@ because job_common.sh wrote the GPU-check error file into scripts/slurm_logs/, w
 dependents 23584467-69 were cancelled.  Resubmitted 2026-11-06, 08:50 CST: 23600767 smoke (1 A100,
 gpuA100x4-interactive, 40 min limit), 23600768 phantom (4 H200 on gpuH200x8, 2 h 30, estimate about 1.5 h) and
 23600769 board (4 H200, 3 h 30, estimate about 2.3 h), both afterok of the smoke, 23600770 sim (1 A100, gpuA100x4,
-50 min).  Fill in the actual times when they finish.
+50 min).  The smoke job completed on 2026-11-06 in 10 min 58 s on gpua001 (A100 40 GB; both datasets at
+downsample 4 and every 4th view), and the three runs were released at 10:01 CST.  Fill in their actual times
+when they finish.
