@@ -123,7 +123,10 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   VGStudio FDK), LN = NMAR 24393.4, LI 24633.5, against the paper's reference 24697.2 (MBIR 24342.9, IPMR 24697.1),
   so NMAR recovers 44% of what FDK misses and LI 88%.  Figures of those slices with a zoom around the metal:
   <dataset>/slices_<dataset>_{most_metal,center}_z<k>.png (scripts/plot_scan_slices.py on the npz slices in
-  scan_stats/slices/).  The figures were sent to Ziyun but not checked by eye, because the image tool rejected them.
+  scan_stats/slices/).  The figures agree with the numbers: on phantom slice 265 NMAR keeps a faint copy of FDK's pattern (bright haze
+  above and below the metal, dark wedges at its sides) while LI is clean; on the board LI blacks out the plastic
+  between the metal parts, NMAR leaves blocky gray patches there, and NMAR with the bone class looks like FDK
+  without the streaks.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
