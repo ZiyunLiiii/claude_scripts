@@ -107,10 +107,23 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   LN = NMAR 1.0721 / 0.9711, NMAR+MBIR 1.0754 / 0.9709, against IPMR 0.8833 / 0.9751 of that rerun: NMAR is 21% above
   IPMR.  The one-material phantoms favor NMAR because its prior is the exact plastic support, and the plastic metric
   is dominated by the voxels next to metal.  Scans: the phantom (748x748x804) took 3 min 41 s (NMAR 56 s, FDK 18 s)
-  and the board (363x363x251) 49 s; they have no ground truth, so the record is the slice figures.  Local copy with
+  and the board (364x364x251) 49 s; they have no ground truth, so the record is the slice figures.  Local copy with
   the tables: Lilly/MAR/IPMR_paper/nmar_baseline/ (README.md, scripts/, delta_report/).  The per-dataset metrics,
   settings, slices.png and logs still have to be fetched, because the Delta ControlMaster socket expired at 00:30
   and a new login needs Duo.  The volumes stay on Delta's NVMe only.
+- Fetched 2026-11-06 morning after Ziyun logged in again: the per-dataset metrics, settings, slices.png and logs are
+  in the local folder, except the board's settings.json, which the NVMe filesystem has not released (a cp on the
+  login node has waited in cl_sync_io_wait since 08:45 CT, and so has the tar of the whole out/ folder; the figures
+  came through a detached cp into home).  Scan checks with scripts/scan_stats2.py (numpy only, on a login node) on
+  the saved volumes: on the phantom slice with the most metal (265) the RMS of the plastic within 2 mm of the metal
+  about the far plastic mean is FDK 0.0399, LI 0.0024, LN = NMAR 0.0138 (NMAR leaves that plastic 67% high); on the
+  board slice with the most metal (79) LI turns the plastic next to the metal into air (near mean 0.0026 against
+  0.0136), NMAR keeps it 22% high with FDK's near RMS (0.0050), and NMAR with the bone class is the only variant
+  below FDK (0.0035).  Plastic volume of the phantom by threshold count: FDK 24153.3 mm^3 (0.11% below the paper's
+  VGStudio FDK), LN = NMAR 24393.4, LI 24633.5, against the paper's reference 24697.2 (MBIR 24342.9, IPMR 24697.1),
+  so NMAR recovers 44% of what FDK misses and LI 88%.  Figures of those slices with a zoom around the metal:
+  <dataset>/slices_<dataset>_{most_metal,center}_z<k>.png (scripts/plot_scan_slices.py on the npz slices in
+  scan_stats/slices/).  The figures were sent to Ziyun but not checked by eye, because the image tool rejected them.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
