@@ -15,9 +15,14 @@
   centered harmonics 1 to p of the frame angles: P = I - Q_B Q_B^t.  p = 2 is implemented first (decided 10-21), and
   the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
   placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  view_angle_filter_matrix in the fork
-  (svd_based_dejitter, d410389) already builds P.  Next: the random-center-angle test on SimRack-1, designed 10-27,
-  not yet approved, nothing run.  SOR is separate from dl4dct; the two share only the simulation datasets.  See the
-  10-27 log entries.
+  (svd_based_dejitter, d410389) already builds P.  The random-center-angle test on SimRack-1 (per-frame MBIR,
+  p = 3) was submitted on 10-27 and resubmitted on ai the same day: smoke 17354383, simulation array 17354384, MBIR 17354385_0 (periodic) and 17359405_1-2 (shuffled6, random).  SOR is separate
+  from dl4dct; the two share only the simulation datasets.  See the 10-27 log entries.
+- SOR prior art (2026-11-05): no published method builds a temporal nuisance basis from the view angle or removes
+  it from windowed CT frames.  The same operation exists as RETROICOR (fMRI), half-wave-plate synchronous signal
+  removal (CMB polarimetry), and order tracking (vibration analysis).  The same artifact is treated in CT (partial
+  scan artifacts, eSMART-RECON, RSTAR4D) and dynamic MRI (UNFOLD, DISPEL) by periodic-schedule filters or
+  data-driven components.  Review and .bib in Slides/2026/1105/Claude outputs/sor_literature; see the 11-05 log entry.
 - 4D beam hardening correction (2026-10-19, branch 4dbhc, uncommitted): option 1a (frame copies, theta per frame, metal rays only) cuts near-metal streaks ~12% on Tella ds2 24 frames; the 3D clamp at rays without metal causes haze and a 4% plastic drop; see the 10-17 and 10-19 log entries
 - Single-view: literature search in progress
 - MAR + multi-slice fusion: pipeline validated end to end on two real Lilly datasets; see `mar_fusion/progress.md`
@@ -36,6 +41,539 @@
   see the 09-29 log entries
 
 ## Log
+
+### 2026-11-05 (NMAR baseline on Gautschi: one job per dataset of the IPMR paper)
+Ziyun asked for NMAR on the four datasets of the paper (two_rods, six_rods, the NSI plastic metal phantom, and the
+RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the results saved in an organized way.
+- Layout on Gautschi: code `~/PycharmProjects/NMAR_reproduction` (a copy of the Mac repo) with
+  `experiments/gautschi/submit_nmar.sbatch` (one sbatch, `DATASET` chosen with `--export`), the job folder
+  `~/PycharmProjects/scripts/2026/1105/nmar_baseline/` (slurm_logs, a copy of IPMR_simulation at 14e7913, README),
+  and outputs `~/Desktop/data/output/2026/1105/nmar_baseline/<dataset>/` with one `.npy` per method,
+  `settings.json`, `slices.png`, the Slurm logs, the sbatch, and a SUCCESS or FAILED marker (the simulations add
+  `gdt.npy`, `sino.npy`, `metrics.json`).
+- The measured scans run through the new `experiments/run_nsi_scan.py` with the loader settings of the paper's own
+  scripts, so the grids match the paper volumes: NSI phantom downsample [2, 2], every 4th view, auto crop
+  (748 x 748 x 804, as `output/2026/0319/demo/`); circuit board downsample [4, 4], every 4th view, auto crop
+  (363 x 363 x 251, as `output/2026/data_for_MAR_paper/circ/circ_stable/`, made by `scripts/2026/0611/mar_recon.py`).
+  Methods: fdk, li, ln, nmar, and for the board nmar_bone (the lower metal class keeps its values in the prior).
+  The simulations run at 256^3 with 360 views: fdk, mbir, li, ln, nmar, nmar_mbir.  The runner adds a figure
+  against the paper's FDK, MBIR and IPMR volumes when the grid matches.  `reduce_metal_artifacts` now takes a
+  precomputed `uncorrected` image, so the four methods share one FDK.
+- Environment: mbirjax 0.7.3 dropped `compute_sino_and_params` and `auto_crop_sino_conebeam`, so the Gautschi venv
+  `~/venvs/nmar` pins mbirjax 0.6.15, the version of the paper's Delta rerun.  The login node's proxy
+  (squid.rcac.purdue.edu:3128) was down, so pip and conda only worked with the proxy variables unset, and conda's
+  package cache was corrupted (readline), so the env is a plain venv of the conda module's python.  A separate
+  `~/venvs/mbirjax` build (mbirjax 0.7.3 with spekpy) was running on the login node at the same time; it is not mine.
+- Both scan trees on scratch were hollow (1 and 0 radiographs left); restored from depot in 3 min each
+  (1807 and 1867 tif), tarballs replaced by symlinks to depot, as in gautschi/restore_datasets.md.
+- Jobs: see the follow-up entry with the job ids.
+
+### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
+Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
+`method/`, then the implementation, in the new repository `/Users/a124601/Desktop/Research_Purdue/repository/NMAR_reproduction`
+(GitHub ZiyunLiiii/NMAR_reproduction, empty before this work).
+- `method/nmar_pseudocode.md` states the method, the two comparison methods of the paper (MAR1 linear interpolation,
+  MAR2 length normalization), the settings the paper reports, and the choices of the reproduction.  Choices: units
+  1/mm with air 0 and soft tissue set to its class mean (the paper uses HU with air -1000 and tissue 0); the bone
+  class is off by default, because the plastic metal phantoms have no third material; the metal voxels of the prior
+  take the soft tissue value; the Gaussian smoothing before the segmentation takes no values from the metal voxels
+  (a plain Gaussian puts a bright ring around each metal part into the prior); the normalization floor is 1e-3 of
+  the prior sinogram maximum and the same bounded denominator is used in both directions, so the corrected sinogram
+  equals the input outside the trace; thresholds default to multi threshold Otsu with num_metal + 2 classes, which
+  is the IPMR segmentation; a metal mask can be passed in so NMAR and IPMR share one mask.
+- Package `nmar/`: `sinogram.py` (metal trace from the forward projection of the mask, vectorized linear
+  interpolation along channels per view, normalized correction), `prior.py` (Otsu thresholds, masked smoothing,
+  prior image), `pipeline.py` (`nmar`, `mar_li`, `mar_ln`; FDK by default at every step as in the paper, MBIR as an
+  option for any step, optional MAR1 precorrection, optional trace dilation).  It runs on mbirjax, the projector and
+  FDK of the IPMR paper, so the comparison changes only the correction.  Environment `~/anaconda3/envs/nmar`
+  (python 3.12, mbirjax 0.7.3, jax 0.12, spekpy 2.5.4, scikit-image 0.26), made today because mbirjax_ref stays reserved.
+- Tests (`tests/test_nmar.py`, 10 pass in 8 s): interpolation values, the identity outside the trace, the prior
+  classes, the trace coverage, automatic thresholds on a plastic metal phantom, and an end to end check on a
+  120 view cone beam phantom (plastic 0.02, dense insert 0.05 next to a rod of 0.1 /mm, which is about aluminum at
+  90 kV).  With the true prior the corrected sinogram equals the metal free sinogram exactly (error 0).  With the
+  FDK prior the relative RMS error inside the trace is 2.1% for NMAR and 8.7% for linear interpolation, and the
+  insert's image RMS error falls from 0.0078 to 0.0047.  A first phantom with a rod 25 times the plastic and 72
+  views gave NMAR 7.5% against LI 6.7%, because FDK of that scan has 55% per voxel streak error and the bone class
+  keeps those values; the paper's advantage needs a usable uncorrected image.
+- With one material plus metal, the NMAR prior is a scaled binary object mask, so NMAR equals MAR2 exactly (the
+  paper says MAR2 is exact in that case).  The smoke run at 64 voxels confirms it (identical metrics).  NMAR differs
+  from MAR2 only when a bone class is on.
+- `experiments/run_simulation.py` rebuilds the IPMR two_rods or six_rods scan through the IPMR_simulation code
+  (spekpy spectrum, beam hardened sinogram) at any size, runs fdk, mbir, li, ln, nmar, nmar_pre, nmar_mbir, and
+  scores them with the paper's plastic NRMSE and SSIM plus the whole volume NRMSE; it saves volumes, metrics.json,
+  settings.json, and a slice figure.
+- two_rods at 128 voxels (360 views, Otsu metal mask with 83% overlap of the true rods, FDK at every step unless
+  said, CPU on the Mac; plastic NRMSE / plastic SSIM / whole volume NRMSE / plastic mean against 0.02189):
+  FDK 0.2345 / 0.8808 / 0.3671 / 0.02150 (8 s); MBIR 0.1875 / 0.9278 / 0.3177 / 0.02170 (237 s);
+  LI 0.1501 / 0.9466 / 0.3555 / 0.02095 (19 s); LN 0.1481 / 0.9473 / 0.3552 / 0.02104; NMAR 0.1481 / 0.9473 /
+  0.3552 / 0.02104 (19 s, identical to LN, and identical with the MAR1 precorrection); NMAR with an MBIR final
+  reconstruction 0.1275 / 0.9672 / 0.3522 / 0.02147 (158 s).  NMAR lowers the plastic NRMSE of FDK by 37%, and
+  NMAR with MBIR lowers that of MBIR by 32%.  The whole volume NRMSE stays near 0.35 for every method, because the
+  reinserted FDK metal values hold most of the squared error.  Caution for the paper: a one material phantom is the
+  case where length normalization is exact, so the two_rods simulation favors NMAR by construction; the real scans
+  with several materials are the fair test.  Outputs in the session scratchpad only (sim_two_rods_128).
+- Nothing is committed.  Files ready to stage: method/nmar_pseudocode.md, nmar/*.py, tests/test_nmar.py,
+  experiments/run_simulation.py, README.md, requirements.txt, pyproject.toml, .gitignore.
+
+### 2026-11-05 (SOR: prior-art literature search)
+Ziyun asked whether anyone has done what SOR does.  Five parallel searches ran (CT and rotating-sensor tomography;
+dynamic MRI and the UNFOLD lineage; the same mathematics in other fields; iterative reconstruction with subspace
+constraints; patents, exact phrases, and conference venues), plus the lists of papers citing SMART-RECON,
+eSMART-RECON, Willis and Bresler 1995, UNFOLD, TIMBIR, multi-slice fusion, and RETROICOR from Semantic Scholar.
+The eSMART-RECON and time separation technique papers were read in full.
+Result: no paper or patent builds a temporal nuisance basis from the view angle of a tomographic frame, and none
+removes such a basis from a sequence of windowed reconstructions.  The same operation exists elsewhere with another
+phase variable: RETROICOR (Glover 2000: per-voxel fit to two harmonics of the measured cardiac and respiratory
+phases, mean kept, fit subtracted; Hu 1995 states that the fit does not rely on periodicity), half-wave-plate
+synchronous signal removal in CMB polarimetry (MAXIPOL 2007, NIKA 2017: eight harmonics of the plate angle), the
+scan-synchronous template of BICEP2, time synchronous averaging and order tracking in vibration analysis, sinusoid
+regression of line noise in EEG, and the Frisch-Waugh-Lovell residual maker.  The same artifact is treated in CT by
+other means: partial scan artifacts of perfusion CT (Primak 2007 synchronizes the ECG to the gantry; PSAR 2009; TSFF
+2012; Mayo and Siemens patents), eSMART-RECON 2020 (SVD components whose temporal spectrum peaks at n / (2 t_s) are
+dropped; needs the back-and-forth sweeps, never uses the angle, has no non-periodic case), RSTAR4D 2024 (streaks
+that rotate with the phase in 4D CBCT, a CNN with circular temporal padding), ResyncCT 2022, and the synchrotron
+papers that record the once-per-turn jitter of sliding-window frames and tolerate it (tomoscopy 2021) or read it as
+sample motion (DYRECT 2025).  In dynamic MRI the artifact is handled by the UNFOLD lineage, radial UNFOLD, DISPEL
+2017 (which states that golden-angle ordering defeats UNFOLD and DISPEL), and the period-matched median filter of
+Frahm's group; all need a periodic schedule, which is the DCT filter under other names.  The projection as a
+constraint has a theory paper: spotlight inversion (Calvetti, Hyvönen, Kolehmainen, Somersalo 2025) and the EIT and
+DOT projection papers of the same group (projection equals the limit of an uninformative prior, not a
+marginalization; a low-rank projector is their d < 2p).  The d < 2p variant itself has loose precedents only
+(ZapLine, optimal basis sets, constrained PCA).  Novelty the search supports: the basis is built from the sensor
+angle, so no periodicity is needed; 4D CT frames from a continuous rotation; the projector as a constraint agent in
+the consensus loop; the eigenproblem inside the harmonic span.
+Review README.md (ten sections, each item with a verification level: text, abstract, or snippet) and prior_art.bib
+(about 110 entries, unverified details marked): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/1105/Claude outputs/sor_literature/.
+Not text-searched: the Fully3D 2021 proceedings and the ICTMS abstracts.  Wiley and IEEE full texts were read only
+through mirrors or PubMed Central.
+
+### 2026-11-04 (the same 60 degree runs on the measured 4D phantom Phantom_30s_Run1, submitted on Delta)
+- Ziyun asked for the same jobs on the measured phantom.  Added the per-frame MBIR, because the real scan has no 60
+  degree MBIR yet.  Full resolution (sinogram 2400 x 728 x 260, grid 260 x 260 x 728), nominal channel offset -1.33845
+  (the NSI loader's default; the script stops on any other), 199 frames of 24 views, the SimRack-1 settings.
+- The NSI scan (2.5 GB) was copied from Gautschi depot to /work/nvme/bjda/zli98/real60/scan in 153 s (MD5 of all 2475
+  files match).  New script run_real60.py (prep, fdk, mbir, mace_dct, mace_sor), reusing run_mace60.py and
+  run_frame_mbir.py; no ground truth, so it saves center slices and the frame Gram matrix.
+- MACE4D at full resolution needs about 400 GB of host memory (176 GB for 99 frames in job 17144248), more than the
+  256 GB of a gpuA100x4 node, so MACE runs on half of a gpuA100x8 node (4 A100 80 GB, 600 GB; 1.5x the billing).
+- Jobs (19:06 CST): 23539419 prep (interactive, 1 A100, 50 min: load, FDK, strength, MBIR smoke on 4 frames, MACE-SOR
+  smoke on 24 frames), then 23539420 MACE-DCT and 23539421 MACE-SOR (gpuA100x8, 2 h), 23539422 MBIR (gpuA100x4, 2.5 h).
+  README section "FDK, MBIR, and MACE4D of the measured 4D phantom in 60 degree frames: design".
+
+### 2026-11-04 (SOR: FDK, MACE-DCT and MACE-SOR of the 60 degree frames, submitted on Delta)
+- Ziyun asked for FDK, MACE4D with the DCT filter, and MACE4D with SOR p = 6 of the 60 degree frames (SimRack-1 cut
+  into 199 frames of 24 views, 12 fpr), on Delta with 4 GPUs, to compare FDK, MBIR (10-29), MACE-DCT, and MACE-SOR.
+  Gautschi scratch could not be read from any login node on 11-04 ("Cannot send after transport endpoint shutdown"),
+  so the MBIR volumes and grams.npz are out of reach for now; the MBIR scores are in results/arc60 on the Mac.
+- New script run_mace60.py (methods fdk, mace_dct, mace_sor), with the settings of the SimRack-1 baselines of 10-05
+  and 12 fpr.  FDK is the MACE4D initial image; both MACE4D runs start from it and use the denoiser sigma_noise and
+  sigma_x that MACE4D with the DCT filter estimates from it, so the filter is the only difference.  SOR enters MACE4D
+  by replacing mbirtorch.mace4d.temporal_filter_matrix (as on 10-20).  Checked on the Mac with the real SimRack-1
+  model: frames and centers match the dataset, the SOR matrix equals the post-MBIR SOR p = 6 (11 directions), the DCT
+  at period 12 removes 17, and pinning sigma_x turns auto-regularization off.  Each run writes grams.npz in the format
+  of run_frame_mbir.py.
+- Delta jobs (18:27 CST): 23537605 prep (dataset, FDK, strength, MACE-SOR smoke on 24 frames, 1 iteration; 1 A100,
+  interactive partition, 30 min), 23537606 MACE-DCT and 23537607 MACE-SOR (4 A100 each, 1 h 40 min, afterok on the
+  prep).  Outputs in /work/nvme/bjda/zli98/sor_random_angle/arc60/{fdk,mace_dct,mace_sor_p6,smoke_mace}.  README
+  section "FDK and MACE4D on the 60 degree frames: design" in Slides/2026/1027/Claude outputs/sor_random_angle.
+
+### 2026-10-31 (FuSe2 workshop deck on 4D CT)
+Built a 10-minute deck for the FuSe2 (NSF Future of Semiconductors) workshop: `Lilly/4DCT_FuSe2.pptx`.
+It follows the story conventional FDK, per-frame MBIR, 4D MACE, 4D MACE + SOR, then parallel computing.
+The MBIRTorch QR code is on the 4D MACE, parallel computing, and summary slides.
+The deck keeps four slides of `Lilly/4DCT_presentation.pptx` (title, trade-off, multi-slice fusion, closing) and adds six.
+The template itself is unchanged.
+Five new GIFs and their scripts are in `Slides/2026/1031/Claude outputs/fuse2_deck/` (README there): the scan
+animation, FDK vs MBIR, the 2 x 2 comparison of the four methods on Phantom_30s_Run1, the angle-locked shift with
+and without SOR, and a replay of one MACE iteration on 4 H100 GPUs.
+Facts used: the scan takes 80 views/s at 2.5 deg/view (one turn 1.8 s, a new frame every 0.3 s); the RMS shift of the
+static parts is 0.604 voxel for 4D MACE and 0.023 voxel for 4D MACE + SOR (row component, z = 364); the SOR order
+numbers are the 10-29 deck's per-frame MBIR + SOR results.
+SOR code was not found in mbirtorch on any local branch.  Ziyun chose to keep the slides saying that MBIRTorch holds
+the 4D and SOR code, so SOR must be pushed before the talk.  The deck was checked only as a LibreOffice render, not in PowerPoint.
+Revision (v2, `Lilly/4DCT_FuSe2_v2.pptx`, because v1 was open in PowerPoint): the scan GIF now shows only the
+scanner turning while the object moves (Ziyun: the frame view was too complicated), and the scan slide comes
+before the "Why 4D CT?" slide, so the concept comes before any CT images.  Slide 9 now uses Ziyun's queue GIF from
+`1001/Claude outputs/mace4d_queue_gif/` with its off-white background set to white.  `Lilly/4DCT_presentation.pptx`
+was gone at the rebuild, so `build_deck.py` now reads a copy in `fuse2_deck/template/`.
+Second revision (Ziyun's story, same v2 file): the trade-off slide now says that one full turn per frame blurs,
+asks whether a short time window helps, and says that FDK on a third of a turn gives limited-angle artifacts (noise,
+jitter, shading).  The MBIR slide says that the prior favors smooth images, that this regularization makes the
+problem less ill-posed and lowers the noise, and that the frames are still not very clean and still jitter.  The
+template's bottom GIF has 99 frames of 120 degrees; its old text said 60 degrees.
+Third revision: slide 2 now pairs the scan GIF with a new 3D GIF (`make_volume4d_gif.py`, `gifs/volume_4d.gif`):
+the 3D volume of the moving rack and gear, and a strip that collects six volumes along a time axis as the 4D data.
+It is a matplotlib drawing, in step with the scan GIF.  No full 3D phantom volumes are on this Mac.
+Fourth revision: a new slide 4, "From Views to 4D Frames" (`make_windows_gif.py`, `gifs/views_to_frames.gif`),
+right before the trade-off slide.  Views (ideal projections of the drawn rack and gear) fill a row as the scanner
+turns; each 120 degree window gets an arrow to its frame, an ideal image at the middle of the window; a new window
+every 60 degrees.  The deck now has 11 slides.
+Fifth revision: Ziyun prefers PowerPoint animations, so slide 4 is now built from shapes and pictures
+(`fuse2_deck/views_to_frames/*.png`) with click animations written as p:timing XML by `build_deck.py`
+(`add_click_animations`): five clicks, each showing a window's new views, its bar and arrow, and its frame.  The
+slide XML passes pml.xsd, and LibreOffice reads all 45 effects; not yet played in PowerPoint.
+Sixth revision: the trade-off slide (slide 5) has four clicks that follow Ziyun's talk (full-turn GIF and box,
+question, short-window GIF and box, closing line).  "Why 4D CT?" (slide 3) now shows the drawn rack and gear as a
+3D volume at three moments (`make_filmstrip3d.py`, `filmstrip_3d.png`) instead of real phantom frames.  Ziyun numbers
+slides without the title slide, so their "slide 4" is deck slide 5.
+Seventh revision (`Lilly/4DCT_FuSe2_v3.pptx`): the two template GIFs on slide 5 had no loop block, so they played
+once and the bottom one had stopped by its click.  v3 is Ziyun's PowerPoint save of v2 (slide 5 moved: boxes left,
+GIFs right, seven clicks) with both GIFs set to loop (`gifutil.loop_forever`, `loop_deck_gifs.py`) and the notes
+matched to the clicks.  `build_deck.py` now writes v3 and reproduces Ziyun's slide 5.  v2 was left as saved.
+Eighth revision (`Lilly/4DCT_FuSe2_v4.pptx`, built): the SOR slide no longer shows the angle-error GIF.  It splits a
+reconstruction into the moving object plus sensor-related artifacts (ideal images, `make_sor_figures.py`), with angle
+dials in the window colors, four clicks following Ziyun's story, and one line of the simulated NRMSE results.  The
+results GIF now has FDK with 360 deg per frame, taken from `0702/fdk_144.gif` and calibrated on the static parts.
+Ziyun's v3 edit of the MACE slide (diagram and QR moved) is ported into the build; v3 was left as saved.
+Ninth revision (v4 rebuilt): at Ziyun's request the SOR slide is now in words, four clicks chained by arrows (sensor
+characteristics -> artifacts blend in -> remove the sensor components -> SOR, "an algorithm we are developing"), with
+a "Next: results on a real scan" line; no pictures and no simulated NRMSE.  The summary now says SOR is in development.
+Tenth revision (`Lilly/4DCT_FuSe2_v5.pptx`, built; v4 left as Ziyun saved it): ported Ziyun's v4 edits with smoother
+language (MBIR slide: optimization-based, less data than a 3D scan, regularize along time; MACE slide: 3D denoisers on
+space-time volumes, data-fitting model) and Ziyun's new slide 8, "Step 2: 4D MACE Result", which now shows 4D MACE
+without dejitter (`real_nofilter.npz`) beside an enlarged view of static parts with dashed average edges
+(`gifs/mace_jitter.gif`, `make_recon_gifs.make_jitter_gif`).  12 slides.  `build_deck.py` now deletes unused template
+slides after adding new ones, because python-pptx otherwise reused the part name slide12.xml.
+Eleventh revision (`Lilly/4DCT_FuSe2_v6.pptx`, built; v5 left as Ziyun saved it): ported Ziyun's v5 edits (MACE result
+caption without the number, results text, parallel slide QR and caption, summary bullet).  All speaker notes are now a
+spoken script in `scripts/speaker_notes.py` (about 1,230 words, 9.5 min): thanks Mingqi (translation CT) at the start,
+transitions between slides, [Click] marks matching the animations, and at the end MBIRTorch (all our code, open source
+with documentation) and the hand-off to Jingsong (view selection).
+Twelfth revision (`Lilly/4DCT_FuSe2_v7.pptx`, made from Ziyun's saved v6; v6 left as saved): the titles drop "Step N:"
+(MBIR, MACE, and SOR are successive methods, not stages of one pipeline): "Model-Based Iterative Reconstruction (MBIR)",
+"4D MACE with Multi-Slice Fusion", "4D MACE on a Real Scan", "Sensor Orthogonal Reconstruction (SOR)".  Ziyun's v6 notes
+and results-slide highlight box (four clicks, panel by panel) are ported into the build (`speaker_notes.py`, exit effects
+in `add_click_animations`); a fresh build matches v7.
+
+### 2026-10-29 (SOR: 60 degree arc datasets in three orders, submitted from a forked session)
+- Ziyun asked the forked session for the 10-27 random-angle test with 60 degree frames: 24 views, a new frame every
+  12 views (12 frames per rotation, 50% overlap), 199 frames, in the periodic, shuffled (seed 20261028), and random
+  (seed 20261027) orders.  DCT at period 12; SOR with p = 3 and p = 8 saved; SOR scored at p = 3, 4, 6, 8 from the
+  Gram matrices.  With 12 distinct angles SOR p = 8 equals SOR p = 6 in the periodic and shuffled orders (11
+  directions); in the random order it removes 16 of 198 directions.
+- The run has its own snapshot of the 10-27 scripts (with the --views_per_frame option of the other session), its own
+  datasets (sor/datasets/arc60_orders), and its own outputs (output/2026/1029/sor_arc60), because the other session
+  was editing the shared scripts at the time.  README and scripts: Slides/2026/1029/Claude outputs/sor_arc60.
+- Gautschi jobs 17442971 (smoke), 17442972 (simulation array), 17442973 (MBIR array, 2 GPUs per order), 17442974
+  (filtering, figures, GIFs), submitted at 01:23 as a chain while ai was full (897 jobs pending).  Ziyun's rule: if
+  they have not run by 3 am, cancel them and submit to Delta.  (Ziyun skipped Delta at about 01:30, then logged into
+  Delta at 02:00 and restored the rule.)  stage_delta.sh copied the scripts, the SimRack-1 code archive, its geometry,
+  and its ground truth to /work/nvme/bjda/zli98/sor_arc60/ in 56 s (MD5 checked, imports checked on the login node),
+  and a check runs at 03:02 that cancels the pending Gautschi jobs by ID and runs submit_delta.sh.  The delta login
+  script now connects to one login node (dt-login02), and the shared connection is named after it, so plain
+  `ssh delta` does not find it.
+- 03:02: no job had started, so 17442971-4 were cancelled by ID.  submit_delta.sh then hung: the connection to
+  dt-login02 stayed up (keepalives answered), but no command returned for over 12 min, including the other session's
+  `hostname`.  The chain was resubmitted on Gautschi at 03:15 as 17448863 (smoke), 17448864 (sim), 17448865 (MBIR),
+  17448866 (filter).  The hung Delta submission was left running; if it goes through, cancel whichever copy has not
+  started.  Lesson: cancel on one cluster only after the other cluster has confirmed its jobs.
+- 07:21: the smoke job 17448863 passed (started 07:18, 3 min 8 s).  The ground truth of its odd frames matches
+  SimRack-1 exactly, and its 6-frame MBIR has NRMSE 0.475 on average, at 13 to 22 s per frame.  At 07:24 the
+  simulation array 17448864 was pending behind 859 ai jobs (Slurm's start estimate 2026-11-06).  At 07:25 the shared
+  Delta connection refused new sessions, so Delta needs a new login by Ziyun before it can be used or checked.
+- 09:28: Ziyun logged into Delta again.  No JOBS.txt and no Delta job existed, so the 03:03 submission never ran.
+  At 09:29 the chain was submitted on Delta as 23319029 (smoke), 23319030 (sim), 23319031 (MBIR), 23319032
+  (filter), and the Delta smoke job started at once.  A watcher on the Mac cancels by ID the chain of the cluster
+  whose simulation starts second (until 10-30 12:00); it cancels nothing if a simulation or the Delta smoke fails.
+- 09:33: the Delta smoke job passed (3 min 25 s, NRMSE 0.475 as on Gautschi), and the Delta simulation started, so
+  the watcher cancelled the Gautschi chain 17448864-6.  The run goes on Delta only, with outputs in
+  /work/nvme/bjda/zli98/sor_arc60/.  (The other session's job 17443031 had finished at 07:30 on its own.)
+- 10:58: the Delta chain finished, and every job completed.  NRMSE over all voxels, MBIR / DCT / SOR p = 3 /
+  SOR p = 8: periodic 0.4439 / 0.3244 (-26.9%) / 0.3330 (-25.0%) / 0.3106 (-30.0%); shuffled 0.4437 / 0.4334
+  (-2.3%) / 0.3332 (-24.9%) / 0.3119 (-29.7%); random 0.4482 / 0.4359 (-2.7%) / 0.3421 (-23.7%) / 0.3223 (-28.1%).
+  All four expectations held: MBIR error larger than with 120 degree frames (0.331 to 0.333); p = 8 leaves no
+  static angle error in the periodic and shuffled orders; random damage 2.9% at p = 3 and 7.6% at p = 8, against
+  6/198 and 16/198; DCT helps only in the periodic order.  The periodic dataset matches the other session's 60
+  degree frames cut from SimRack-1 to 1e-4.  Ghost at p = 8: +23% / +43% / +68%.  Tables, figures, GIFs, logs,
+  and Gram matrices copied to results/ (MD5 checked) and to the Gautschi output folder; the datasets and volumes
+  (90 GB) stay on Delta.  The other session then installed its Delta login change (11:02).
+
+### 2026-10-29 (SOR: per-frame MBIR of SimRack-1 with 60 degree frames, periodic only, submitted)
+- Ziyun first asked for 45 degree frames in all three settings; I built and submitted that (18 views, a new frame
+  every 9 views, 265 frames; jobs 17442536-9), and Ziyun dropped it before any job ran ("45 / 22.5 is not good").  The
+  jobs were cancelled while pending, and their job files were removed.
+- The run now: the regular per-frame MBIR of the SimRack-1 scan cut by construct_time_frame_models(model,
+  frames_per_rotation=12, frame_overlap_factor=2): 199 frames of 24 views (60 degrees), a new frame every 12 views.
+  One 4D volume, the periodic setting.  DCT at period 12 and SOR with p = 3 and p = 6 are applied and saved.  New
+  script make_frames_dataset.py writes the frames as a dataset with the ground truth at the frame center times (the
+  99 odd frames are compared with the SimRack-1 ground truth).  Code, files, and the job are in the README of
+  Slides/2026/1027/Claude outputs/sor_random_angle, section "60 degree frames cut from the SimRack-1 scan".
+- Gautschi job 17443031 (run60.sbatch, 2 GPUs, smoke test of 6 frames first) was pending at 01:23 with ai full
+  (897 jobs pending).  Ziyun's instruction: if it has not started by 3 am, cancel it and run run60_delta.sbatch on
+  Delta.  The Delta connection was closed at 01:25; Ziyun was asked to run `delta`.
+- A forked session runs the 60 degree arc datasets in all three settings on its own (scripts/2026/1029/sor_arc60,
+  output 2026/1029/sor_arc60, jobs 17442971-4).  It shares no files with this run.
+- Delta fallback staged at 02:05: the scripts, the SimRack-1 simulator code (code/simrack1_code, dl4dct 3f4e660), and
+  the SimRack-1 config, sinograms, and ground truth (simrack1/) in /work/nvme/bjda/zli98/sor_random_angle/, all MD5
+  checked against Gautschi.  The imports and the 199 frames were checked on the login node.  Logging in took long:
+  login.delta sent us to dt-login04 (141.142.140.205), which hung after the password and timed out (no Duo request
+  was ever sent); dt-login02 worked.  At 02:05 the Delta gpuA100x4 queue had 2738 jobs pending, so Delta may not
+  start sooner than Gautschi.
+- Pending, approved by Ziyun: after tonight's two 60 degree runs finish, change the Delta login so that it works on any
+  login node and plain `ssh delta` finds the connection.  `ControlPath ~/.ssh/cm/%r@%n:%p` in the Host delta block
+  (checked with ssh -G: one socket, zli98@delta:22, for every node), and a new ~/bin/delta that tries dt-login01 to 04
+  in turn, moves on when a node does not ask for Duo within 30 s, and stops if the password is rejected.  The draft
+  is in this session's scratchpad (delta_new); both files are backed up with the suffix .bak-20261029 first.  Not
+  done before the runs end, because the new ControlPath would hide the open dt-login02 connection.
+- 3 am check (03:02): 17443031 was still pending (Priority; 882 ai jobs pending).  The Delta connection through
+  dt-login02 was open (mux master alive, port 22 answering), but every command sent through it hung, my `hostname`
+  test and the forked session's submit command alike, still at 03:14.  So 17443031 stays on Gautschi; it is
+  cancelled only after a Delta submission succeeds.  A watcher checks every 5 min until 04:00 for Delta to answer.
+  The forked session cancelled its Gautschi jobs 17442971-4 at 03:02:16, and its Delta submission was hanging; I
+  told it so.  It resubmitted its chain on Gautschi at 03:15 as 17448863-6.
+- Delta did not answer through dt-login02 at any check from 03:15 to 04:02, so 17443031 stays on Gautschi (still
+  pending at 04:02).  A watcher (until noon) waits for every sor_arc60 job to finish before the Delta login change.
+- 17443031 ran on Gautschi from 06:59 to 07:30 (31 min 18 s), and every check passed.  NRMSE over all voxels:
+  MBIR 0.4437, DCT 0.3244 (-26.9%), SOR p = 3 0.3329 (-25.0%), SOR p = 6 0.3105 (-30.0%).  With 120 degree frames
+  (12 fpr periodic arc dataset) they were 0.3312, 0.2291 (-30.8%), 0.2597 (-21.6%), 0.2153 (-35.0%).  The MBIR
+  error repeats every 6 frames (180 degrees), and harmonic 2 holds 37.1 of the 42.0 angle part of the static error.
+  SOR p = 6 removes the whole angle part.  DCT rises to 0.428 in the first and last 25 frames.  Results, tables,
+  and figures: README section "60 degree frames cut from the SimRack-1 scan: results" and results/arc60/ in
+  Slides/2026/1027/Claude outputs/sor_random_angle.  The Delta staging in /work/nvme/bjda/zli98/sor_random_angle/ was
+  not used.
+- The Delta login change still waits: at 09:42 the forked session's chain runs on Delta (23319030-2) through the
+  connection that Ziyun opened at 09:28 with plain `ssh delta` (socket zli98@login.delta.ncsa.illinois.edu:22).  The
+  new ControlPath would hide that socket from it.
+- 11:02: the forked session reported that its Delta chain finished at 10:58 and that its copy back ended at 11:05,
+  so the Delta login change was made.  ~/bin/delta and ~/.ssh/config were backed up with the suffix .bak-20261029.
+  The ControlPath is now ~/.ssh/cm/%r@%n:%p (one socket, zli98@delta:22, for every node, checked with ssh -G).  The
+  new ~/bin/delta tries dt-login02, 03, 04, 01 in turn with a 10 s connect timeout, uses HostKeyAlias
+  login.delta.ncsa.illinois.edu (nodes 02 to 04 have its ed25519 key; dt-login01 did not answer), and stops if the
+  password is rejected.  It passes bash -n and an expect parse check.  It has not run yet; Ziyun's next `delta`
+  tests it.  Ziyun's 09:28 login (pid 70308) still holds the old socket, which the new ControlPath does not find.
+
+### 2026-10-28 later (SOR at 12 frames per rotation: full p = 6 outputs, run on NCSA Delta)
+- Gautschi job 17399665 (p = 6) waited 2.5 h because ai was full (835 jobs pending; smallgpu also full).  Ziyun asked
+  to run it on Delta.  The inputs (3 x mbir.npy, grams.npz, ground truth; 29.5 GB) went Gautschi -> Mac -> Delta in
+  8 min with three zstd streams, MD5 checked, to /work/nvme/bjda/zli98/sor_random_angle/.  Delta job 23292386 (one
+  A100, scripts/filter12_p6_delta.sbatch) passed in 4.3 min; 17399665 was cancelled.  The ground truth is the same
+  file in all three settings (same MD5), because the frame times are the same.
+- Checks: volume NRMSE equals the Gram NRMSE to 2.0e-9; p = 6 numbers equal the sor_p.json sweep to 6e-17; MBIR and
+  DCT numbers equal the p = 3 run to a relative 6e-14 (floating-point order on another CPU); inputs unchanged.
+- Results against the MBIR (p = 3 in parentheses): static -18.8% / -18.8% / -17.6% for periodic / shuffled / random
+  (-12.5 / -12.5 / -12.4); moving -8.4% / -1.3% / +1.1% (-6.3 / -1.5 / -1.5); damage 0.5% / 4.4% / 5.6%; ghost
+  +67% / +167% / +216%.  The angle part of the static error is removed in periodic and shuffled, and drops from 25.7
+  to 5.0 in random (harmonics 7 and 8 are left).  y shift -81% / -79% / -74%; static pixel error -49% / -50% / -41%.
+- 12 fpr p = 6 against 6 fpr p = 3 (both use every harmonic the repeating angles hold, the same share of
+  directions in random): random static -17.6% against -12.5%, moving +1.1% against +2.6%, damage 5.6% against 5.8%.
+- All expectations held (flat static curves 0.180-0.188, y shift about 0.010, pixel error about 0.002, more ghost).
+- README section "12 frames per rotation, SOR with p = 6: results (2026-10-28)"; local outputs in
+  results/fpr12/analysis_p6/; the SOR p = 6 volumes copied back to Gautschi (<order>/mbir_sor_p6.npy).
+- The Delta copy (about 60 GB on /work/nvme, shared project quota) is to be deleted once Ziyun agrees.
+- For the slides (Ziyun's request): figures with MBIR, DCT, SOR p = 3, and SOR p = 6 in results/fpr12/analysis_p3_p6/
+  (NRMSE per setting, all 197 frames; GIFs of frames 0-99, five rows with the ground truth, 28.6 MB).
+  plot_nrmse_by_setting.py now takes several comparison.json files and --out_dir; make_setting_gifs.py takes
+  several --harmonics and --num_frames.  SOR p = 6 is drawn in #16508f (validated with the dataviz checker).
+- 2026-10-29: Ziyun wants the NRMSE over all voxels, not split into static and moving ("the jitter doesn't have
+  anything to do with static or moving").  New plot_nrmse_all_voxels.py draws fig_nrmse_all_voxels.png in
+  results/fpr12/analysis_p3_p6/ (one panel per setting, four results, the same y scale).  All-voxel NRMSE:
+  SOR p = 6 -35.0% / -34.2% / -29.1%, SOR p = 3 -21.6% / -21.1% / -19.7%, DCT -30.8% / -2.8% / -2.8%.
+- 2026-10-29 later: Ziyun asked for one image per setting and frame rate (6 in all; 3 curves at 6 fpr, 4 at 12 fpr)
+  with easy labels.  plot_nrmse_all_voxels.py now writes one figure per setting (title = setting and frame rate,
+  legend with mean and change, y range 0.20-0.40 in all six, --out_dir).  The six images are in
+  results/figures_nrmse_all_voxels/ locally and on Gautschi.
+
+### 2026-10-28 (SOR at 12 frames per rotation: results, p = 3)
+- Jobs 17367617-9 and 17367840 on ai all finished on 2026-10-27 with exit 0.  The ground truth of the 99 even
+  frames equals SimRack-1 (difference 0.0), and the filtered NRMSE equals the Gram NRMSE to 1.7e-9.
+- MBIR is as good as at 6 fpr (static NRMSE 0.226 to 0.229).  With 12 distinct angles, the harmonics 4 to 6 of the
+  angle no longer fold onto 1 to 3.  So SOR p = 3 now gives static -12.5% in the periodic and shuffled settings
+  (6 fpr: -17.4%), the same as random (-12.4%).  p = 6 (11 directions) removes all of the angle part: static -18.8%
+  in both repeating settings.
+- Random angles, same p = 3: static -12.4% (6 fpr -12.5%), moving -1.5% (6 fpr +2.6%), damage 3.0% (5.8%),
+  ghost +152% (+203%).  At p = 4: moving -1.3% (6 fpr +5.8%), damage 3.9% (8.7%).  The damage in the aperiodic
+  settings is close to d / (T - 1), so doubling the frames halves the damage of a given p.
+- Shuffled with every angle function removed (12 fpr p = 6 against 6 fpr p = 3): static -18.8% / -17.4%, moving
+  -1.3% / -0.3%, damage 4.4% / 4.5%.  The gain from more frames is used up by the extra directions.
+- DCT at period 12 (17 directions): periodic static -16.7%, all -30.8%; aperiodic about -1.8% static.
+- SOR lowers the y shift by 55-56% in all settings.  The periodic MBIR y shift is 0.048 voxel (6 fpr 0.018): two new
+  center angles 180 degrees apart (frames t mod 12 = 1, 7) give spikes of 0.1-0.2 voxel.
+- Added `--pixel X Y` to plot_comparison.py; the 12 fpr static-pixel figure uses (76, 45) as at 6 fpr.
+- One process per GPU made per-frame MBIR 3.5x faster (17 s against 60 s of GPU time per frame); times are in
+  gautschi/job_times.md.
+- README section "12 frames per rotation: results (2026-10-28)" in
+  Slides/2026/1027/Claude outputs/sor_random_angle/README.md; outputs in results/fpr12/analysis/.
+- Next: full p = 6 outputs at 12 fpr (curves and GIFs), with names that do not overwrite the p = 3 outputs.
+
+### 2026-10-27 (NCSA Delta: storage checked, mbirtorch installed, first GPU job)
+Ziyun logged in to Delta (ACCESS project ELE260090) through a shared SSH connection; the login and the facts below
+are in paths.md under "Cluster (NCSA Delta)".  Storage: home /u/zli98 is empty (100 GB quota), and the project
+space bjda holds 127 GB on /work/hdd (1 TB quota) and almost nothing on /projects or /work/nvme (500 GB each).
+Compared with Gautschi: A100 40 GB instead of H100 80 GB, a 2-day job limit instead of 14 days, and 2,973 shared
+GPU-hours instead of 18,327; Slurm bills the largest of the GPU, CPU and memory shares.
+mbirtorch is cloned at ~/PycharmProjects/mbirtorch (main, d9e8933) with the conda env mbirtorch (miniforge3-python
+module, Python 3.11.18, torch 2.14.0+cu130, mbirtorch 0.2.0 editable, 6.1 GB).  Test job 23256558 (~/delta_test/,
+1 A100 on gpuA100x4-interactive, 4 min 51 s, 0.16 GPU-hours) passed: driver 595.71.05, 128^3 cone-beam MBIR 45.3 s
+on the first run (kernel compile) and 4.6 s on the second, NRMSE 0.064; the 15-frame MACE4D demo 113.8 s and 101.3 s.
+No Gautschi timing of the same script exists yet.
+
+### 2026-10-27 night (SOR at 12 frames per rotation: scripts generalized, jobs submitted)
+Charlie asked what happens when the frame rate increases.  Design (Ziyun approved): keep the 120° arc of 48 views and
+start a frame every 12 views instead of 24, so 197 frames over the 30 s scan; the same three orders (periodic with 12
+angles, shuffled with seed 20261028, random with seed 20261027); per-frame MBIR; DCT at period 12 (17 directions) and
+SOR with p = 6 (11 directions with 12 repeating angles, 12 with random), also scored at p = 3, 4, 8.  Ziyun asked for
+my choice of p and d: p = 6, d = 2p, because 12 repeating angles need harmonics 1 to 6, and p = 6 holds about 96% of the
+random-setting spectrum at about the cost of p = 3 at 6 frames per rotation (12/196 against 6/98).
+Code changes: schedule.py takes the frame rate (6 fpr output unchanged, checked against the saved centers);
+make_arcs_dataset.py takes --frames_per_rotation and checks the ground truth of the frames with SimRack-1 times;
+run_frame_mbir.py runs one spawned process per GPU writing into a memory-mapped mbir.npy (same settings and seeds);
+analyze_filters.configure(fpr, p) sets the orders, DCT period, SOR harmonics, and frame window for every script.
+Tests: the 10-21 regression gives the same numbers; a synthetic 197-frame run of apply_filters and score_sor_p passes
+(volumes agree with the Gram NRMSE to 2.1e-9).  Preflight on the login node: 9456 views, centers to 2.5e-8 rad.
+Jobs on ai: 17367617 smoke (2 GPUs, 15 min), 17367618 simulation array (1 GPU, 25 min each), 17367619 MBIR array
+(4 GPUs, 45 min each), 17367620 filtering, tables, p sweep, figures, GIFs at 12 fps (1 GPU, 20 min).  Ziyun then
+chose p = 3, d = 6 for the main comparison, for comparability with 6 fpr, and p = 6, d = 12 next: 17367620 was
+cancelled while pending and resubmitted as 17367840 with --harmonics 3 (afterok 17367619; the p sweep 3, 4, 6, 8
+stays in it).  Output
+~/Desktop/data/output/2026/1027/sor_random_angle/fpr12/, datasets ~/Desktop/data/sor/datasets/SimRack-1-arcs-<order>-fpr12/.
+
+### 2026-10-27 night (SOR random-angle test: cause of the ghost)
+The ghost metric (mean |value| at pixels empty in the truth of the frame and filled in another frame, z = 182 and
+x = 65, 1e-3) was split by applying each filter to the truth alone and to the MBIR error alone.  MBIR: 0.58, 0.58,
+0.54 (periodic, shuffled, random), all of it MBIR error (a frame's 48 views span 0.6 s around the center time, so the
+moving object also shows where it is before and after).  Filter applied to the truth alone: DCT 0.448 in every
+setting; SOR periodic 0.417, shuffled 1.180, random 1.329 (p = 3), 1.686 (p = 4), 1.824 (p = 5).  Filter applied to
+the MBIR error alone: 0.86 to 0.98 for every filter.  So the growth of the ghost with SOR in the aperiodic settings is
+the filter moving part of the true object into other frames: SOR subtracts from every frame a least-squares fit of
+the harmonic curves to each voxel's time series, with one amplitude per curve for all 99 frames, so a voxel that the
+object enters or leaves gets a nonzero fit in its empty frames.  With periodic angles the curves are fast and a slow
+step fits them little; with aperiodic angles they jump from frame to frame and a step fits them about as much as
+random directions, more so the more curves there are.
+
+### 2026-10-27 night (SOR random-angle test: p = 4 and p = 5)
+score_sor_p.py (Gautschi login node, 16 s) scored SOR with harmonics 1 to p for p = 3, 4, 5 on the saved Gram matrices.
+Periodic and shuffled: p = 4 and 5 give the same filter as p = 3 (5 directions; harmonics 4 and 5 coincide with 2 and
+1 at six angles).  Random (MBIR static 0.2289, moving 0.3105, all 0.3322): p = 3 static 0.2004 (-12.5%), moving 0.3186
+(+2.6%), all 0.2674 (-19.5%), angle part 14.4e-4, damage 5.8%, ghost 1.63e-3; p = 4 static 0.1920 (-16.1%), moving
+0.3286 (+5.8%), all 0.2524 (-24.0%), angle part 9.2e-4, damage 8.7%, ghost 1.97e-3; p = 5 static 0.1905 (-16.8%),
+moving 0.3353 (+8.0%), all 0.2444 (-26.4%), angle part 8.0e-4, damage 10.4%, ghost 2.06e-3.  So each step of p lowers
+the static error and raises the moving error.  README and results/analysis/sor_p.{md,json} in the local folder.
+
+### 2026-10-27 evening (SOR random-angle test: one NRMSE figure and one GIF per setting)
+Ziyun asked for one figure per setting with the static NRMSE per frame on top and the moving one below
+(plot_nrmse_by_setting.py, from comparison.json), and one GIF per setting whose rows are the ground truth, MBIR, DCT,
+and SOR, each as the y-z slice x = 65 and the x-y slice z = 182, playing the 99 frames (make_setting_gifs.py on the
+Gautschi login node, 51 s for three GIFs of 22 MB, 880 x 1110 pixels, gray 0 to 0.03).  First made at 3 fps, then
+remade at 6 fps (160 ms per frame, one turn per second) on Ziyun's request for a higher frame rate.  Files
+results/analysis/fig_nrmse_{periodic,shuffled,random}.png and gif_{periodic,shuffled,random}.gif in the local folder.
+
+### 2026-10-27 later (SOR random-angle test: README results rewritten with plain statistics)
+Ziyun asked to avoid statements such as "SOR removes 100% of the static error" and to compare the statistics plainly.
+The results sections of the README now give each value for MBIR, DCT, and SOR with the change from the MBIR: NRMSE
+(static, moving, all), the static error split into time mean, angle part, and rest (static_error_split.json; RMS 1e-4,
+periodic MBIR 43.9 = 33.6 time mean, 25.0 angle part, 13.4 rest; SOR 36.1, angle part 0.0; random SOR 38.6, angle part
+14.4), damage and ghost, the static pixel, and the shift.  The predictions section is kept as written.  New fact: DCT
+raises the rest of the static error in every setting (13.4 to 15.4 in the periodic one).
+
+### 2026-10-27 later (SOR random-angle test: low-pass filter removed from the comparison)
+Ziyun decided that the temporal low-pass filter should not be in the plots and results.  It was removed from
+analyze_filters.py, plot_comparison.py, and apply_filters.py, and the tables (results.md, results.json), the five
+figures, and comparison.json were made again on the Gautschi login node (16 s); the README lost its low-pass rows and
+prediction, with one line noting the removal.  The other numbers are unchanged.  The low-pass volumes
+<order>/mbir_lowpass.npy (3 x 2.4 GB) are still on scratch, and filter_times.json still lists their timings.
+
+### 2026-10-27 late (SOR random-angle test: per-frame NRMSE, frame shift, static pixel)
+Ziyun asked for plots of the per-frame NRMSE (static, moving), the shift in x and y of each frame, and the value at a
+static pixel, for MBIR, DCT, SOR, and low-pass in each order.  plot_comparison.py (Gautschi login node, 22 s) reads
+analysis/results.json and <order>/grams.npz, rebuilds the filters, registers the 32-slice slab at z = 182 of every
+frame against its mean frame on 376 static pixels (the least-squares shift of 2026-10-08, smoothing 1.5), and picks the
+static pixel (76, 45) of z = 182 (truth 0.0079, an edge) with the largest temporal spread of the MBIR.  Shift RMS x/y
+(voxels): periodic MBIR 0.048/0.018, SOR 0.039/0.008; shuffled MBIR 0.051/0.019, SOR 0.039/0.009; random MBIR
+0.052/0.039, SOR 0.049/0.018, low-pass 0.038/0.017.  All shifts are below 0.06 voxel, so the jitter is an intensity
+pattern.  Static pixel RMS error: periodic 0.0056 -> SOR 0.0019; shuffled 0.0054 -> 0.0019; random 0.0037 -> SOR
+0.0032, low-pass 0.0026.  The static NRMSE per frame of SOR is the same flat curve (0.188) in the periodic and shuffled
+orders.  Figures in results/analysis/ of the local folder; README updated.
+
+### 2026-10-27 late (SOR random-angle test: results of the per-frame MBIR)
+All jobs done: MBIR 24.6, 24.6, 24.9 min (periodic, shuffled6, random); filtering job 17360503 48 s for all three
+(Gram comparison 3.1 s; per filter 0.005 s for the product, 0.6 s to the host, 1.5 s to save).  Every NRMSE of a saved
+filtered volume equals the Gram NRMSE to 2.1e-9.  Filtered volumes <order>/mbir_{dct,sor,lowpass}.npy stay on Gautschi;
+results/analysis/ (results.md, results.json, fig_spectrum.png, fig_tradeoff.png) copied to the local folder.
+NRMSE all/static/moving, static angle error m <= 8 (1e-4), damage to the moving truth:
+periodic MBIR 0.3316/0.2270/0.3119, 24.97; DCT 0.2365/0.1920/0.2885, 3.13, 0.8%; SOR 0.2249/0.1875/0.2878, 0.00, 0.5%.
+shuffled6 MBIR 0.3319/0.2270/0.3111, 24.98; DCT 0.3218/0.2234/0.3072, 23.09, 0.8%; SOR 0.2278/0.1875/0.3103, 0.00,
+4.5%; low-pass (K = 47) 0.2681/0.2003/0.2746, 11.99, 4.5%.
+random MBIR 0.3322/0.2289/0.3105, 25.89; DCT 0.3244/0.2254/0.3069, 24.15, 0.8%; SOR 0.2674/0.2004/0.3186, 14.42,
+5.8%; low-pass (K = 41) 0.2593/0.1970/0.2757, 11.96, 5.7%.
+Findings: (1) SOR removes all of the static angle error in the periodic and shuffled orders, so the order of the angles
+does not matter to SOR when the angles repeat; DCT fails in the shuffled order (15% removed).  (2) In the random order
+the static error has large harmonics above 3 (RMS 1e-4 at m = 1..8: 12.3, 16.7, 5.7, 11.1, 4.7, 6.0, 3.5, 3.9), so
+p = 3 removes 69% and p = 4 would remove 87%.  (3) The periodic values equal the random harmonics folded modulo 6 to 2%,
+and m = 6 folds onto the time mean in the periodic order.  (4) At equal damage the low-pass beats SOR in the random
+order on every measure and in the moving region of the shuffled order, because SimRack-1 moves slowly and the low-pass
+also removes noise.  (5) SOR does not help the moving region in the aperiodic orders (0.3103 shuffled, 0.3186 random,
+against 0.311), and its ghost grows to 1.6e-3.  Write-up in the README of the local folder.
+
+### 2026-10-27 night (SOR random-angle test: scripts re-checked, job times, analysis script tested)
+Ziyun asked to re-check the submitted scripts and to estimate the time of each job.  No error was found.  Timings from
+past logs: the SimRack-1 simulation (16850958, L40S) took 380 s for the transmission of 2400 views x 5 sub-angles
+(32 ms per view and sub-angle), 133 s for the ground truth, and 22 s for the checks; the 10-07 re-simulation took
+554 s.  The arc datasets have 4752 views, so the transmission takes about 13 min.  The script makes a new one-view
+model for every view and sub-angle (23760 models; SimRack-1 reused 720), and a copy takes 0.4 ms on the login node,
+so this adds about 10 s.  Estimates against the limits: smoke 10 to 12 min (limit 30); simulation 17 to 20 min per
+order (limit 60); per-frame MBIR about 20 min per order (limit 45), from the 10-05 MBIR (987 s on 4 H100, 39 s per
+frame, the first frames 90 s with compilation), plus 2 to 3 min to save and compute the Gram matrices.  About 5
+GPU-hours in all.  Not measured: whether a fresh one-view model costs more on the GPU; the smoke log will show it.
+Analysis script analyze_filters.py (Mac, mbirtorch from the fork on PYTHONPATH): it reads <order>/grams.npz, scores
+none, DCT, SOR (view_angle_filter_matrix, p = 3), a DCT-II low-pass at the damage of SOR, and SOR with shuffled
+centers (20 orders) as the chance level, and writes results.json, results.md, fig_spectrum.png, fig_tradeoff.png.
+Tested with --test_simrack1 on the 10-21 SimRack-1 MBIR data (treated as the periodic order): it reproduces the 10-21
+numbers exactly (NRMSE all/static/moving: MBIR 0.3251/0.2259/0.3117, DCT 0.2340/0.1913/0.2884, SOR
+0.2229/0.1867/0.2876; frames 12-85: 0.3249, 0.2275, 0.2226; ghost 0.578, 0.909, 0.956e-3; damage NRMSE DCT
+0.0192/0.0089/0.0520, SOR 0.0136/0.0000/0.0443).  New numbers on that data: the static error of the MBIR at harmonics
+m = 1, 2, 3 is 13.4, 20.2, 5.6 (1e-4); DCT removes 98.4% of it and SOR 100%; SOR changes 0.5% of the temporal
+variance of the moving truth; the low-pass with at most that damage keeps 90 of 99 modes and removes 5%; SOR with
+shuffled centers removes 9% and changes 5.1%.  Output Slides/2026/1027/Claude outputs/sor_random_angle/test_simrack1_1021/.
+
+Resubmission (Ziyun's go, same day): the job history showed that smallgpu waited 9 to 18 h while 1-GPU ai jobs start
+within about half an hour (gautschi/job_times.md).  Jobs 17353296-8 were cancelled while pending and resubmitted with
+the same dependencies: 17354383 smoke (ai, 1 GPU, -n14, 25 min), 17354384 simulation array (ai, 1 GPU, -n14, 35 min
+each), 17354385 MBIR array (ai, 4 GPUs, 35 min each).  OMP_NUM_THREADS is now 14 in common.sh.
+Results of the resubmission: smoke 3.3 min (started 0.1 h after submission), simulations 5.1 to 5.5 min each on an
+H100, all checks passed (ground truth equal to SimRack-1, reprojection residuals 0.058 to 0.059 as SimRack-1).  The
+per-frame MBIR runs about 2x slower per frame than on 10-05 (40 to 90 s per frame per GPU against 19 to 33 s, about 11
+iterations per frame in both), with the GPUs 0 to 8% busy and the process at 1.5 CPU cores: the four frames run as
+threads of one Python process.  The fork's MBIR code equals upstream main d9e8933; the 10-05 run used 010043e, 111
+commits earlier.  Ziyun chose to keep the current version.  MBIR tasks 1 and 2 were cancelled while pending and
+resubmitted as 17359405_1-2 with a 45-min limit; task 0 (17354385_0) runs on with 35 min.
+MBIR times: periodic 24.6 min, shuffled6 24.6 min.  Filtering on Gautschi (Ziyun's request): apply_filters.py runs
+the Gram comparison of analyze_filters.py (which sets K of the low-pass filter), applies the DCT, SOR, and low-pass
+filters to the full MBIR of each order on one GPU, saves <order>/mbir_<filter>.npy, checks the NRMSE of each saved
+volume against the Gram NRMSE (tolerance 1e-4; 1.6e-9 on a synthetic local test), and records the time of each step in
+<order>/filter_times.json and analysis/filter_times.json.  Job 17360503 (ai, 1 GPU, -n14, 20 min, afterok 17359405_2);
+the comparison goes to ~/Desktop/data/output/2026/1027/sor_random_angle/analysis/.
+
+### 2026-10-27 evening (SOR random-center-angle test: final design, scripts written, jobs submitted)
+This entry replaces the design of the entry below it.  Changes agreed with Ziyun: one source of the artifact (exact
+geometry, so the limited angle of each frame is the only source), per-frame MBIR only (MACE4D later), p = 3 fixed with
+d = 2p (no sweep), and three filters plus the low-pass.  The old prediction "SOR removes at least 90% of the static
+error up to harmonic p" tested nothing, because SOR removes that part exactly by construction.  On 6 distinct angles
+sin 3 theta is proportional to cos 3 theta (both are a constant times (-1)^k), so the rank is 5 there, not 6.
+Datasets (99 frames of 48 views, 4752 views; frame t keeps the view times of SimRack-1 views 24 t to 24 t + 47; the
+angle step is exactly -2.5 deg in float64, because SimRack-1's config step -2.500003 deg is its float32 rounding and
+makes a false sixth direction at the 1e-8 rank tolerance; noise seed 0 and i0 11000 as SimRack-1):
+SimRack-1-arcs-periodic (the SimRack-1 centers, a control made by the same code), SimRack-1-arcs-shuffled6 (the same
+centers in a random order, seed 20261028; counts 16, 16, 16, 17, 17, 17), SimRack-1-arcs-random (uniform, seed
+20261027; 99 distinct centers, cond of the p = 3 basis 1.37).  Saved in /home/li5273/Desktop/data/sor/datasets/ (on
+scratch; each folder also holds its scripts and schedule.npz so that it can be made again).
+Filters, applied on the Mac to the saved Gram matrices: none; DCT temporal_filter_matrix(99, period=6) (removes 8
+directions); SOR view_angle_filter_matrix(centers, harmonics=(1, 2, 3)) with the float64 centers (removes 5, 5, 6);
+a low-pass that keeps the lowest K orthonormal DCT-II modes, with K set so that its damage to the moving truth equals
+that of SOR; the SOR filter with the centers in a random order of the frames as the chance level.  Metrics, the
+predictions, and the checks are in the README of the local folder, written before any result.
+Code: mbirtorch from a git archive of mbirtorch_ziyun_fork, branch svd_based_dejitter (d4103890), for both the
+simulation and the MBIR (Ziyun's instruction); the simulator and the phantom from the SimRack-1 code archive (dl4dct
+3f4e660), imported as a library.  The MBIR settings are those of the SimRack-1 per-frame MBIR of 10-05 (sharpness 1.0,
+positivity, transmission_root weights, default iterations, frame k seeded with k).  Login-node preflight passed: the
+imports resolve to the two archives, the binned sinogram is (4752, 364, 130) and the recon grid (130, 130, 364), the
+model centers match the schedule to 2.3e-8 rad, and SOR is symmetric and idempotent (1e-8, float32) and keeps the mean.
+Jobs (submitted on Ziyun's go): 17353296 smoke (smallgpu, 1 GPU, 30 min: 6 frames of the random order, 2 sub-angles,
+then their MBIR and Gram matrices); 17353297 simulation array 0-2 = periodic, shuffled6, random (smallgpu, 1 GPU,
+1 h each, afterok smoke); 17353298 MBIR array (ai, 4 GPUs, 45 min each, aftercorr simulation).  Code
+~/PycharmProjects/scripts/2026/1027/sor_random_angle/ (schedule.py, make_arcs_dataset.py, run_frame_mbir.py,
+common.sh, smoke.sbatch, sim.sbatch, mbir.sbatch), output ~/Desktop/data/output/2026/1027/sor_random_angle/ (README,
+code/mbirtorch_fork, slurm_logs, <order>/mbir.npy, metrics_mbir.json, grams.npz), local copies and README
+Slides/2026/1027/Claude outputs/sor_random_angle/.  Not yet: the analysis script on the Mac.
 
 ### 2026-10-27 later (SOR generalization test: a random center angle for each frame, designed)
 Ziyun wants to extend SOR to other sensor-induced artifacts and to test how it generalizes.  The first test gives

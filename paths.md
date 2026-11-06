@@ -6,6 +6,13 @@
 
 ## Notable Projects
 - Lilly Proposal (LaTeX): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Proposal_4D_Lilly/main.tex
+- IPMR paper (plastic-metal BHC, LaTeX, Overleaf via Dropbox): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Iterative Plastic Metal Reconstruction (submitted version in original-submission-backup/). Simulation repo: /Users/a124601/Desktop/Research_Purdue/repository/IPMR_simulation. Figure and metric scripts: /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/Figures/v2_code (simulation_2_metal.py / simulation_6_metal.py compute Table IV; plot_simulation_*_metal.py make Figs 3-4). Saved simulation volumes (256^3): /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/data_for_MAR_paper/simulation/{two_rods,six_rods}
+  NSI phantom (JB-033) plastic-volume analysis from Lilly (VGStudio, source of Table V): /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/MBIR VS other methods volume quantification_Lilly.pptx and MBIR_Object_Volume_Executive_Summary.pdf in the same folder. Half-resolution NSI recons (748x748x804, incl. no-metal MBIR): .../IPMR_paper/data_for_MAR_paper/demo/. Response letter: <Overleaf IPMR folder>/revision-v1/response_letter.tex
+  IPMR parameter sensitivity on the single-metal simulation (2026-11-04; order, beta, alpha, gamma, passes): scripts, README, and later the metrics and figures in /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/sensitivity; Delta folder /work/nvme/bjda/zli98/ipmr_sensitivity/ (out/<knob>/ holds the volumes)
+  NMAR baseline for the IPMR paper (2026-11-05): repo /Users/a124601/Desktop/Research_Purdue/repository/NMAR_reproduction (GitHub ZiyunLiiii/NMAR_reproduction; method/nmar_pseudocode.md, package nmar/, tests/, experiments/run_simulation.py), run with ~/anaconda3/envs/nmar/bin/python (mbirjax 0.7.3, jax 0.12, spekpy 2.5.4, scikit-image; made 2026-11-05). The paper: /Users/a124601/Desktop/Research_Purdue/papers/MAR/NMAR.pdf
+  IPMR run-time study for the reviewers (2026-11-05; FDK, MBIR, IPMR of the full-size NSI phantom and circuit board with the time of every IPMR step, GPU memory, and the two simulation phantoms): scripts and README in /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/timing; Gautschi code ~/PycharmProjects/scripts/2026/1105/ipmr_timing/ (venv ~/venvs/mbirjax, mbirjax 0.7.3), outputs ~/Desktop/data/output/2026/1105/ipmr_timing/<run>/
+  NMAR baseline on Gautschi (2026-11-05): code ~/PycharmProjects/NMAR_reproduction (rsync of the Mac repo; experiments/gautschi/submit_nmar.sbatch takes DATASET=smoke|two_rods|six_rods|nsi_phantom|circuit_board), job folder ~/PycharmProjects/scripts/2026/1105/nmar_baseline/ (slurm_logs/, IPMR_simulation/ at 14e7913, README.md), outputs ~/Desktop/data/output/2026/1105/nmar_baseline/<dataset>/, venv ~/venvs/nmar (python of /apps/external/conda/2025.09, jax cuda12, mbirjax 0.6.15, spekpy; built with the proxy variables unset because squid was down and the conda cache was corrupted)
+  Paper real-data volumes on Gautschi: NSI phantom 748x748x804 in ~/Desktop/data/output/2026/0319/demo/ (recon_demo_fdk, mbir_recon_demo, recon_3_1_demo_alpha1_beta0_gamma0.1; the local demo/ copies), circuit board 363x363x251 in ~/Desktop/data/output/2026/data_for_MAR_paper/circ/circ_stable/ (made with scripts/2026/0611/mar_recon.py settings: downsample [4,4], every 4th view, auto crop). Datasets demo_nsi_vert_metal_all_views and Horizontal_Elec_Board_1800 were restored from depot on 2026-11-05 (tarballs now symlinks to depot)
 - MACE/MACE4D API deck (beamer, Overleaf via Dropbox): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/MBIRTorch_4DCT_API/main.tex
 - Sensor Orthogonal Reconstruction note (LaTeX, Overleaf via Dropbox): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Sensor Orthogonal Reconstruction/main.tex
 - Wedge experiment for that note (scripts, arrays, figures, README): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/0924/Claude outputs/wedge_experiment — moved there from mbirtorch/Claude outputs (no longer in the repo); run with the mbirtorch env from that directory
@@ -18,6 +25,13 @@
 - Stage 1 of the sensor-orthogonal plan (corrected-offset 4D runs, survey, sweep, convergence): code on Gautschi `~/PycharmProjects/lilly_exp/nsi/2026/0924/sor_stage1/`, outputs `~/Desktop/data/output/2026/0924/sor_stage1/`; copies of small outputs, scripts and README: /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/0924/Claude outputs/sor_stage1
 - Sensor Orthogonal Reconstruction -- Theory (LaTeX, Overleaf via Dropbox; Ziyun's own theory notes, started 2026-09-28): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Sensor Orthogonal Reconstruction -- Theory/main.tex
 - SOR blueprints (Ziyun's newest formulation, 2026-10-27; index with Theory, Theory 2, Software Architecture pages): https://claude.ai/artifact/648swpno4LjUtjvxwcf8jS
+- SOR random-center-angle test (2026-10-27; per-frame MBIR of SimRack-1 arc datasets with periodic, shuffled and random frame centers): code on Gautschi `~/PycharmProjects/scripts/2026/1027/sor_random_angle/`, datasets `/home/li5273/Desktop/data/sor/datasets/SimRack-1-arcs-{periodic,shuffled6,random}/` (scratch), output `~/Desktop/data/output/2026/1027/sor_random_angle/`; local README and scripts: /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/1027/Claude outputs/sor_random_angle
+- SOR, 60 degree frames cut from the SimRack-1 scan (2026-10-29; periodic only, 199 frames of 24 views): dataset `/home/li5273/Desktop/data/sor/datasets/SimRack-1-frames-periodic-fpr12-arc60/`, results `~/Desktop/data/output/2026/1027/sor_random_angle/arc60/` on Gautschi (job scripts/run60.sbatch in the same scripts folder; Delta copy in /work/nvme/bjda/zli98/sor_random_angle/arc60/ if it runs there)
+- SOR, FDK and MACE4D (DCT, SOR p = 6) of the 60 degree frames (2026-11-04, Delta): `/work/nvme/bjda/zli98/sor_random_angle/arc60/` (fdk/, mace_dct/, mace_sor_p6/, smoke_mace/), dataset `/work/nvme/bjda/zli98/sor_random_angle/datasets/SimRack-1-frames-periodic-fpr12-arc60/`; scripts run_mace60.py, prep60_delta.sbatch, mace60_delta.sbatch in the sor_random_angle scripts folder
+- Measured phantom Phantom_30s_Run1 in 60 degree frames (2026-11-04, Delta, full resolution; FDK, MBIR, MACE-DCT, MACE-SOR p = 6): `/work/nvme/bjda/zli98/real60/` (scan/ = copy of the NSI scan, prep/, fdk/, mbir/, mace_dct/, mace_sor_p6/, smoke_*/, slurm_logs/); scripts run_real60.py, real60_prep_delta.sbatch, real60_delta.sbatch in the sor_random_angle scripts folder
+- SOR, 60 degree arc datasets in three orders (2026-10-29, forked session; 199 frames of 24 views at 12 fpr, periodic, shuffled, random; SOR p = 3 and 8): code on Gautschi `~/PycharmProjects/scripts/2026/1029/sor_arc60/` (its own snapshot of the 10-27 scripts), datasets `/home/li5273/Desktop/data/sor/datasets/arc60_orders/`, output `~/Desktop/data/output/2026/1029/sor_arc60/`; Delta fallback `/work/nvme/bjda/zli98/sor_arc60/`; local README and scripts: /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/1029/Claude outputs/sor_arc60
+- SOR prior-art literature search (2026-11-05; review README.md with verification levels and prior_art.bib of about 110 entries): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/1105/Claude outputs/sor_literature/
+- FuSe2 workshop deck on 4D CT (2026-10-31, 12 slides): current version /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT_FuSe2_v7.pptx (earlier versions 4DCT_FuSe2.pptx and _v2 to _v6 beside it); speaker notes in scripts/speaker_notes.py; GIFs, figures, scripts, README, and a copy of the template 4DCT_presentation.pptx in template/: /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/1031/Claude outputs/fuse2_deck (build_deck.py rebuilds 4DCT_FuSe2_v7.pptx and overwrites it)
 - Core properties of the periodic removal (zero mean of the temporal bases, the two forms X - sum s_r u_r v_r^t = X(I - V_Omega V_Omega^t), mean kept, orthogonal projection, at most P - 1 periodic components; 2026-10-17): /Users/a124601/Library/CloudStorage/Dropbox/Apps/Overleaf/Sensor Orthogonal Reconstruction -- Theory/core_properties.tex (+ .pdf; set it as the main document in Overleaf to compile). The earlier periodic_modes_derivation.tex is no longer in the folder; its numerical check code/periodic_modes/check_projection.py is still there
 - Numerical checks of the old Theory note, whose theory was replaced on 2026-10-21 (pseudo-inverse split, P, R_xhat, Lambda_hat on a 32 x 32 Shepp-Logan, 2026-09-30; script, figures, README): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/1001/Claude outputs/theory_pinv
 - SVD of a stack of 18 frame reconstructions and the DFT of its temporal bases (parallel and fan beam, 2026-09-30; script, figures, README): /Users/a124601/Desktop/Research_Purdue/Lilly/4DCT/Slides/2026/1001/Claude outputs/frame_svd
@@ -137,13 +151,68 @@
   `~/Desktop/data/output/2026/1001/4d_viewer_trial/` (package copy `mbirtorch_4dviewer/`, `vendor/tornado`
   link, `smoke/` test volumes).
 
+- Since at least 2026-11-05 the bouman account is capped at 3 H100 GPUs in total for the whole group (`sacctmgr show assoc account=bouman` shows GrpTRES gres/gpu=3); a 4-GPU sbatch is rejected with AssocGrpGRES. Login nodes reach PyPI and conda-forge only with the proxy variables unset (the squid proxy times out). Python environments: ~/.conda/envs/mbirtorch (torch 2.14+cu130) and the venv ~/venvs/mbirjax (mbirjax 0.7.3, jax[cuda12] 0.12.0.1, spekpy, PyYAML; made 2026-11-05 by scripts/2026/1105/ipmr_timing/make_env.sh after conda create failed on a corrupted readline package in ~/.conda/pkgs).
+
 ## Cluster (NCSA Delta)
 - ACCESS project ELE260090 (Charlie's): about 3,000 GPU-hours on Delta, 2026-10-12 to 2027-10-11,
   shared by everyone on the project. NCSA login `zli98`. Host `login.delta.ncsa.illinois.edu`.
 - Setup guide from Charlie (2026-10-14) and his login scripts (`scripts/delta.sh`, `scripts/nersc.sh`):
-  /Users/a124601/Desktop/Research_Purdue/Delta_scripts
+  /Users/a124601/Desktop/Research_Purdue/cluster_script/Delta_scripts (moved there from Research_Purdue/Delta_scripts)
 - Login needs the NCSA password and an NCSA Duo push (Duo Mobile on a phone; a YubiKey fails for ssh).
-  Claude works through a shared SSH connection (`ControlMaster`, 4 h) that Ziyun opens.
+  An SSH key cannot replace them. The server offers only `gssapi-with-mic,password` (checked 2026-10-28).
+- One-command login (Charlie's setup, working since 2026-10-28): Ziyun runs `delta` (~/bin/delta, on the PATH
+  through ~/.zshrc) and taps Approve on the phone. The script reads the password from the Keychain (item
+  `delta-password`, account `zli98`), answers Duo with `1` (push), and opens a shared SSH connection.
+  ~/.ssh/config has `Host delta login.delta.ncsa.illinois.edu` (User zli98, ControlMaster auto,
+  ControlPath ~/.ssh/cm/%r@%n:%p, ControlPersist 4h, ServerAliveInterval 60). The config from before that
+  entry is backed up at ~/.ssh/config.bak-20261028.
+  Claude runs `ssh delta <cmd>`, `scp ... delta:...` and `rsync` with no prompts, and checks the
+  connection with `ssh -O check delta`. The connection closes after 4 h with nothing using it, and
+  then Ziyun runs `delta` again. The old `~/.ssh/cm-delta` path is no longer used.
+  Delta drops a login prompt left unanswered for about 2 minutes. The host key is in known_hosts (2026-10-27).
+  2026-10-29: login.delta round-robins over the login nodes dt-login01 to 04 (141.142.140.194, .195, .196, .205).
+  dt-login04 hung after the password and timed out, with no Duo request sent, and dt-login01 did not answer on
+  port 22 at 11:00.  Since 2026-10-29 11:00 the `delta` script tries the nodes in the order 02, 03, 04, 01 and
+  moves to the next node when one does not ask for Duo within 30 s (`delta 03 04` picks the nodes).  It stops at
+  once if the password is rejected, so that it does not lock the account.  Nodes 02 to 04 have the host key of
+  login.delta, and the script checks each node's key against that known_hosts entry (HostKeyAlias).  The
+  ControlPath uses the name typed (%n), so the shared connection is `~/.ssh/cm/zli98@delta:22` for every node,
+  and plain `ssh delta` and `ssh -O check delta` find it.  Always pass `-o BatchMode=yes` in Claude's commands,
+  so that ssh never tries a password when the connection is closed (failed tries count against the account).
+  The versions from before this change are ~/bin/delta.bak-20261029 and ~/.ssh/config.bak-20261029.
+- Web portal (Open OnDemand): https://openondemand.delta.ncsa.illinois.edu/ (CILogon with the NCSA login and
+  NCSA Duo). Apps: Shell Access, JupyterLab, Code Server (VS Code), TensorBoard, Desktop.
+- Slurm account `bjda-delta-gpu` (2,999 GPU-hours deposited, 2,973 left on 2026-10-27). `quota` lists storage,
+  `accounts` the balance, `jobcharge -a bjda-delta-gpu -d <days> --detail` the charges per job.
+- GPU partitions (2-day limit; `-interactive` versions 1 h, one job per user): gpuA100x4 (default; 4x A100 40 GB,
+  64 cores, 256 GB), gpuA40x4 (4x A40 48 GB), gpuA100x8, gpuH200x8 (8x H200 141 GB, 96 cores, 2 TB, one node per job).
+  Charge per GPU-hour: A40 0.5, A100x4 1, A100x8 1.5, H200 3; interactive 2x, `-preempt` 0.5x (for checkpointed jobs).
+  Slurm bills the largest of the GPU, CPU and memory shares (PriorityFlags=MAX_TRES). The share of one A100x4 GPU is
+  16 cores and 62.5 GB, so 1 GPU with --mem=200G is billed as 3.2 GPUs. Default memory is 1 GB per CPU, so set --mem.
+- mbirtorch on Delta (2026-10-27): repo ~/PycharmProjects/mbirtorch (main, HTTPS clone); conda env `mbirtorch`
+  at /u/zli98/.conda/envs/mbirtorch (Python 3.11.18, torch 2.14.0+cu130, mbirtorch editable). Activate with
+  `module load miniforge3-python; source "$(conda info --base)/etc/profile.d/conda.sh"; conda activate mbirtorch`.
+  The A100 nodes run driver 595.71.05. The 1-GPU test job and its script are in ~/delta_test/ (job 23256558 passed).
+- Other software: modules pytorch-conda/2.8 and 2.12, cudatoolkit/26.5_13.2; apptainer is installed, and NGC
+  containers are in /sw/external/NGC. RHEL 9.6.
+- Storage (2026-10-27): home /u/zli98 (100 GB soft, 4 KB used); project allocation `bjda`, shared by the
+  project: /projects/bjda (500 GB soft), /work/nvme/bjda (500 GB soft, fast), /work/hdd/bjda (1,000 GB soft,
+  126.9 GB used by others on the project).
+- SOR random-angle test on Delta (2026-10-28): /work/nvme/bjda/zli98/sor_random_angle/ with code/mbirtorch_fork,
+  scripts/ (a copy of the Gautschi scripts plus filter12_p6_delta.sbatch), datasets/ (ground truth of the 12 fpr
+  datasets), fpr12/<order>/ (mbir.npy and grams.npz copied from Gautschi), and slurm_logs/. Copying 29.5 GB from
+  Gautschi through the Mac (3 zstd streams) ran at about 35 MB/s.
+
+## MBIRTorch MCP server
+- Code repository (private): git@github.com:ZiyunLiiii/mcp_sandbox.git, branch main; created 2026-11-03
+  - Mac clone: /Users/a124601/Desktop/Research_Purdue/repository/mcp_sandbox
+  - Gautschi clone (the copy Claude Code runs): /home/li5273/PycharmProjects/mcp_sandbox
+- Project notes (goal, progress): /Users/a124601/Desktop/Claude_scripts/mbirtorch_mcp
+- Server Python on Gautschi: /home/li5273/venvs/mbirtorch_mcp/bin/python
+  (anaconda 2025.12 Python 3.13.9 plus mcp 2.3.0; no torch, does not need scratch)
+- Test volumes on Gautschi: ~/mbirtorch_mcp_test/rack4d.{h5,npy} (4D, from tests/make_rack4d.py); 3D test file
+  /depot/bouman/data/Translation/TCT_BGA_recon/MBIR_recon.h5
+- Claude Code registration: `mbirtorch-gautschi`, local scope, for the mbirtorch repo folder (in ~/.claude.json)
 
 ## Claude Scripts
 - Local (Mac): /Users/a124601/Desktop/Claude_scripts
