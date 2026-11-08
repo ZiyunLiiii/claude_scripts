@@ -132,7 +132,7 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   read from Delta's NVMe; the paper folder has both).  Comparison figures GT/FDK/MBIR/NMAR/IPMR on slice 128:
   nmar_baseline/<phantom>/comparison_<phantom>_z128.png (scripts/plot_simulation_comparison.py).  Shape check against
   data_for_MAR_paper: both simulations match (use six_rods_pet_rerun for the multi-metal row); the NSI NMAR run
-  matches the paper FDK to 1e-4 but nmar.npy (1.8 GB) is still only on Delta; the board NMAR is 364x364x251 against
+  matches the paper FDK to 1e-4, and its nmar.npy and metal_mask.npy were copied to Revision_data the same day; the board NMAR is 364x364x251 against
   the paper's 363x363x251, a half-voxel grid shift, so it needs a rerun on the paper grid (Ziyun: not now).
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
