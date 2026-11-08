@@ -133,7 +133,10 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   nmar_baseline/<phantom>/comparison_<phantom>_z128.png (scripts/plot_simulation_comparison.py).  Shape check against
   data_for_MAR_paper: both simulations match (use six_rods_pet_rerun for the multi-metal row); the NSI NMAR run
   matches the paper FDK to 1e-4, and its nmar.npy and metal_mask.npy were copied to Revision_data the same day; the board NMAR is 364x364x251 against
-  the paper's 363x363x251, a half-voxel grid shift, so it needs a rerun on the paper grid (Ziyun: not now).
+  the paper's 363x363x251, a half-voxel grid shift, so it needs a rerun on the paper grid (Ziyun: not now).  A rerun with every 8th view (Delta job 23657207,
+  out/circuit_board_v8, 58 s; DATASET=circuit_board_v8 added to experiments/delta/submit_nmar.sbatch, not committed)
+  still gave 364x364x251, and its FDK is further from the paper FDK (15.8% after the half-voxel shift, against 7.9%
+  for 450 views), so the view count is not the cause and the paper used at least 450 views.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
