@@ -136,7 +136,8 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   the paper's 363x363x251, a half-voxel grid shift, so it needs a rerun on the paper grid (Ziyun: not now).  A rerun with every 8th view (Delta job 23657207,
   out/circuit_board_v8, 58 s; DATASET=circuit_board_v8 added to experiments/delta/submit_nmar.sbatch, not committed)
   still gave 364x364x251, and its FDK is further from the paper FDK (15.8% after the half-voxel shift, against 7.9%
-  for 450 views), so the view count is not the cause and the paper used at least 450 views.
+  for 450 views), so the view count is not the cause and the paper used at least 450 views.  Ziyun's decision: the board NMAR goes into
+  one slice comparison figure only, not a table, so the 450-view run (364 grid, nmar_bone) is used as it is.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
