@@ -138,6 +138,15 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   still gave 364x364x251, and its FDK is further from the paper FDK (15.8% after the half-voxel shift, against 7.9%
   for 450 views), so the view count is not the cause and the paper used at least 450 views.  Ziyun's decision: the board NMAR goes into
   one slice comparison figure only, not a table, so the 450-view run (364 grid, nmar_bone) is used as it is.
+- 2026-11-08: revised Figs. 3, 4, 5, 6, 12, 13 with an NMAR panel.  Scripts in IPMR_paper/Revision_codes
+  (fig<N>_*.py, each a copy of the script that made the paper figure, plus make_previews.py), panels as separate PDFs
+  in IPMR_paper/Revision_figures/fig<N>_*/ and previews in Revision_figures/previews/.  Source scripts: Fig. 3
+  v2_code/plot_simulation_2_metal_zoomedin.py (z 128), Fig. 4 v2_code/plot_simulation_6_metal_zoomedin_pet_rerun.py
+  (PET rerun data, z 128), Fig. 5 v2_code/plot_demo.py (slice 374 after rot90), Fig. 6 v4/plot_demo_zoomedin.py
+  (slice 374, rows 200-300, cols 400-600, profile at col 100), Fig. 12 v4/plot_circ_zoomedin.py (z 105, rows
+  115-280, cols 45-160), Fig. 13 v2_code/plot_circ_zoomedin.py (index 136 on axis 1, rows 80-320, cols 40-140).
+  The regenerated panels match the paper panels (Figs. 3 and 13 pixel for pixel; Fig. 4 differs only by the PET data).
+  The paper itself was not changed.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
