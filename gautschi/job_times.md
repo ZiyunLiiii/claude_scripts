@@ -219,5 +219,14 @@ gpuA100x4-interactive, 40 min limit), 23600768 phantom (4 H200 on gpuH200x8, 2 h
 downsample 4 and every 4th view), and the three runs were released at 10:01 CST.  The sim job 23600770 completed
 on 2026-11-06 in 7 min 17 s on gpua028 (A100; two_rods 256^3: simulation 51 s, MBIR 29 s including the jax
 compilation, IPMR 145 s; six_rods: simulation 55 s, MBIR 19 s, IPMR 111 s; jax peak 1.3 GiB).  The phantom and
-board jobs were still pending on gpuH200x8 (reason Priority) 38 h after submission.  Fill in their actual times
-when they finish.
+board jobs were still pending on gpuH200x8 (reason Priority) 38 h after submission, and Ziyun had them cancelled
+on 2026-11-08.
+
+Back on Gautschi (submitted 2026-11-08, 00:31 EST), with half the views at full detector resolution and the
+warm-up added to the scripts; both waited at first behind three running and two pending 1-GPU jobs of another
+member (AssocGrpGRES):
+
+| Job | Size | Resources | Estimate | Limit given | Actual |
+|---|---|---|---|---|---|
+| 17958015 sim | two_rods and six_rods, 256^3, 360 views: warm-up, FDK, MBIR, IPMR | 1 H100 (ai, -n14) | about 8 min | 20 min | |
+| 17958016 real | phantom then board, 900 views, full detector: warm-up, FDK, MBIR, IPMR, 3 volumes each | 3 H100 (ai, -n42) | about 2 h 25 min | 3 h 45 | |
