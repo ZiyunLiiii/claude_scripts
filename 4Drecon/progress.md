@@ -127,6 +127,13 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   above and below the metal, dark wedges at its sides) while LI is clean; on the board LI blacks out the plastic
   between the metal parts, NMAR leaves blocky gray patches there, and NMAR with the bone class looks like FDK
   without the streaks.
+- 2026-11-08: Ziyun wants NMAR (not LI or LN) added to the paper's comparisons; the code keeps LI and LN.  The simulation
+  and board NMAR volumes were copied to IPMR_paper/Revision_data/nmar_baseline/ (two_rods fdk.npy and gdt.npy would not
+  read from Delta's NVMe; the paper folder has both).  Comparison figures GT/FDK/MBIR/NMAR/IPMR on slice 128:
+  nmar_baseline/<phantom>/comparison_<phantom>_z128.png (scripts/plot_simulation_comparison.py).  Shape check against
+  data_for_MAR_paper: both simulations match (use six_rods_pet_rerun for the multi-metal row); the NSI NMAR run
+  matches the paper FDK to 1e-4 but nmar.npy (1.8 GB) is still only on Delta; the board NMAR is 364x364x251 against
+  the paper's 363x363x251, a half-voxel grid shift, so it needs a rerun on the paper grid (Ziyun: not now).
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
