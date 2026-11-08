@@ -216,5 +216,8 @@ dependents 23584467-69 were cancelled.  Resubmitted 2026-11-06, 08:50 CST: 23600
 gpuA100x4-interactive, 40 min limit), 23600768 phantom (4 H200 on gpuH200x8, 2 h 30, estimate about 1.5 h) and
 23600769 board (4 H200, 3 h 30, estimate about 2.3 h), both afterok of the smoke, 23600770 sim (1 A100, gpuA100x4,
 50 min).  The smoke job completed on 2026-11-06 in 10 min 58 s on gpua001 (A100 40 GB; both datasets at
-downsample 4 and every 4th view), and the three runs were released at 10:01 CST.  Fill in their actual times
+downsample 4 and every 4th view), and the three runs were released at 10:01 CST.  The sim job 23600770 completed
+on 2026-11-06 in 7 min 17 s on gpua028 (A100; two_rods 256^3: simulation 51 s, MBIR 29 s including the jax
+compilation, IPMR 145 s; six_rods: simulation 55 s, MBIR 19 s, IPMR 111 s; jax peak 1.3 GiB).  The phantom and
+board jobs were still pending on gpuH200x8 (reason Priority) 38 h after submission.  Fill in their actual times
 when they finish.
