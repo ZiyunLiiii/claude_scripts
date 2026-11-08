@@ -235,4 +235,5 @@ The same runs were also submitted on Delta (2026-11-07, 23:45 CST, at Ziyun's re
 first), each on gpuH200x8 with priority 1267 at submission: 23657258 sim (1 H200, 20 min, out/sim_h200),
 23657259 phantom (4 H200, 48 cpus, 300G, 1 h 20, estimate 50 min, out/real/phantom), 23657260 board (4 H200,
 1 h 45, estimate 1 h 5 min, out/real/board).  Once one cluster has delivered a dataset, cancel its pending copy on
-the other.
+the other.  Ziyun had the Delta sim job 23657258 cancelled on 2026-11-08 before it started: the simulation times
+come from the Gautschi rerun 17958015 (H100), even if the measured scans come from Delta (H200).
