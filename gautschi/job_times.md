@@ -229,6 +229,7 @@ member (AssocGrpGRES):
 | Job | Size | Resources | Estimate | Limit given | Actual |
 |---|---|---|---|---|---|
 | 17958015 sim | two_rods and six_rods, 256^3, 360 views: warm-up, FDK, MBIR, IPMR | 1 H100 (ai, -n14) | about 8 min | 20 min | 6 min 41 s (h007, started 01:23 EST after 52 min in the queue) |
+| 17962638 sim | the same with standard MBIR by split_sino_recon, into sim_split/ | 1 H100 (ai, -n14) | about 8 min | 20 min | |
 | 17958016 real | phantom then board, 900 views, full detector: warm-up, FDK, MBIR, IPMR, 3 volumes each | 3 H100 (ai, -n42) | about 2 h 25 min | 3 h 45 | |
 
 The same runs were also submitted on Delta (2026-11-07, 23:45 CST, at Ziyun's request, as a second chance to run
