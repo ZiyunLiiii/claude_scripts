@@ -42,6 +42,20 @@
 
 ## Log
 
+### 2026-11-06 to 2026-11-09 (IPMR revision: Reviewer 1 minor issues 1 and 6)
+- Minor issue 1: main.tex before Eq. (10) now says 5-component and gives the general count binom(n+K, K) - 1, both in
+  red; the response is in revision-v1/response_letter.tex.  Ziyun made the W -> D change (minor issue 3) and the
+  GDT -> GT change (minor issue 4) in the same way.
+- Minor issue 6 (Fig. 6(e) has no reference curve): the profile line crosses plastic only, so the true profile is
+  constant.  Plastic level of the five saved half-resolution volumes (histogram mode over the volume, data_for_MAR_paper/demo):
+  0.0198 to 0.0199 /mm in all five, and the no-metal MBIR median is within 0.5% of the metal-scan recons.  New panel
+  with the metal-free plastic value as a dashed reference (mean 0.01990, std 0.00029 /mm over a 100 x 70 block of
+  slice 374): Revision_codes/plot_demo_cross_section.py -> Revision_figures/demo_cross_section_plot.{pdf,png}; the
+  Overleaf figure is untouched until Ziyun approves.  Along the line IPMR stays between 0.0097 (voxel 36) and 0.031
+  (voxel 62) with a plateau of 0.023, FDK falls to -0.060, and MBIR to 0.  The no-metal scan is rotated about the
+  vertical axis by roughly 10 to 20 degrees relative to the metal scan, and its insert cavities are air, so a no-metal
+  profile along the same line would need a 3D rigid registration (not done).
+
 ### 2026-11-05 (NMAR baseline on Gautschi: one job per dataset of the IPMR paper)
 Ziyun asked for NMAR on the four datasets of the paper (two_rods, six_rods, the NSI plastic metal phantom, and the
 RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the results saved in an organized way.
