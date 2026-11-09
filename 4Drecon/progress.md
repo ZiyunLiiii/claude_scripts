@@ -162,6 +162,12 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   read through `ssh delta "ssh dt-login01 cat <file>"`.  All NMAR+MBIR results are now on the Mac:
   nsi_phantom/nmar_mbir.npy (748x748x804), circuit_board/nmar_mbir.npy and nmar_bone_mbir.npy (364x364x251), plus
   settings_mbir.json and slices_mbir.png in each folder; the three volumes match the Delta MD5 sums.
+- 2026-11-09: NMAR+MBIR panels added to the revised Figs. 3, 4, 5, 6, 12, 13 (after NMAR; the board uses
+  nmar_bone_mbir cropped to 363).  The same Revision_codes scripts now also write nmar_mbir*.pdf into each figure
+  folder; Fig. 6 also writes demo_zoomed_rois_1x6_with_nmar_mbir.pdf and demo_cross_section_plot_with_nmar_mbir.pdf
+  (NMAR+MBIR in tab:brown).  The NMAR-only panels were rerendered pixel for pixel identical.  make_previews.py writes
+  previews/<fig>.png (NMAR set) and previews/<fig>_with_nmar_mbir.png.  ROI stats of NMAR+MBIR: two rods mean
+  0.021365, var 4.8e-10; six rods mean 0.035382, var 3.4e-5 (NMAR: 0.021364 / 3.4e-10, 0.035383 / 2.8e-5).
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
