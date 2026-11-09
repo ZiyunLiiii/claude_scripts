@@ -147,6 +147,12 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   115-280, cols 45-160), Fig. 13 v2_code/plot_circ_zoomedin.py (index 136 on axis 1, rows 80-320, cols 40-140).
   The regenerated panels match the paper panels (Figs. 3 and 13 pixel for pixel; Fig. 4 differs only by the PET data).
   The paper itself was not changed.
+- 2026-11-08: NMAR with a final MBIR reconstruction (15 iterations max) on the two real scans, submitted on Delta.
+  The simulations already had nmar_mbir.npy.  run_nsi_scan.py gained the methods nmar_mbir and nmar_bone_mbir, and
+  submit_nmar.sbatch the datasets nsi_phantom_mbir (fdk, nmar_mbir) and circuit_board_mbir (fdk, nmar_mbir,
+  nmar_bone_mbir), with the views and downsampling of the NMAR runs.  Jobs 23673962 (phantom) and 23673963 (board),
+  one A100 on gpuA100x4, 1 h 30 limit, outputs in /work/nvme/bjda/zli98/nmar_baseline/out/<dataset>/.  The code
+  changes are uncommitted in NMAR_reproduction (with the earlier circuit_board_v8 edit), and copied to Delta.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
