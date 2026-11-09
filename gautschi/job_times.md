@@ -230,11 +230,16 @@ member (AssocGrpGRES):
 |---|---|---|---|---|---|
 | 17958015 sim | two_rods and six_rods, 256^3, 360 views: warm-up, FDK, MBIR, IPMR | 1 H100 (ai, -n14) | about 8 min | 20 min | 6 min 41 s (h007, started 01:23 EST after 52 min in the queue) |
 | 17962638 sim | the same with standard MBIR by split_sino_recon, into sim_split/ | 1 H100 (ai, -n14) | about 8 min | 20 min | 8 min 1 s (h008, started 03:24 EST after 1 h 48 min in the queue) |
-| 17958016 real | phantom then board, 900 views, full detector: warm-up, FDK, MBIR, IPMR, 3 volumes each | 3 H100 (ai, -n42) | about 2 h 25 min | 3 h 45 | |
+| 17958016 real | phantom then board, 900 views, full detector: warm-up, FDK, MBIR, IPMR, 3 volumes each | 3 H100 (ai, -n42) | about 2 h 25 min | 3 h 45 | 1 h 55 min 41 s (h012, phantom 47 min, board 1 h 8 min; pending with AssocGrpGRES for 34 h, moved to the burst QOS at 10:55 EST on 2026-11-09, started 11:00) |
 
 The same runs were also submitted on Delta (2026-11-07, 23:45 CST, at Ziyun's request, as a second chance to run
 first), each on gpuH200x8 with priority 1267 at submission: 23657258 sim (1 H200, 20 min, out/sim_h200),
 23657259 phantom (4 H200, 48 cpus, 300G, 1 h 20, estimate 50 min, out/real/phantom), 23657260 board (4 H200,
 1 h 45, estimate 1 h 5 min, out/real/board).  Once one cluster has delivered a dataset, cancel its pending copy on
 the other.  Ziyun had the Delta sim job 23657258 cancelled on 2026-11-08 before it started: the simulation times
-come from the Gautschi rerun 17962638 (H100), even if the measured scans come from Delta (H200).
+come from the Gautschi rerun 17962638 (H100), even if the measured scans come from Delta (H200).  Gautschi 17958016 delivered both measured scans on 2026-11-09, so the Delta copies 23657259 and 23657260 are to be
+cancelled (they were still pending at 00:04 EST that day).
+
+The burst QOS (`scontrol update jobid=<id> qos=burst`) gets a job past the group cap of 3 H100: the reason changed
+from AssocGrpGRES to Resources at once.  It doubles the GPU-hours charged, allows 8 h at most, and allows one burst
+job per account.
