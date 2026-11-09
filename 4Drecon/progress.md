@@ -55,6 +55,15 @@
   (voxel 62) with a plateau of 0.023, FDK falls to -0.060, and MBIR to 0.  The no-metal scan is rotated about the
   vertical axis by roughly 10 to 20 degrees relative to the metal scan, and its insert cavities are air, so a no-metal
   profile along the same line would need a 3D rigid registration (not done).
+- Style of the Fig. 6(e) panel decided 2026-11-09: Ziyun chose variant A1 of Revision_codes/profile_style_trials.py
+  (single panel, thin colored lines, solid black line at the metal-free plastic value, framed legend at the upper
+  left, inset of the IPMR ROI with the red profile line, light dashed grid, single-column width 3.5 in, 8 pt).  Six
+  published profile figures and the four trials (A, A1, B, D) are in Revision_figures/style_trials/.  The old panel
+  sampled every third voxel and hid the second FDK dip (-0.060 at voxel 64; the plotted voxels 63 and 66 read -0.034
+  and -0.020); the new panels draw every voxel.  The final panel is not drawn yet: Ziyun will add NMAR (and possibly
+  other baselines) to the figure first, keeping this profile line (slice 374, ROI rows 200-300, cols 400-600,
+  column 100).  The NMAR phantom volume on the same 748 x 748 x 804 grid is on Delta only
+  (/work/nvme/bjda/zli98/nmar_baseline/out/nsi_phantom/); only its slice 374 along axis 0 is needed for the profile.
 
 ### 2026-11-05 (NMAR baseline on Gautschi: one job per dataset of the IPMR paper)
 Ziyun asked for NMAR on the four datasets of the paper (two_rods, six_rods, the NSI plastic metal phantom, and the
