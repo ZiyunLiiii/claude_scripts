@@ -153,6 +153,9 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   nmar_bone_mbir), with the views and downsampling of the NMAR runs.  Jobs 23673962 (phantom) and 23673963 (board),
   one A100 on gpuA100x4, 1 h 30 limit, outputs in /work/nvme/bjda/zli98/nmar_baseline/out/<dataset>/.  The code
   changes are uncommitted in NMAR_reproduction (with the earlier circuit_board_v8 edit), and copied to Delta.
+  The 1 h 30 limit kept both jobs out of backfill (estimated start next noon), so at Ziyun's request the phantom
+  limit was cut to 45 min and the board job was moved to gpuA100x4-interactive with 30 min (23673963 cancelled,
+  now 23675655).  Both started within a minute, at 22:55 CST on 2026-11-08.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
