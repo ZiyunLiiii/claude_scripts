@@ -156,6 +156,10 @@ RP2040 circuit board) on Gautschi, one GPU for about 15 minutes each, with the r
   The 1 h 30 limit kept both jobs out of backfill (estimated start next noon), so at Ziyun's request the phantom
   limit was cut to 45 min and the board job was moved to gpuA100x4-interactive with 30 min (23673963 cancelled,
   now 23675655).  Both started within a minute, at 22:55 CST on 2026-11-08.
+  Both COMPLETED (phantom 8 min 54 s, final MBIR 420 s; board 2 min 50 s).  Copied to Revision_data/nmar_baseline:
+  circuit_board/nmar_mbir.npy and nmar_bone_mbir.npy (364x364x251, like nmar_bone) and nsi_phantom/settings_mbir.json.
+  Still on Delta only: nsi_phantom_mbir/nmar_mbir.npy (its cat stalled at 0 bytes for 2.5 h, the NVMe stall), both
+  slices.png and the board settings.json; the ControlMaster expired at 02:40 on 11-09, so they need a new login.
 
 ### 2026-11-05 (NMAR baseline for the IPMR paper: pseudo code and implementation)
 Ziyun asked for NMAR (Meyer et al., Med. Phys. 37(10), 2010) as a baseline for the IPMR paper: first the pseudo code in
