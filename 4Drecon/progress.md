@@ -272,7 +272,15 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   `smoke` case.  Jobs on Gautschi, one H100 each, burst QOS, submitted about 15:40 EST: smoke 18231582, then
   circuit_board 18231583 (30 iterations from the start, new folder `.../1110/mbir_bhc/nsi_scans/circuit_board/`)
   and nsi_phantom 18231584 (iterations 11 to 30), both with `afterok` on the smoke job.  The phantom's iteration 10
-  is backed up in `nsi_phantom/backup_iteration_10/`.  Results pending.  At 30 iterations the simulations already
+  is backed up in `nsi_phantom/backup_iteration_10/`.  The smoke job passed in 1 min 55 s.  The board job took
+  24 min 26 s (about 45 s for each iteration on the H100, peak 11.4 GB), and its first 10 iterations repeat the
+  Delta run to every printed digit.  Board at iterations 10, 20, 30: cost 1.4498e7, 1.4101e7, 1.3869e7; cost
+  decrease in that iteration 0.46%, 0.17%, 0.12%; image change 0.66%, 0.35%, 0.27%; coefficient of `p_L p_H`
+  0.303, 0.326, 0.321 (it peaks at 0.327 near iteration 23); `p_H^2` -0.200, -0.235, -0.252; `p_L^2` -0.062,
+  -0.084, -0.101.  The label change still jumps (4 labels at iteration 20, 1232 at 21, 512 at 30).  Results file
+  on the Mac: `mbir_bhc_baseline/nsi_scans/circuit_board/gautschi_h100_30it/results.json`.  The phantom job was
+  at iteration 19 at 17:06 EST (about 407 s for each iteration).  My two background waiters failed because zsh
+  does not split a command kept in a variable, so I replaced them with one that uses a shell function.  At 30 iterations the simulations already
   have MBIR-BHC below IPMR in plastic NRMSE on both phantoms (two_rods 0.1099 vs 0.1264, six_rods 0.8323 vs 0.8833).
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
