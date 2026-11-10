@@ -106,8 +106,21 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   by the sinogram size and by the volume size, the phantom would need about 58 to 92 GB (an estimate, not measured).
   Nothing was resubmitted.  Log and results.json copied to
   /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/mbir_bhc_baseline/nsi_scans/.
-- Not done: an evaluation of the measured scans (they have no ground truth), and a way to run the phantom (an H200,
-  or less memory in the image update).
+- circuit_board job 23699794 (started 2026-11-10 01:36 CST, one A100) COMPLETED in 20 min at 470 x 470 x 253: FDK
+  13 s, MBIR 89 s (peak 4.1 GB), 10 MBIR-BHC iterations 1058 s (about 106 s each, peak 11.4 GB).  The cost falls at
+  every iteration (1.606e7 to 1.450e7).  The coefficients still move at iteration 10: (1,1) 0.086 to 0.303, (0,2)
+  -0.057 to -0.200, (2,0) -0.016 to -0.062.  Image change per iteration 1.54% to 0.66%; 46,876 high density voxels.
+  New scripts `experiments/nsi_scans/extract_slices.py` (two slices per volume, memory maps, runs on a login node)
+  and `plot_slices.py` (nmar env).  Figures `slices.png` and `slices_zoom.png` in
+  /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/mbir_bhc_baseline/nsi_scans/circuit_board/ (with
+  results.json and slices.npz; the volumes fdk, mbir, bhc_10, mask_10 stay on Delta in
+  /work/nvme/bjda/zli98/mbir_bhc/out/nsi_scans/circuit_board/).  In the axial slice with the most metal (83) the
+  bright streaks next to the metal parts are weaker than in MBIR; over the low density voxels with material
+  (MBIR above 0.01 1/mm, median 0.017) the RMS change from MBIR is 0.0031 1/mm, and the mean of the high density
+  voxels rises from 0.136 to 0.143.  No comparison with the IPMR image of the board was made.
+  `experiments/nsi_scans/README.md` holds both scan results.
+- Not done: an evaluation of the measured scans (they have no ground truth), a comparison of the board with IPMR,
+  and a way to run the phantom (an H200, or less memory in the image update).
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
