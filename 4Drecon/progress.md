@@ -232,6 +232,15 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   `experiments/nsi_scans/plot_convergence.py` draws `convergence.png` in
   `IPMR_paper/mbir_bhc_baseline/nsi_scans/`.  Ziyun said "Yes, commit": the script and two README lines are commit
   63390d4, pushed.
+- Longer runs (2026-11-10 afternoon): Ziyun wants both measured scans rerun because 10 iterations are not enough.
+  I suggested 30 in total, with the volumes kept at 10, 20 and 30, and they said "ok, submit those jobs with burst
+  mode".  Runner changes in `run_nsi_scan.py` (not committed): a call with a larger `--num_outer` continues a run,
+  and `--keep_every` (default 10) keeps the volumes of every 10th iteration.  The Gautschi job script has a new
+  `smoke` case.  Jobs on Gautschi, one H100 each, burst QOS, submitted about 15:40 EST: smoke 18231582, then
+  circuit_board 18231583 (30 iterations from the start, new folder `.../1110/mbir_bhc/nsi_scans/circuit_board/`)
+  and nsi_phantom 18231584 (iterations 11 to 30), both with `afterok` on the smoke job.  The phantom's iteration 10
+  is backed up in `nsi_phantom/backup_iteration_10/`.  Results pending.  At 30 iterations the simulations already
+  have MBIR-BHC below IPMR in plastic NRMSE on both phantoms (two_rods 0.1099 vs 0.1264, six_rods 0.8323 vs 0.8833).
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 

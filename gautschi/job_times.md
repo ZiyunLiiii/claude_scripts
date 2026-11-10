@@ -287,3 +287,15 @@ a few minutes of submission.
 
 The same run on a Delta H200 took 318 to 354 s per iteration.  The time of one MBIR-BHC iteration follows
 voxels x views: 24 s at 256^3 with 360 views and 106 s at 470 x 470 x 253 with 450 views, both on an A100.
+
+### 30 iterations on both measured scans (submitted 2026-11-10, about 15:40 EST)
+
+Neither scan had converged at 10 iterations, so Ziyun asked for longer runs.  All three jobs use one H100 on ai with
+the burst QOS.  `sacctmgr show qos burst` gives MaxJobsPA = 1 and no submit limit, so several burst jobs can wait and
+one runs at a time.  The two long jobs depend on the smoke job with `--dependency=afterok`.
+
+| Job | Size | Resources | Estimate | Limit given | Actual |
+|---|---|---|---|---|---|
+| 18231582 smoke_nsi | circuit board at downsample 8, every 8th view: 2 MBIR-BHC iterations, then a second call that continues to 5 | 1 H100 (ai, -n14, burst) | about 5 min | 15 min | pending |
+| 18231583 circuit_board | circuit board at downsample 4, every 4th view (470 x 470 x 253, 450 views): FDK, MBIR, 30 MBIR-BHC iterations | 1 H100 (ai, -n14, burst) | about 30 min (106 s per iteration on an A100, H100 taken as 2.1 x faster) | 50 min | pending |
+| 18231584 nsi_phantom | NSI phantom (748 x 748 x 803, 450 views): MBIR-BHC iterations 11 to 30 from the saved iteration 10 | 1 H100 (ai, -n14, burst) | about 2 h 15 min (400 s per iteration) | 3 h 30 | pending |
