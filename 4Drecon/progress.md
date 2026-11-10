@@ -74,8 +74,13 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   main.tex, ref.bib, and the response letter are unchanged.  The text is black, not red.
 - data_for_MAR_paper/demo/recon_demo_mbir.npy on the Mac is an iCloud placeholder (dataless), so a script that
   reads it stalls.  The NSI slice figure reads the two slices from results/nsi/paper_slices.npz instead.
-- Later the same day Ziyun had the two volume error rows removed from Fig. S1.  It now shows the plastic NRMSE and
-  SSIM only (plot_curves.py sim), and the volume errors of the simulation stay in Table S2.
+- Later the same day Ziyun had the two volume error rows removed from Fig. S1, and then the metal mean error and
+  the two volume error columns removed from Table S2.  Ziyun's reason: the paper uses NRMSE and SSIM, and new error
+  metrics would raise new questions.  (In the simulation the plastic volume error of IPMR, +0.33%, is above that of
+  MBIR, +0.17%, and FDK, +0.11%, a difference of about a tenth of a voxel of boundary position.)  Fig. S1 now shows the
+  plastic NRMSE and SSIM, and Table S2 the mask changes, the fitted functions, NRMSE, SSIM, and the interior std.  The
+  two sentences of the supplement that cited the removed numbers are edited.  The numbers stay in
+  results/sim/extra_metrics.json and the README.  The NSI figure and table are unchanged.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
