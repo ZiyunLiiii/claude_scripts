@@ -266,3 +266,17 @@ within one minute.
 
 The NSI estimate of 22 min per run comes from the A100 runs of the NMAR baseline (MBIR of this grid in 420 s), not
 from an H100 run.  Fill in the actual times, and correct the estimate, when the jobs finish.
+
+## MBIR-BHC baseline on the NSI phantom (submitted 2026-11-10)
+
+Code in `~/PycharmProjects/scripts/2026/1110/mbir_bhc/` (see `experiments/nsi_scans/README.md` of the
+MBIR-BHC_reproduction repository on the Mac), env `/home/li5273/.conda/envs/mbirtorch`.  The group's three normal
+slots were taken, so the job used the burst QOS.  It waited for a free H100 (reason Resources) and started within
+a few minutes of submission.
+
+| Job | Size | Resources | Estimate | Limit given | Actual |
+|---|---|---|---|---|---|
+| 18214401 nsi_phantom | NSI phantom at downsample 2, every 4th view (748 x 748 x 803, 450 views): FDK, MBIR, 10 MBIR-BHC iterations of 20 gradient steps | 1 H100 (ai, -n14, burst) | 1 h to 2 h 30 | 3 h | 1 h 9 min 11 s (h015; FDK 15 s, mbirtorch MBIR 137 s, 365 to 409 s per MBIR-BHC iteration, peak 51.0 GB of 80 GB) |
+
+The same run on a Delta H200 took 318 to 354 s per iteration.  The time of one MBIR-BHC iteration follows
+voxels x views: 24 s at 256^3 with 360 views and 106 s at 470 x 470 x 253 with 450 views, both on an A100.

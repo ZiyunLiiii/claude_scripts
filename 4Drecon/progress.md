@@ -148,8 +148,21 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   board 1733 x 1733 x 953), scaled from these runs: about 400 GB (phantom) and 330 to 580 GB (board) on one GPU, and
   about 1 h 40 and 1 h 25 per iteration on one H100 (time follows voxels x views).  The present code runs on one GPU,
   so neither fits.
-- Not done: an evaluation of the measured scans (they have no ground truth), a comparison of the board with IPMR,
-  and the end of the Gautschi phantom job 18214401.
+- Gautschi 18214401 COMPLETED at 12:16 EST after 1 h 9 min (h015, one H100): all 10 iterations, 3945 s in total
+  (365 to 409 s each), peak 51.0 GB.  Cost 1.117e8 after iteration 1 and 4.686e7 after iteration 10; coefficients
+  (1,1) 0.183 to 0.446, (0,2) -0.059 to -0.124, (2,0) -0.031 to -0.064; image change 7.02% to 0.71%; 1,600,229 high
+  density voxels.  The Delta H200 run agrees to four digits at every shared iteration.  Volumes (fdk, mbir, bhc_10,
+  mask_10, slices.npz) in ~/Desktop/data/output/2026/1110/mbir_bhc/nsi_scans/nsi_phantom/ on Gautschi (scratch);
+  results.json, slices.npz, slices.png and slices_zoom.png in
+  .../mbir_bhc_baseline/nsi_scans/nsi_phantom/gautschi_h100/ on the Mac.  What the slices show (axial 262, row 366):
+  the bright plastic above and below the largest metal insert is gone and the dark bands from its two ends are
+  mostly filled; the metal edges are sharper; a new speckled texture appears in the plastic next to the two ends
+  of the insert.  Standard deviation of the plastic voxels (low density, MBIR above 0.01 1/mm; a rough selection):
+  axial slice FDK 0.0189, MBIR 0.0147, MBIR-BHC 0.0083 (44% below MBIR); row slice 0.0088, 0.0070, 0.0037 (47%
+  below MBIR).  `experiments/nsi_scans/README.md` holds the three phantom runs.
+- Not done: an evaluation of the measured scans (they have no ground truth), and a comparison of the board and the
+  phantom with IPMR (the paper's IPMR volume of the phantom at 748 x 748 x 804 is on Gautschi in
+  ~/Desktop/data/output/2026/0319/demo/).
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
