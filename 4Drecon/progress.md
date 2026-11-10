@@ -225,6 +225,12 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
 - Ziyun said "Yes, commit": the MBIR-BHC_reproduction repo got its first commit 4c109dd on main (39 files; the 20
   tests pass) and was pushed to github.com/ZiyunLiiii/MBIR-BHC_reproduction.  The copies of the code on Delta and
   Gautschi hold the same files except the two comparison scripts on Delta.
+- Convergence (Ziyun asked 2026-11-10): neither measured scan has converged after 10 iterations.  On the phantom
+  the tenth iteration lowers the cost by 0.94%, changes the image by 0.71%, and changes 264 labels (0.016% of the
+  high density voxels, up from 0.0014% at iteration 4).  On the board it lowers the cost by 0.46% and changes the
+  image by 0.66%, and the label change jumps between 0.03% and 2.4%.  New script
+  `experiments/nsi_scans/plot_convergence.py` (not committed) draws `convergence.png` in
+  `IPMR_paper/mbir_bhc_baseline/nsi_scans/`.  The README of that experiment has two new lines (not committed).
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 
