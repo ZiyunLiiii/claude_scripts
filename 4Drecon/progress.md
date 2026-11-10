@@ -91,19 +91,32 @@ set and the run with the FDK masks kept are not part of it.
 - Mask update: the change in cost for one voxel that changes its label is exact and uses 2 x order back projections
   with powers of the projector coefficients (`coeff_power` 1 to 4 for order 2).  The voxels change in two checkerboard
   groups with a check of the cost.  A version that visits one voxel at a time, as in the paper, exists for small images.
-- Tests: 16 pass in 6 s on the Mac CPU (32 x 32 parallel beam phantom whose sinogram follows the polynomial model).
-- Small phantom results (`experiments/small_phantom/run_small_phantom.py`, default settings, MBIR initial image):
-  RMS error in the plastic 0.0056 for MBIR, 0.0038 after 8 x 20 steps, 0.0014 after 150 x 20 steps (75% lower).
-  The coefficients do not return to the generating values (-0.05, -0.10, -0.20): they are (-0.159, 0.676, -0.280)
-  after 150 iterations, and the cost reached (114.2) is below the cost of the true phantom (160.5).  The prior lowers
-  the metal value (0.154 to 0.144, true 0.2), and the coefficients compensate.
-- Gradient descent is slow: the cost still decreases after 3000 steps.  With snr_db = 45 the cost after 150 iterations
-  (644.9) is far above the cost of the true phantom, and 30 mask labels differ from the truth.  With gamma fixed,
-  600 plain steps reach cost 206.2, and a trial with momentum reaches 202.5 in 195 steps.  Momentum is in the script
-  only.
+- Momentum (added the same day on Ziyun's yes): `update_image(..., momentum=True)` is the default, FISTA with a
+  return to plain steps when a step does not decrease the cost.  The projections are linear in the image for a fixed
+  mask, so the gradient at the extrapolated point comes from the graph of the current image, and a step with momentum
+  costs the same as a plain step (2 forward and 2 back projections).  `momentum=False` gives plain steps.
+- Tests: 20 pass in 12 s on the Mac CPU (32 x 32 parallel beam phantom whose sinogram follows the polynomial model).
+- Small phantom results (`experiments/small_phantom/run_small_phantom.py`, default settings, MBIR initial image,
+  generating coefficients (-0.05, -0.10, -0.20), true metal value 0.2, cost of the true phantom 160.5):
+  - MBIR: RMS error in the plastic 0.0056, metal mean 0.154.
+  - Plain steps: 8 x 20 gives cost 150.3 and plastic error 0.0038; 150 x 20 gives 114.2 and 0.0014, gamma
+    (-0.159, 0.676, -0.280), metal mean 0.144.
+  - Momentum: 8 x 20 gives 130.9 and 0.0025; 150 x 20 gives 110.9 and 0.0018, gamma (-0.192, 0.763, -0.289), metal
+    mean 0.139.  The lower cost comes with the higher plastic error.
+  - With gamma fixed, momentum reaches the minimum of the image update (202.5) in 199 steps, and 600 plain steps
+    reach 206.2.
+- The minimum of the cost is not at the truth on this phantom.  The trial `--refit_every_step` (in the script only)
+  refits gamma before every gradient step, so the momentum acts on x and gamma together.  It reaches cost 110.0 in
+  160 steps and 81.6 in 3000 steps.  The metal mean falls to 0.102 (the threshold is 0.1), gamma (1,1) grows to 1.88,
+  and the plastic error goes 0.0014, 0.0028, 0.0036, 0.0019, 0.0011.  Interpretation: p_L is nearly the same for all
+  rays through the metal, so the term p_L p_H acts as a second linear term in p_H, and the data do not fix the metal
+  value.  The prior lowers it, and the threshold penalty stops it.  The reconstruction therefore depends on the number
+  of iterations.  Whether this happens on the paper's phantoms and the IPMR datasets is not known.
+- With snr_db = 45 and plain steps, the cost after 150 iterations (644.9) is far above the cost of the true phantom,
+  and 30 mask labels differ from the truth.
 - Not done: the 2D parallel beam check against the paper (target coefficients 0.00945 and -0.03231 for the
-  multi-material phantom, pre-corrected data), values of beta and eta, any run on the IPMR datasets, memory and time
-  on cone beam data.
+  multi-material phantom, pre-corrected data), values of beta and eta, a rule for the number of iterations, any run
+  on the IPMR datasets, memory and time on cone beam data.
 
 ### 2026-11-09 (IPMR revision: plan for Reviewer 3 comment 1, the segmentation perturbation test)
 Ziyun asked for a plan to address Reviewer 3 comment 1 (revision-v1/response_letter.tex).  The reviewer asks for
