@@ -243,3 +243,26 @@ cancelled (they were still pending at 00:04 EST that day).
 The burst QOS (`scontrol update jobid=<id> qos=burst`) gets a job past the group cap of 3 H100: the reason changed
 from AssocGrpGRES to Resources at once.  It doubles the GPU-hours charged, allows 8 h at most, and allows one burst
 job per account.
+
+## IPMR segmentation robustness test (submitted 2026-11-09)
+
+Scripts in `~/PycharmProjects/scripts/2026/1109/ipmr_segmentation/` (see IPMR_paper/segmentation_robustness/README.md on
+the Mac), venv `~/venvs/nmar` (mbirjax 0.6.15).  Each run is one IPMR reconstruction (3 iterations) with a changed
+segmentation.  At submission the group's three H100 were taken by another member's jobs with 3 h 30 limits, and two
+older jobs of the group were pending, so the normal jobs wait.  The smoke job ran on the burst QOS and started
+within one minute.
+
+| Job | Size | Resources | Estimate | Limit given | Actual |
+|---|---|---|---|---|---|
+| 18174842 smoke | two_rods 256^3: 9 runs of 1 IPMR iteration; NSI phantom at downsample 8, every 8th view: 8 runs of 1 iteration | 1 H100 (ai, -n14, burst) | about 13 min | 25 min | 10 min 14 s (h005; simulation part 343 s at about 32 s per run, NSI part 257 s at about 26 s per run) |
+| 18175212 sim ref | two_rods 256^3, 2 IPMR runs | 1 H100 (ai, -n14) | about 6.5 min | 15 min | |
+| 18175213 sim morph | 12 IPMR runs | 1 H100 | about 32 min | 55 min | |
+| 18175214 sim method | 2 IPMR runs | 1 H100 | about 6.5 min | 15 min | |
+| 18175215 sim threshold | 12 IPMR runs | 1 H100 | about 32 min | 55 min | |
+| 18175216 nsi ref | NSI phantom at downsample 2, every 4th view (748 x 748 x 804, 450 views), 1 IPMR run | 1 H100 | about 24 min | 45 min | |
+| 18175217 nsi morph | 6 IPMR runs, after 18175216 | 1 H100 | about 2 h 15 | 3 h 30 | |
+| 18175218 nsi method | 2 IPMR runs, after 18175216 | 1 H100 | about 46 min | 1 h 15 | |
+| 18175219 nsi threshold | 6 IPMR runs, after 18175216 | 1 H100 | about 2 h 15 | 3 h 30 | |
+
+The NSI estimate of 22 min per run comes from the A100 runs of the NMAR baseline (MBIR of this grid in 420 s), not
+from an H100 run.  Fill in the actual times, and correct the estimate, when the jobs finish.

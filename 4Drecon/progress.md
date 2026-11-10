@@ -42,6 +42,40 @@
 
 ## Log
 
+### 2026-11-09 night (IPMR revision: Reviewer 3 comment 1, scripts written and jobs submitted on Gautschi)
+Ziyun narrowed the plan of the entry below to three tests on two datasets, and asked for the scripts and for jobs on
+Gautschi with one GPU per reconstruction.  The datasets are the single-metal simulation (two_rods) and the NSI phantom
+at the downsampling of the paper's figures (detector downsampling 2, every 4th view, 748 x 748 x 804).  The six_rods
+set and the run with the FDK masks kept are not part of it.
+- Folder: IPMR_paper/segmentation_robustness/ (README.md, scripts/).  `seg_perturb.py` holds the segmentations and a
+  `Segmenter` that replaces `mjp.segment_plastic_metal` for one run.  `run_seg.py` runs one test on one dataset and
+  records the metrics, the thresholds, the mask sizes, theta, and slices after every iteration.  `test_seg_perturb.py`
+  has 8 tests on a synthetic volume (pass on the Mac).  Everything uses mbirjax 0.6.15 (`~/venvs/nmar` on Gautschi).
+- Test 1 (morph): the metal regions, or the boundary between the object and air, moved by -3 to +3 voxels (simulation)
+  and by -2 to +2 voxels (NSI) with a ball.  The boundaries move in the labels of the whole reconstruction and the
+  cylindrical mask is applied afterwards.  Otherwise a rod that the mask cuts would lose slices at the cut.
+- Test 2 (method): ISO-50 thresholds (midpoint between the histogram peaks of two classes) and a watershed of the
+  gradient magnitude for the voxels within 0.25 of the class gap of an Otsu threshold.  k-means was left out because
+  it has the objective of multi-threshold Otsu.  A Gaussian mixture was tried on the synthetic volume and dropped: its
+  plastic component is narrow (thresholds 0.0184 and 0.0222 for plastic at 0.02), so it labels plastic with small
+  artifacts as metal or air.
+- Test 3 (threshold): the plastic/metal threshold or the air/plastic threshold moved by +/-0.05, 0.1, 0.2 of the gap
+  between the two class means (NSI: +/-0.1 and 0.2 for plastic/metal, +/-0.2 for air/plastic).
+- Reference runs: default Otsu, and for the simulation the true masks.  28 simulation runs and 15 NSI runs in all.
+- NSI settings: Table II (order 3, beta 0.002, alpha 1, gamma 0.1, 3 iterations).  The paper's image file is named
+  beta0, so the default run of this study is its own reference, not the paper's volume.
+- Smoke job 18174842 (burst QOS, started in under a minute): completed in 10 min 14 s with every kind of segmentation
+  on both datasets.  The default run gives NRMSE 0.1371 after one iteration, the value of the sensitivity study.  On
+  the FDK image the Otsu metal mask has 2.1% more voxels than the true mask (Dice 0.990).
+- Jobs (normal QOS, one H100 each, submitted 22:05 EST): 18175212 sim ref, 18175213 sim morph, 18175214 sim method,
+  18175215 sim threshold, 18175216 nsi ref, and 18175217 nsi morph, 18175218 nsi method, 18175219 nsi threshold, which
+  start after 18175216 succeeds.  Outputs: ~/Desktop/data/output/2026/1109/ipmr_segmentation/<sim|nsi>/<test>/.  At
+  submission the group's three H100 were taken by another member's jobs (3 h 30 limits), with two older jobs pending,
+  so these jobs wait.  The burst QOS would run them at once, at twice the charge and one burst job at a time, and the
+  group's nightly burst job starts at 03:00.
+- Next: when the jobs finish, copy metrics.json, settings.json and slices.npz to segmentation_robustness/results/,
+  fill the actual times into gautschi/job_times.md, make the figure, and write the subsection and the response.
+
 ### 2026-11-09 (MBIR-BHC baseline for the IPMR revision: first implementation)
 - Purpose: MBIR-BHC (Jin, Bouman, Sauer, IEEE TCI 2015) as a second comparison method for the IPMR revision.  Charlie's
   direction: minimize the paper's cost over the image x, the mask b, and the coefficients gamma, with a closed form fit
