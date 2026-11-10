@@ -120,6 +120,13 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   and the air/plastic threshold shift already tests the plastic mask.  The object mask rows are out of Fig. S1, S2,
   S4, Table S1, Table S2, and the text.  The runs stay in the results.  The supplement now has two sweeps of masks
   and thresholds per dataset plus the methods: metal mask offset, plastic/metal threshold, air/plastic threshold.
+- Fig. S2, air/plastic threshold row: the red metal mask line is removed from this row (Ziyun's request), because
+  this threshold does not act on the metal mask.  The caption says so, and adds that the threshold moves the outer
+  plastic boundary, which is outside the view, by less than one voxel.  A preview of the row as the full slice with
+  the plastic mask in blue was made first, and the row keeps the view around the rods.  In the preview the outer
+  radius goes from 100.7 to 100.0 voxels (default 100.2), so the six panels look the same, and the rods become
+  small.  The blue line also showed 12 to 27 voxels next to the rods that carry the air label (12 in the default
+  run, none when the threshold is lowered).
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
