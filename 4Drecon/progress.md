@@ -87,6 +87,13 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   changes, datasets, metrics, results for the simulation, results for the NSI phantom, summary and limitations).
   \FloatBarrier (package placeins) keeps the floats of each part inside it, and a commented template for the next
   topic is at the end of the file.  It compiles to 12 pages with no warning.
+- Ziyun then made the NSI part a qualitative test on scanned data.  Fig. S4 (NSI curves) and Fig. S6 (NSI fitted
+  functions, where G_p grows with the metal projection) are out of the supplement, and so are the NSI table and the
+  NSI numbers in the text.  The NSI slice figure is now Fig. S4, with the window of Fig. 6 of the paper (0 to 0.08
+  /mm) and no numbers in its titles.  In that window FDK and MBIR show dark bands next to the metal, IPMR removes
+  them, and only the runs with the metal shrunk by 1 or 2 voxels differ visibly (dark lines along the metal boundary,
+  brighter plastic next to it).  The interior std column also left Table S2.  The supplement is 8 pages.  The removed
+  figures and the NSI table stay in segmentation_robustness/figures and tables, and the README lists what is shown.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
