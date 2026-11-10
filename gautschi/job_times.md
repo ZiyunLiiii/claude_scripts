@@ -255,17 +255,24 @@ within one minute.
 | Job | Size | Resources | Estimate | Limit given | Actual |
 |---|---|---|---|---|---|
 | 18174842 smoke | two_rods 256^3: 9 runs of 1 IPMR iteration; NSI phantom at downsample 8, every 8th view: 8 runs of 1 iteration | 1 H100 (ai, -n14, burst) | about 13 min | 25 min | 10 min 14 s (h005; simulation part 343 s at about 32 s per run, NSI part 257 s at about 26 s per run) |
-| 18175212 sim ref | two_rods 256^3, 2 IPMR runs | 1 H100 (ai, -n14) | about 6.5 min | 15 min | |
-| 18175213 sim morph | 12 IPMR runs | 1 H100 | about 32 min | 55 min | |
-| 18175214 sim method | 2 IPMR runs | 1 H100 | about 6.5 min | 15 min | |
-| 18175215 sim threshold | 12 IPMR runs | 1 H100 | about 32 min | 55 min | |
-| 18175216 nsi ref | NSI phantom at downsample 2, every 4th view (748 x 748 x 804, 450 views), 1 IPMR run | 1 H100 | about 24 min | 45 min | |
-| 18175217 nsi morph | 6 IPMR runs, after 18175216 | 1 H100 | about 2 h 15 | 3 h 30 | |
-| 18175218 nsi method | 2 IPMR runs, after 18175216 | 1 H100 | about 46 min | 1 h 15 | |
-| 18175219 nsi threshold | 6 IPMR runs, after 18175216 | 1 H100 | about 2 h 15 | 3 h 30 | |
+| 18175212 sim ref | two_rods 256^3, 2 IPMR runs | 1 H100 (ai, -n14) | about 6.5 min | 15 min | 3 min 34 s (h017, started 00:12 EST on 2026-11-10 after 2 h 7 min in the queue) |
+| 18175213 sim morph | 12 IPMR runs | 1 H100 | about 32 min | 55 min | 20 min 20 s (h005) |
+| 18175214 sim method | 2 IPMR runs | 1 H100 | about 6.5 min | 15 min | 3 min 51 s (h012) |
+| 18175215 sim threshold | 12 IPMR runs | 1 H100 | about 32 min | 55 min | 17 min 25 s (h012) |
+| 18175216 nsi ref | NSI phantom at downsample 2, every 4th view (748 x 748 x 804, 450 views), 1 IPMR run | 1 H100 | about 24 min | 45 min | 10 min 26 s (h005; data ready in 19 s, IPMR 587 s) |
+| 18175217 nsi morph | 6 IPMR runs, after 18175216 | 1 H100 | about 2 h 15 | 3 h 30 | 59 min 12 s (h012; runs of 493 to 646 s) |
+| 18175218 nsi method | 2 IPMR runs, after 18175216 | 1 H100 | about 46 min | 1 h 15 | 22 min 10 s (h009; ISO-50 577 s, watershed 682 s) |
+| 18175219 nsi threshold | 6 IPMR runs, after 18175216 | 1 H100 | about 2 h 15 | 3 h 30 | 56 min 37 s (h009; runs of 508 to 566 s) |
 
-The NSI estimate of 22 min per run comes from the A100 runs of the NMAR baseline (MBIR of this grid in 420 s), not
-from an H100 run.  Fill in the actual times, and correct the estimate, when the jobs finish.
+The NSI estimate of 22 min per run came from the A100 runs of the NMAR baseline (MBIR of this grid in 420 s), and it
+was more than twice the need.  Measured on an H100 with mbirjax 0.6.15: an IPMR run (3 iterations) of the NSI phantom
+at 748 x 748 x 804 with 450 views takes about 9.5 min (8 to 11.5 min), and an IPMR run of two_rods at 256^3 with its
+metrics takes about 1.5 min.  Plan with these numbers.  All eight jobs waited about 2 h behind the group's GPU cap and
+then ran between 00:12 and 02:55 EST.
+
+Analysis of the saved volumes on a login node (2026-11-10): the login nodes allow 10 GB of memory per user (cgroup
+memory.max), and a process above it is killed without a message in its own output.  `analyze_volumes.py` reads the 18
+NSI volumes of 1.8 GB one at a time and takes about 2 min.
 
 ## MBIR-BHC baseline on the NSI phantom (submitted 2026-11-10)
 

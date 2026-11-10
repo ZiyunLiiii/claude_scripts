@@ -42,6 +42,41 @@
 
 ## Log
 
+### 2026-11-10 (IPMR revision: Reviewer 3 comment 1, results in and supplementary file written)
+Ziyun asked for a supplementary material file in the Overleaf project that organizes the results of the segmentation
+perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed overnight without an error.
+- Results copied to IPMR_paper/segmentation_robustness/results/ (metrics, settings, slices, logs).  The volumes stay on
+  Gautschi (28 GB).  `scripts/analyze_volumes.py` (run on a login node) adds extra_metrics.json: volumes at the Otsu
+  thresholds of the default run, statistics of the interior plastic voxels (more than 5 voxels from air and metal),
+  and the same for the paper's FDK and MBIR volumes.
+- Simulation (plastic NRMSE; FDK 0.1871, MBIR 0.1523, default 0.1264): true masks 0.1269, ISO-50 0.1260, watershed
+  0.1263; thresholds moved by up to 0.2 of the gap 0.1244 to 0.1344; object boundary moved by up to 3 voxels 0.1158 to
+  0.1272; metal regions grown by 1 to 3 voxels 0.1354 to 0.1366; metal regions shrunk by 1, 2, 3 voxels 0.1264,
+  0.1435, 0.1983.  The run with the metal shrunk by 3 voxels is worse than FDK, and its rods are hollow (metal volume
+  -54.7%).  The metal mean error grows from -37.6% to -47.4% already at 1 voxel, which the plastic NRMSE does not see.
+- NSI phantom (std of the interior plastic in percent of the plastic value; FDK 25.7, MBIR 20.4, default 7.6): all 14
+  changed runs are between 6.6 and 9.9.  A larger metal mask lowers it (6.6), and a smaller one raises it (9.9 at -2
+  voxels, where the metal volume falls by 17.3% and the metal mean by 32.0%).  The plastic volume at fixed thresholds
+  changes by -0.16% to +0.08% (MBIR -1.33%, FDK -2.06%, close to the 1.44% and 2.09% of Table V).
+- Fitted beam-hardening functions: nearly unchanged in the simulation (G_p(1)/G_p(0) = 0.23), except for the metal
+  shrunk by 2 or 3 voxels.  On the NSI phantom they change a lot (G_p(1)/G_p(0) from 1.84 to 6.35, default 2.86)
+  while the interior plastic changes by at most 4.6% RMS.  G_p grows with the metal projection in every NSI run, which
+  is the opposite of the simulation.  Flagged to Ziyun; not investigated.
+- The paper's IPMR volume of March 2026 differs from the default run of this study by 0.49% RMS over the interior
+  plastic, so the mbirjax version matters about as much as the smallest tested changes.
+- Figures (segmentation_robustness/figures/: seg_<sim|nsi>_curves, _slices, _bh_functions) and tables
+  (tables/seg_<sim|nsi>_table.tex) from the new scripts plot_curves.py, plot_sim_slices.py, plot_nsi_slices.py,
+  plot_bh_functions.py, make_tables.py, seg_results.py.
+- Supplementary file: `supplementary.tex` in the Overleaf IPMR folder (IEEEtran, one column, numbering S-I, Fig. S1,
+  Table S1, the paper's item numbers defined once at the top), with supplement/figures/ and supplement/tables/.  It
+  has five sections: overview, the tests, results for the simulation, results for the NSI phantom, summary and
+  limitations.  It compiles locally to 12 pages with no warning (segmentation_robustness/supplementary_preview.pdf).
+  main.tex, ref.bib, and the response letter are unchanged.  The text is black, not red.
+- data_for_MAR_paper/demo/recon_demo_mbir.npy on the Mac is an iCloud placeholder (dataless), so a script that
+  reads it stalls.  The NSI slice figure reads the two slices from results/nsi/paper_slices.npz instead.
+- Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
+  main.tex.
+
 ### 2026-11-09 night (MBIR-BHC on the IPMR datasets: simulations and the two measured scans submitted on Delta)
 Ziyun chose order 2 and a fixed 10 iterations for the IPMR datasets, and asked for the NSI phantom and the circuit
 board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `experiments/nsi_scans/` (READMEs there).
