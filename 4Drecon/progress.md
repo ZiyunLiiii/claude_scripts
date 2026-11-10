@@ -174,6 +174,9 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   MBIR-BHC 0.0056 (60% below MBIR, 27% above IPMR); row slice 0.0066, 0.0026, 0.0032 (MBIR-BHC 26% above IPMR).
   With the plastic chosen from the IPMR image instead, MBIR-BHC is 112% and 86% above IPMR.  The order is the same
   on every selection.
+- Ziyun said "Yes, commit": the MBIR-BHC_reproduction repo got its first commit 4c109dd on main (39 files; the 20
+  tests pass) and was pushed to github.com/ZiyunLiiii/MBIR-BHC_reproduction.  The copies of the code on Delta and
+  Gautschi hold the same files except the two comparison scripts on Delta.
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 
