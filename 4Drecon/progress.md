@@ -84,8 +84,22 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   The resumable script was copied to Delta.  Smoke job 23700163 (board at 8 x 8, three calls) COMPLETED in 2 min 27 s
   and confirmed the stop and the resume: the first call stopped after MBIR with exit code 3, the second ran
   iteration 1 and stopped with exit code 3, and the third ran iterations 2 and 3 and ended with exit code 0.
-- Not done: reading the results of the four queued jobs (23699601, 23699602, 23699794, 23700170), and an evaluation
-  of the measured scans (they have no ground truth).
+- Simulation results (jobs 23699601 and 23699602 started 2026-11-10 00:05 CST and COMPLETED in 14 min each; 24 s
+  per MBIR-BHC iteration on one A100; metrics and logs copied to
+  /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/mbir_bhc_baseline/ipmr_simulation/, volumes on Delta in
+  /u/zli98/mbir_bhc/out/ipmr_simulation/<case>/).  Plastic NRMSE / SSIM:
+  - two_rods: FDK 0.1871 / 0.9273 (mbirjax and mbirtorch), MBIR 0.1526 / 0.9627 (mbirjax) and 0.1456 / 0.9686
+    (mbirtorch), NMAR 0.0981 / 0.9753, IPMR 0.1264 / 0.9717, MBIR-BHC 0.1192 / 0.9808 at 10 iterations and
+    0.1099 / 0.9828 at 30.  At 10 iterations MBIR-BHC is 5.7% below IPMR and 18.1% below its MBIR start.
+  - six_rods: FDK 1.2412 / 0.9551, MBIR 1.1517 / 0.9700 (mbirjax) and 1.1005 / 0.9720 (mbirtorch), NMAR
+    1.0721 / 0.9711, IPMR (PET rerun) 0.8833 / 0.9751, MBIR-BHC 0.9274 / 0.9785 at 10 iterations and 0.8323 / 0.9795
+    at 30.  At 10 iterations MBIR-BHC is 5.0% above IPMR and 15.7% below its MBIR start; at 30 it is 5.8% below IPMR.
+  - The plastic NRMSE falls at every one of the 30 iterations on both phantoms, and the coefficients still move
+    (two_rods (1,1): 0.138 at 10, 0.161 at 30).  Limits of the comparison: MBIR-BHC starts from the mbirtorch MBIR,
+    which scores better than the mbirjax MBIR; MBIR-BHC keeps x >= 0 and IPMR does not; the IPMR rows are mbirjax
+    numbers, not rerun in mbirtorch.
+- Not done: reading the results of the two queued scan jobs (23699794 circuit_board, 23700170 nsi_phantom), and an
+  evaluation of the measured scans (they have no ground truth).
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
