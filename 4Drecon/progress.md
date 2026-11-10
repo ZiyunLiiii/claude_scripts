@@ -109,6 +109,8 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   lowered by 0.2", "raised by 0.1".  The text uses "metal mask" and "object mask" (the plastic mask and the metal
   mask together) in place of "metal regions" and "object boundary".  The x axes of Fig. S1 keep the signed numbers
   and say what the sign means.
+- Ziyun saw the panel titles of the slice figures touch the row above.  Both slice figures now have more space
+  between the rows (ROW_HEIGHT and ROW_GAP in plot_sim_slices.py and plot_nsi_slices.py).
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
