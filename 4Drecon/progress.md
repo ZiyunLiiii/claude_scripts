@@ -124,8 +124,18 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   from the saved FDK and MBIR volumes and records the peak GPU memory and the time of every iteration.  Scheduler
   estimate at submission: start 2026-11-10 18:59 CST (28 jobs pending and 3 running on that partition).  If it stops
   for its time budget it exits with code 3, and the same command continues it; that needs Ziyun's yes.
+- 2026-11-10 11:10 EST: Ziyun asked for the phantom on Gautschi, one H100 (80 GB), burst QOS.  New files in
+  `experiments/nsi_scans/gautschi/`: `common_gautschi.sh`, `nsi_scan.sbatch`, `copy_to_gautschi.sh`.  Code on
+  Gautschi in ~/PycharmProjects/scripts/2026/1110/mbir_bhc/code/ (mbirtorch as a git archive of 296f738 on
+  PYTHONPATH, ahead of the checkout installed in the env /home/li5273/.conda/envs/mbirtorch; the import check on the
+  login node passed), logs in .../mbir_bhc/slurm_logs/, volumes in
+  ~/Desktop/data/output/2026/1110/mbir_bhc/nsi_scans/nsi_phantom/ (scratch).  Scan:
+  ~/Desktop/data/demo_nsi_vert_metal_all_views (1807 radiographs present).  Job 18214401 (ai, -n14, 1 GPU, burst,
+  limit 3 h, BUDGET_MIN=172) starts from FDK and MBIR.  At submission the group's three normal slots were taken, and
+  the job was pending with reason Resources (17 of 20 nodes fully allocated).  The estimate of 58 to 92 GB means it
+  may not fit 80 GB.  The Delta job 23712015 (H200, estimate 18:59 CST) is still queued as a second chance.
 - Not done: an evaluation of the measured scans (they have no ground truth), a comparison of the board with IPMR,
-  and the result of the phantom job 23712015.
+  and the results of the phantom jobs 18214401 (Gautschi) and 23712015 (Delta).
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
