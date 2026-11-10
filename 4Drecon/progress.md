@@ -113,6 +113,13 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   between the rows (ROW_HEIGHT and ROW_GAP in plot_sim_slices.py and plot_nsi_slices.py).
 - Table S2 now starts with the baseline row, "IPMR, Otsu (default)", with dashes in its change columns.  FDK and
   MBIR follow, then the other segmentation methods, then the sweeps (Ziyun's request).
+- Ziyun asked whether the object mask sweep is needed, and then had it removed.  Ziyun's view: beam hardening eats
+  into the plastic mask, so growing it must help.  The simulation does not show that mechanism (the Otsu plastic mask
+  is 0.2% larger than the true mask, Dice 0.997, and growing it by 3 voxels lowers the Dice to 0.969 while the NRMSE
+  falls to 0.1160), but the sweep was hard to read (shrinking by 3 voxels also gave 0.1158, with unstable iterations)
+  and the air/plastic threshold shift already tests the plastic mask.  The object mask rows are out of Fig. S1, S2,
+  S4, Table S1, Table S2, and the text.  The runs stay in the results.  The supplement now has two sweeps of masks
+  and thresholds per dataset plus the methods: metal mask offset, plastic/metal threshold, air/plastic threshold.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
