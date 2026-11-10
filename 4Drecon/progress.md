@@ -111,6 +111,8 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   and say what the sign means.
 - Ziyun saw the panel titles of the slice figures touch the row above.  Both slice figures now have more space
   between the rows (ROW_HEIGHT and ROW_GAP in plot_sim_slices.py and plot_nsi_slices.py).
+- Table S2 now starts with the baseline row, "IPMR, Otsu (default)", with dashes in its change columns.  FDK and
+  MBIR follow, then the other segmentation methods, then the sweeps (Ziyun's request).
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
