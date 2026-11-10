@@ -74,6 +74,8 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   main.tex, ref.bib, and the response letter are unchanged.  The text is black, not red.
 - data_for_MAR_paper/demo/recon_demo_mbir.npy on the Mac is an iCloud placeholder (dataless), so a script that
   reads it stalls.  The NSI slice figure reads the two slices from results/nsi/paper_slices.npz instead.
+- Later the same day Ziyun had the two volume error rows removed from Fig. S1.  It now shows the plastic NRMSE and
+  SSIM only (plot_curves.py sim), and the volume errors of the simulation stay in Table S2.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
