@@ -98,8 +98,16 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
     (two_rods (1,1): 0.138 at 10, 0.161 at 30).  Limits of the comparison: MBIR-BHC starts from the mbirtorch MBIR,
     which scores better than the mbirjax MBIR; MBIR-BHC keeps x >= 0 and IPMR does not; the IPMR rows are mbirjax
     numbers, not rerun in mbirtorch.
-- Not done: reading the results of the two queued scan jobs (23699794 circuit_board, 23700170 nsi_phantom), and an
-  evaluation of the measured scans (they have no ground truth).
+- nsi_phantom job 23700170 (started 2026-11-10 01:42 CST on one A100 of 40 GB) FAILED after 6 min 22 s with CUDA
+  out of memory.  FDK took 15 s and MBIR 285 s (peak 8.7 GB) at 748 x 748 x 803, and both volumes are saved.  The
+  error came in the first gradient step of the first MBIR-BHC iteration, in the qGGMRF gradient of
+  `mbir_bhc/prior.py`, with 38.6 GiB already held.  No MBIR-BHC iteration finished.  So the present image update
+  does not fit 40 GB at the paper's size of this scan.  The circuit board (470 x 470 x 253) peaks at 11.4 GB; scaled
+  by the sinogram size and by the volume size, the phantom would need about 58 to 92 GB (an estimate, not measured).
+  Nothing was resubmitted.  Log and results.json copied to
+  /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/mbir_bhc_baseline/nsi_scans/.
+- Not done: an evaluation of the measured scans (they have no ground truth), and a way to run the phantom (an H200,
+  or less memory in the image update).
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
