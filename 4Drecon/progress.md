@@ -94,6 +94,10 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   them, and only the runs with the metal shrunk by 1 or 2 voxels differ visibly (dark lines along the metal boundary,
   brighter plastic next to it).  The interior std column also left Table S2.  The supplement is 8 pages.  The removed
   figures and the NSI table stay in segmentation_robustness/figures and tables, and the README lists what is shown.
+- Ziyun then had the G_p(1)/G_p(0) and S_m(1) columns removed from Table S2, with the sentences that quoted their
+  values.  Table S2 now has the mask changes, NRMSE, and SSIM.  Fig. S3 (the fitted functions of the simulation as
+  curves) and the two equations that define G_p(m) and S_m(m) are still in the supplement, with two sentences that
+  describe the curves without numbers.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
