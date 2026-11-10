@@ -42,6 +42,33 @@
 
 ## Log
 
+### 2026-11-09 (IPMR revision: plan for Reviewer 3 comment 1, the segmentation perturbation test)
+Ziyun asked for a plan to address Reviewer 3 comment 1 (revision-v1/response_letter.tex).  The reviewer asks for
+perturbation tests of the segmentation, with NRMSE and volume error, and for a statement of the limits when the
+segmentation fails.  The plan is proposed and waits for Ziyun's approval.  No script is written and no job is submitted.
+- Role of the segmentation (mbirjax preprocess/mar.py and segmentation.py): multi-threshold Otsu with num_metal + 2
+  classes gives one plastic mask and the metal masks in every IPMR iteration.  The plastic sinogram p is the scaled
+  projection of the plastic mask, and p is used only in the fit of theta.  Each metal sinogram m is the projection of
+  the masked reconstruction, and m is used in the fit and is added back to the corrected sinogram.
+- Injection: a wrapper replaces mjp.segment_plastic_metal during the run and applies the same error in every
+  iteration.  mbirjax 0.6.15 calls the function through mjp, so the technique of sensitivity/scripts/sweep.py works.
+- Main set, two_rods on Delta in the environment of the sensitivity sweeps (21 runs): the metal boundary moved by -3 to
+  +3 voxels, the plastic outer boundary moved by -3 to +3 voxels, the plastic/metal threshold moved by +/-0.1, 0.2 and
+  0.4 of the gap between the plastic and metal means, and three reference runs (default Otsu, true masks, FDK masks
+  kept for all iterations).
+- Second set, six_rods (9 runs): the metal boundary moved by +/-1 and +/-2 voxels, the Ti/Cu threshold moved by +/-0.2
+  of the gap, num_metal = 1, default Otsu, and true masks.
+- Recorded after each iteration: plastic NRMSE, SSIM and mean error (Table IV code), plastic and metal volume error
+  from an unperturbed Otsu segmentation of the result, the error of the masks in use against the true masks (Dice and
+  volume), theta, and the normalization scales.
+- Optional: four half-resolution runs of the NSI phantom (metal boundary +/-2 voxels, threshold +/-0.2), compared with
+  the default IPMR, because the reviewer's concern is measured scans.
+- Output: a folder IPMR_paper/segmentation_robustness/ laid out like sensitivity/, one figure in the style of Fig. 14,
+  a red subsection "Robustness to segmentation errors" after Parameter sensitivity that also states the limits, and
+  the response.  A new subsection before Computation Cost changes IV-E to IV-F, which two finished responses cite.
+- Hypothesis to test: the metal boundary matters more than the plastic boundary, and a metal mask that is too small
+  hurts more than one that is too large.
+
 ### 2026-11-06 to 2026-11-09 (IPMR revision: Reviewer 1 minor issues 1 and 6)
 - Minor issue 1: main.tex before Eq. (10) now says 5-component and gives the general count binom(n+K, K) - 1, both in
   red; the response is in revision-v1/response_letter.tex.  Ziyun made the W -> D change (minor issue 3) and the
