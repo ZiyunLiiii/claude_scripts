@@ -77,8 +77,14 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   (`--time_budget_minutes`, exit code 3 when more calls are needed, volumes saved per iteration).  This version
   compiles but has not run anywhere, and it is not copied to Delta.  Delta still has the version of the smoke test,
   which the circuit board job uses.  Ziyun then said to leave it, so nothing else was submitted.
-- Not done: the NSI phantom (no job is queued for it), reading the results of the three queued jobs, and an
-  evaluation of the measured scans (they have no ground truth).
+- 23:25 CST: Ziyun asked for a 3 h A100 job on the phantom, to see what it does.  Job 23700170 (nsi_phantom,
+  gpuA100x4 batch, one A100 of 40 GB, limit 3 h, BUDGET_MIN=172).  The memory at 748 x 748 x 804 on 40 GB is not
+  known; the estimate from the small runs is above 40 GB.  The job uses the resumable script: it starts no iteration
+  that would end after 172 min, exits with code 3, and the same command continues from the last finished iteration.
+  The resumable script was copied to Delta; its stop and resume are tested by smoke job 23700163 (board at 8 x 8,
+  three calls).
+- Not done: reading the results of the four queued jobs (23699601, 23699602, 23699794, 23700170), and an evaluation
+  of the measured scans (they have no ground truth).
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
