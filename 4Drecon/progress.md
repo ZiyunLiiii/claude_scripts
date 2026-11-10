@@ -42,6 +42,29 @@
 
 ## Log
 
+### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
+Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
+- Simulation of Section IV-A of the paper: parallel beam, 720 views over 180 degrees, 1024 channels of 0.24 mm, image
+  512 x 512 over 250 mm.  Two-material phantom (water disk of radius 90 mm, two aluminium inserts of radius 10 mm, 36 mm
+  from the center, read from Fig. 5(a)) and multi-material phantom (eight inserts on a ring of radius 60 mm, read from
+  Fig. 7(a), materials of Table VI; PVC is the high density material at the 800 HU threshold).
+- Source: spekpy 95 kVp, 12 degree anode, 10.259 mm Al, chosen so that the mean energy is the paper's 56.4093 keV; the
+  standard deviation is 14.41 keV against the paper's 14.22.  Attenuation: NIST values held by spekpy.  The true HU of
+  the five low density inserts (-184, -92, 89, 142, 594) agree with the axis of the paper's Fig. 8.  Water
+  pre-correction: the exact inverse of the water beam hardening function (the paper fits a polynomial).
+- Coefficients at the truth (`ideal_coefficients.py`, exact path lengths, least squares): multi-material order 2 gives
+  (1,1) -0.0497 and (0,2) -0.0433; the paper's Table VII has 0.00945 and -0.03231.  Two-material order 2 gives -0.0469
+  and -0.0229.  On the rays through the high density material p_L is 3.21 +- 0.42 (multi) and 3.54 +- 0.17 (two), so
+  p_L p_H is close to a multiple of p_H, the same near-degeneracy as in the small phantom.
+- Delta: code in /u/zli98/mbir_bhc/code/ (mbirtorch as a git archive of 296f738), results in
+  /u/zli98/mbir_bhc/out/paper_2d/<case>/, logs in /u/zli98/mbir_bhc/slurm_logs/.
+- Smoke job 23697694 (interactive partition, one A100): COMPLETED in 2 min 47 s.  At full size, FBP and MBIR take 31 s
+  and one MBIR-BHC iteration (20 momentum steps and a mask update) takes 5.3 s.  After 4 iterations from the MBIR image
+  the multi-material coefficients are (1,1) 0.0089 and (0,2) -0.0284, near the paper's values and still moving.
+- Full cases, 300 iterations of 20 momentum steps from the MBIR image, beta = eta = 1, submitted 2026-11-09 22:06 CST:
+  23697759 two_material_order2 (limit 45 min), 23697760 multi_material_order2 (45 min), 23697761 two_material_order3
+  (55 min), 23697762 multi_material_order3 (55 min).  Expected run time 27 to 33 min each.  Results not read yet.
+
 ### 2026-11-09 night (IPMR revision: Reviewer 3 comment 1, scripts written and jobs submitted on Gautschi)
 Ziyun narrowed the plan of the entry below to three tests on two datasets, and asked for the scripts and for jobs on
 Gautschi with one GPU per reconstruction.  The datasets are the single-metal simulation (two_rods) and the NSI phantom
