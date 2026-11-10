@@ -101,6 +101,9 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
 - Ziyun kept Fig. S3 and its description, and asked for a more focused Table S2 with the change against the default
   IPMR run.  Table S2 now has four columns: NRMSE, its change in percent, SSIM, and its change in percent (FDK +48.1%
   and -4.57%, MBIR +20.5% and -0.91%, metal shrunk by 3 voxels +57.0% and -5.25%).  The mask change columns are out.
+- Fig. S2 (simulation slices, a crop of slice 128 to the middle 120 x 120 voxels) now also uses the paper's window,
+  0 to 0.08 /mm (Fig. 3), at Ziyun's request.  The hollow rods of the run with the metal shrunk by 3 voxels and the
+  faint streaks of the run with the object boundary moved by -3 voxels are still visible in that window.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
