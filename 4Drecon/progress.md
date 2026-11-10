@@ -68,7 +68,17 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   /work/nvme/bjda/zli98/mbir_bhc/out/nsi_scans/<case>/ (fdk.npy, mbir.npy, bhc_latest.npy after every iteration,
   bhc_10.npy at the end), because the Delta home is at 84 of 102 GB; results.json is copied to
   /u/zli98/mbir_bhc/out/nsi_scans/<case>/.
-- Not done: reading the results of the four jobs, and an evaluation of the measured scans (they have no ground truth).
+- 23:14 CST: Ziyun said a 5 h H200 request would never start.  The scheduler agrees (`sbatch --test-only`): on
+  gpuH200x8 a job of any length from 30 min to 5 h is estimated to start on 2026-11-18, with 420 jobs pending there.
+  Job 23699795 (nsi_phantom) was cancelled.  The same test put a gpuA100x4 batch job at 2026-11-11 10:03, a
+  gpuA100x4-interactive job at once, and a gpuH200x8-interactive job (1 h maximum, one job per user) about 35 min
+  later.  The three A100 batch jobs (23699601, 23699602, 23699794) were left in the queue.
+- `experiments/nsi_scans/run_nsi_scan.py` was then changed on the Mac so that it can run as a chain of short jobs
+  (`--time_budget_minutes`, exit code 3 when more calls are needed, volumes saved per iteration).  This version
+  compiles but has not run anywhere, and it is not copied to Delta.  Delta still has the version of the smoke test,
+  which the circuit board job uses.  Ziyun then said to leave it, so nothing else was submitted.
+- Not done: the NSI phantom (no job is queued for it), reading the results of the three queued jobs, and an
+  evaluation of the measured scans (they have no ground truth).
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
