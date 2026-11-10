@@ -81,8 +81,9 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   gpuA100x4 batch, one A100 of 40 GB, limit 3 h, BUDGET_MIN=172).  The memory at 748 x 748 x 804 on 40 GB is not
   known; the estimate from the small runs is above 40 GB.  The job uses the resumable script: it starts no iteration
   that would end after 172 min, exits with code 3, and the same command continues from the last finished iteration.
-  The resumable script was copied to Delta; its stop and resume are tested by smoke job 23700163 (board at 8 x 8,
-  three calls).
+  The resumable script was copied to Delta.  Smoke job 23700163 (board at 8 x 8, three calls) COMPLETED in 2 min 27 s
+  and confirmed the stop and the resume: the first call stopped after MBIR with exit code 3, the second ran
+  iteration 1 and stopped with exit code 3, and the third ran iterations 2 and 3 and ended with exit code 0.
 - Not done: reading the results of the four queued jobs (23699601, 23699602, 23699794, 23700170), and an evaluation
   of the measured scans (they have no ground truth).
 
