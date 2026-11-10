@@ -160,9 +160,22 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   of the insert.  Standard deviation of the plastic voxels (low density, MBIR above 0.01 1/mm; a rough selection):
   axial slice FDK 0.0189, MBIR 0.0147, MBIR-BHC 0.0083 (44% below MBIR); row slice 0.0088, 0.0070, 0.0037 (47%
   below MBIR).  `experiments/nsi_scans/README.md` holds the three phantom runs.
-- Not done: an evaluation of the measured scans (they have no ground truth), and a comparison of the board and the
-  phantom with IPMR (the paper's IPMR volume of the phantom at 748 x 748 x 804 is on Gautschi in
-  ~/Desktop/data/output/2026/0319/demo/).
+- Phantom against the paper's IPMR image (Ziyun: "Yes, compare").  IPMR volume:
+  ~/Desktop/data/output/2026/0319/demo/recon_3_1_demo_alpha1_beta0_gamma0.1.npy on Gautschi (mbirjax, 748 x 748 x
+  804).  It has the orientation and units of the mbirtorch volumes, and its slice k + 1 is slice k here (correlation
+  of the two MBIR images in the axial slice 0.9997).  New scripts `experiments/nsi_scans/add_reference_slices.py`
+  and `plot_comparison.py`.  Figure `comparison_ipmr_zoom.png` in
+  .../mbir_bhc_baseline/nsi_scans/nsi_phantom/gautschi_h100/ (MBIR, IPMR, MBIR-BHC, window 0 to 0.04 1/mm).
+  Reading: IPMR's plastic is nearly uniform; MBIR-BHC is between MBIR and IPMR, with weaker but visible bright
+  regions above and below the largest insert, thin dark bands at the two smaller inserts, and the speckle at the
+  ends of the largest insert (its mask marks 25,628 voxels of the axial slice as high density, about 6,800 more
+  than are above the threshold).  Standard deviation of the plastic voxels (MBIR above 0.01 1/mm, outside the
+  MBIR-BHC mask, below the threshold in every image): axial slice MBIR 0.0141, IPMR 0.0044 (69% below MBIR),
+  MBIR-BHC 0.0056 (60% below MBIR, 27% above IPMR); row slice 0.0066, 0.0026, 0.0032 (MBIR-BHC 26% above IPMR).
+  With the plastic chosen from the IPMR image instead, MBIR-BHC is 112% and 86% above IPMR.  The order is the same
+  on every selection.
+- Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
+  paper.
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
