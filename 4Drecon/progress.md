@@ -119,8 +119,13 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   (MBIR above 0.01 1/mm, median 0.017) the RMS change from MBIR is 0.0031 1/mm, and the mean of the high density
   voxels rises from 0.136 to 0.143.  No comparison with the IPMR image of the board was made.
   `experiments/nsi_scans/README.md` holds both scan results.
+- 2026-11-10 10:01 CST: Ziyun said yes to a 1 h job on the interactive H200 partition for the phantom.  Job 23712015
+  (nsi_phantom, gpuH200x8-interactive, one H200, limit 1 h, BUDGET_MIN=55, --mem=60G from the job file).  It continues
+  from the saved FDK and MBIR volumes and records the peak GPU memory and the time of every iteration.  Scheduler
+  estimate at submission: start 2026-11-10 18:59 CST (28 jobs pending and 3 running on that partition).  If it stops
+  for its time budget it exits with code 3, and the same command continues it; that needs Ziyun's yes.
 - Not done: an evaluation of the measured scans (they have no ground truth), a comparison of the board with IPMR,
-  and a way to run the phantom (an H200, or less memory in the image update).
+  and the result of the phantom job 23712015.
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
