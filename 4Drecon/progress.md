@@ -98,6 +98,9 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   values.  Table S2 now has the mask changes, NRMSE, and SSIM.  Fig. S3 (the fitted functions of the simulation as
   curves) and the two equations that define G_p(m) and S_m(m) are still in the supplement, with two sentences that
   describe the curves without numbers.
+- Ziyun kept Fig. S3 and its description, and asked for a more focused Table S2 with the change against the default
+  IPMR run.  Table S2 now has four columns: NRMSE, its change in percent, SSIM, and its change in percent (FDK +48.1%
+  and -4.57%, MBIR +20.5% and -0.91%, metal shrunk by 3 voxels +57.0% and -5.25%).  The mask change columns are out.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
