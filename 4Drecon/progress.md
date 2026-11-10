@@ -63,7 +63,27 @@ Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproductio
   the multi-material coefficients are (1,1) 0.0089 and (0,2) -0.0284, near the paper's values and still moving.
 - Full cases, 300 iterations of 20 momentum steps from the MBIR image, beta = eta = 1, submitted 2026-11-09 22:06 CST:
   23697759 two_material_order2 (limit 45 min), 23697760 multi_material_order2 (45 min), 23697761 two_material_order3
-  (55 min), 23697762 multi_material_order3 (55 min).  Expected run time 27 to 33 min each.  Results not read yet.
+  (55 min), 23697762 multi_material_order3 (55 min).
+- Results (all four COMPLETED in 27 to 32 min, 5.3 to 6.0 s per iteration; copies, `summary.md` and four figures in
+  /Users/a124601/Desktop/Research_Purdue/Lilly/MAR/IPMR_paper/mbir_bhc_baseline/paper_2d/, made by
+  `experiments/paper_2d/summarize_paper_2d.py`; water RMS error in HU over the water region):
+  - Multi-material, order 2: FBP 9.4, MBIR 7.6, MBIR-BHC 5.0 at 10 iterations and 3.2 at 300.  Coefficients
+    (1,1), (0,2): 0.0100, -0.0340 at 10 iterations (paper 0.00945, -0.03231), then -0.0069, -0.0377 at 300, moving
+    toward the fit with the true image (-0.0502, -0.0430).  PVC mean 1272 HU (MBIR), 1298 (10), 1446 (300), true 1935.
+  - Two-material, order 2: FBP 8.9, MBIR 5.9, MBIR-BHC 2.0 at 10 iterations and 3.2 at 300.  Coefficients 0.0115,
+    -0.0253 at 10 and 0.0319, -0.0277 at 300, where (1,1) moves away from the fit with the true image (-0.0475).
+    Aluminium mean 2577 HU (MBIR), 2604 (10), 2370 (300), true 3563.
+  - Order 3: water error 1.7 (two-material) and 1.9 (multi-material) at 10 iterations, then 8.2 and 4.4 at 300.  The
+    two-material coefficients grow to (1,1) 1.42 and (0,2) -3.31.  At 10 iterations the multi-material coefficients
+    (0.0574, -0.0339, -0.0117, -0.0124, 0.0075) have the signs and sizes of the paper's (0.0392, -0.0304, -0.0073,
+    -0.0091, 0.0051).
+  - The water mean is within 0.2 HU of zero for FBP, MBIR and MBIR-BHC; the paper's Table IV has -5.8 to -7.5 HU for
+    all its methods, so that offset comes from its simulation.
+- Reading: the implementation reproduces the paper's coefficients at an early stage (about 10 iterations), and MBIR-BHC
+  then beats MBIR in all four cases.  A long run does not settle at one image: the direction of the drift depends on
+  the phantom (the two-material phantom has the smaller spread of p_L on the high density rays, 0.17 against 0.42, and
+  drifts away from the truth), and order 3 gets worse with iterations.  The number of iterations is therefore a
+  setting of the method here, and it needs a rule before the IPMR datasets are run.
 
 ### 2026-11-09 night (IPMR revision: Reviewer 3 comment 1, scripts written and jobs submitted on Gautschi)
 Ziyun narrowed the plan of the entry below to three tests on two datasets, and asked for the scripts and for jobs on
