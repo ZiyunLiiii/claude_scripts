@@ -104,6 +104,11 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
 - Fig. S2 (simulation slices, a crop of slice 128 to the middle 120 x 120 voxels) now also uses the paper's window,
   0 to 0.08 /mm (Fig. 3), at Ziyun's request.  The hollow rods of the run with the metal shrunk by 3 voxels and the
   faint streaks of the run with the object boundary moved by -3 voxels are still visible in that window.
+- Ziyun found the label "moved by" unclear.  The figures, Table S1, Table S2, the captions, and the text now name
+  each change in words: "metal mask shrunk by 3 voxels", "object mask grown by 2 voxels", "plastic/metal threshold
+  lowered by 0.2", "raised by 0.1".  The text uses "metal mask" and "object mask" (the plastic mask and the metal
+  mask together) in place of "metal regions" and "object boundary".  The x axes of Fig. S1 keep the signed numbers
+  and say what the sign means.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
