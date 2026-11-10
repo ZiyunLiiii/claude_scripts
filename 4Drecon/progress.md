@@ -81,6 +81,12 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   plastic NRMSE and SSIM, and Table S2 the mask changes, the fitted functions, NRMSE, SSIM, and the interior std.  The
   two sentences of the supplement that cited the removed numbers are edited.  The numbers stay in
   results/sim/extra_metrics.json and the README.  The NSI figure and table are unchanged.
+- Ziyun then asked for the supplement to be organized by topic, because it will hold more than the segmentation
+  test.  supplementary.tex now opens with a short introduction (one sentence per section), and the segmentation test
+  is Section S-I, "Robustness of IPMR to Segmentation Errors", with the subsections A to G (role of the segmentation,
+  changes, datasets, metrics, results for the simulation, results for the NSI phantom, summary and limitations).
+  \FloatBarrier (package placeins) keeps the floats of each part inside it, and a commented template for the next
+  topic is at the end of the file.  It compiles to 12 pages with no warning.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
