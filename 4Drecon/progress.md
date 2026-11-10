@@ -42,6 +42,35 @@
 
 ## Log
 
+### 2026-11-09 (MBIR-BHC baseline for the IPMR revision: first implementation)
+- Purpose: MBIR-BHC (Jin, Bouman, Sauer, IEEE TCI 2015) as a second comparison method for the IPMR revision.  Charlie's
+  direction: minimize the paper's cost over the image x, the mask b, and the coefficients gamma, with a closed form fit
+  for gamma, gradient descent for x on the mbirtorch projectors (autograd is available), and coordinate descent for b.
+  His blueprint is at https://claude.ai/artifact/KkFcGjkMhvdDfW5XSM5um9.
+- Code: /Users/a124601/Desktop/Research_Purdue/repository/MBIR-BHC_reproduction (new repo, nothing committed yet).
+  `method/mbir_bhc_method.md` states the model, the cost in the scaling of mbirtorch, the three steps, and the
+  differences from the paper.  Package `mbir_bhc`: `recon_mbir_bhc`, `fit_bhc_polynomial`, `update_image`,
+  `update_mask`, `update_mask_sequential`.
+- Image update: the gradient of the data term comes from autograd through `forward_project_differentiable`.  Each
+  step divides by a diagonal curvature bound, applies the threshold penalty and x >= 0 in closed form, and is
+  accepted only if the cost decreases.
+- Mask update: the change in cost for one voxel that changes its label is exact and uses 2 x order back projections
+  with powers of the projector coefficients (`coeff_power` 1 to 4 for order 2).  The voxels change in two checkerboard
+  groups with a check of the cost.  A version that visits one voxel at a time, as in the paper, exists for small images.
+- Tests: 16 pass in 6 s on the Mac CPU (32 x 32 parallel beam phantom whose sinogram follows the polynomial model).
+- Small phantom results (`experiments/small_phantom/run_small_phantom.py`, default settings, MBIR initial image):
+  RMS error in the plastic 0.0056 for MBIR, 0.0038 after 8 x 20 steps, 0.0014 after 150 x 20 steps (75% lower).
+  The coefficients do not return to the generating values (-0.05, -0.10, -0.20): they are (-0.159, 0.676, -0.280)
+  after 150 iterations, and the cost reached (114.2) is below the cost of the true phantom (160.5).  The prior lowers
+  the metal value (0.154 to 0.144, true 0.2), and the coefficients compensate.
+- Gradient descent is slow: the cost still decreases after 3000 steps.  With snr_db = 45 the cost after 150 iterations
+  (644.9) is far above the cost of the true phantom, and 30 mask labels differ from the truth.  With gamma fixed,
+  600 plain steps reach cost 206.2, and a trial with momentum reaches 202.5 in 195 steps.  Momentum is in the script
+  only.
+- Not done: the 2D parallel beam check against the paper (target coefficients 0.00945 and -0.03231 for the
+  multi-material phantom, pre-corrected data), values of beta and eta, any run on the IPMR datasets, memory and time
+  on cone beam data.
+
 ### 2026-11-09 (IPMR revision: plan for Reviewer 3 comment 1, the segmentation perturbation test)
 Ziyun asked for a plan to address Reviewer 3 comment 1 (revision-v1/response_letter.tex).  The reviewer asks for
 perturbation tests of the segmentation, with NRMSE and volume error, and for a statement of the limits when the
