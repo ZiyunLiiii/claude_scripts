@@ -42,6 +42,34 @@
 
 ## Log
 
+### 2026-11-09 night (MBIR-BHC on the IPMR datasets: simulations and the two measured scans submitted on Delta)
+Ziyun chose order 2 and a fixed 10 iterations for the IPMR datasets, and asked for the NSI phantom and the circuit
+board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `experiments/nsi_scans/` (READMEs there).
+- Simulations: the sinograms and true volumes are the ones the NMAR baseline run saved on Delta (copied to
+  /u/zli98/mbir_bhc/data/ipmr_simulation/<phantom>/), so MBIR-BHC is scored on the data of Table IV.  FDK, MBIR and
+  MBIR-BHC run in mbirtorch with the IPMR settings (sharpness 1, weights transmission_root).  Threshold: IPMR's Otsu
+  threshold between plastic and metal, from the MBIR image.  MBIR-BHC keeps x >= 0.  `score_ipmr_simulation.py`
+  computes the plastic NRMSE and SSIM of the paper (needs scikit-image, so it runs in the NMAR env on Delta).
+- Projector agreement at full size (smoke job): mbirtorch FDK of the mbirjax sinogram of two_rods scores 0.1871 /
+  0.9273, identical to mbirjax and Table IV.  mbirtorch MBIR scores 0.1456 / 0.9686 against 0.1526 / 0.9627 for
+  mbirjax MBIR.
+- First smoke job 23699361 FAILED with CUDA out of memory in the mask update: the Triton cone kernel of mbirtorch back
+  projects only the powers 1 and 2 of the coefficients, and the powers 3 and 4 fall back to a torch body that needs
+  more than 40 GB at 256^3.  Fix: `mbir_bhc/projections.py` back projects powers above 2 in batches of 4096 pixels.
+  Second smoke 23699433 COMPLETED: one MBIR-BHC iteration at 256^3 takes 24 s on one A100; after one iteration
+  two_rods has plastic NRMSE 0.1399 and SSIM 0.9718.
+- Simulation jobs (30 iterations, volumes saved at 10 and 30, the 10-iteration volume is the result; limit 30 min):
+  23699601 two_rods, 23699602 six_rods.  Results in /u/zli98/mbir_bhc/out/ipmr_simulation/<case>/.
+- Measured scans: loaded with the mbirtorch NSI reader at the paper's settings (phantom 2 x 2 and every 4th view,
+  board 4 x 4 and every 4th view, auto crop), the extracted scans of the NMAR run in /u/zli98/nmar_baseline/data/.
+  Smoke job 23699752 (board at 8 x 8 and every 8th view, 235 x 235 x 138) COMPLETED in 1 min 44 s.
+  Jobs: 23699794 circuit_board (one A100, limit 45 min), 23699795 nsi_phantom (one H200 on gpuH200x8, --mem=200G,
+  limit 5 h; the estimate is 2 to 3 h, not measured at that size).  Volumes go to
+  /work/nvme/bjda/zli98/mbir_bhc/out/nsi_scans/<case>/ (fdk.npy, mbir.npy, bhc_latest.npy after every iteration,
+  bhc_10.npy at the end), because the Delta home is at 84 of 102 GB; results.json is copied to
+  /u/zli98/mbir_bhc/out/nsi_scans/<case>/.
+- Not done: reading the results of the four jobs, and an evaluation of the measured scans (they have no ground truth).
+
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
 - Simulation of Section IV-A of the paper: parallel beam, 720 views over 180 degrees, 1024 channels of 0.24 mm, image
