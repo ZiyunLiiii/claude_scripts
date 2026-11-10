@@ -134,8 +134,22 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   limit 3 h, BUDGET_MIN=172) starts from FDK and MBIR.  At submission the group's three normal slots were taken, and
   the job was pending with reason Resources (17 of 20 nodes fully allocated).  The estimate of 58 to 92 GB means it
   may not fit 80 GB.  The Delta job 23712015 (H200, estimate 18:59 CST) is still queued as a second chance.
+- Both phantom jobs started within minutes, in parallel.  Delta 23712015 (one H200) started at 10:06 CST, far
+  ahead of the scheduler's estimate of 18:59, ran 52 min and stopped for its time budget before iteration 10 (exit
+  code 3, so Slurm shows FAILED): 9 of 10 iterations done, 318 to 354 s each, peak 51.0 GB, cost 1.117e8 after
+  iteration 1 and 4.727e7 after iteration 9, coefficient (1,1) 0.183 to 0.440.  bhc_9.npy and mask_9.npy are in
+  /work/nvme/bjda/zli98/mbir_bhc/out/nsi_scans/nsi_phantom/; results.json and the log copied to
+  .../mbir_bhc_baseline/nsi_scans/nsi_phantom/delta_h200/ and slurm_logs/.  It was not resubmitted.  Gautschi
+  18214401 (one H100) started at 11:07 EST on h015: FDK 15 s, MBIR 137 s (peak 8.7 GB), 365 to 409 s per iteration,
+  peak 51.0 GB, 7 of 10 iterations done at 11:59 EST.  So the phantom at 748 x 748 x 803 needs 51 GB, below the
+  estimate of 58 to 92 GB.  Ziyun had said to cancel the Delta job once the Gautschi job finishes; the Delta job
+  ended by itself first, so there is nothing to cancel.
+- Estimate for the full-size scans of the IPMR timing study (900 views, full detector; phantom 1467 x 1467 x 1588,
+  board 1733 x 1733 x 953), scaled from these runs: about 400 GB (phantom) and 330 to 580 GB (board) on one GPU, and
+  about 1 h 40 and 1 h 25 per iteration on one H100 (time follows voxels x views).  The present code runs on one GPU,
+  so neither fits.
 - Not done: an evaluation of the measured scans (they have no ground truth), a comparison of the board with IPMR,
-  and the results of the phantom jobs 18214401 (Gautschi) and 23712015 (Delta).
+  and the end of the Gautschi phantom job 18214401.
 
 ### 2026-11-09 night (MBIR-BHC: the 2D check against the 2015 paper, submitted on Delta)
 Ziyun asked for the 2D check on Delta.  The scripts are in `MBIR-BHC_reproduction/experiments/paper_2d/` (README there).
