@@ -229,8 +229,9 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   the tenth iteration lowers the cost by 0.94%, changes the image by 0.71%, and changes 264 labels (0.016% of the
   high density voxels, up from 0.0014% at iteration 4).  On the board it lowers the cost by 0.46% and changes the
   image by 0.66%, and the label change jumps between 0.03% and 2.4%.  New script
-  `experiments/nsi_scans/plot_convergence.py` (not committed) draws `convergence.png` in
-  `IPMR_paper/mbir_bhc_baseline/nsi_scans/`.  The README of that experiment has two new lines (not committed).
+  `experiments/nsi_scans/plot_convergence.py` draws `convergence.png` in
+  `IPMR_paper/mbir_bhc_baseline/nsi_scans/`.  Ziyun said "Yes, commit": the script and two README lines are commit
+  63390d4, pushed.
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 
