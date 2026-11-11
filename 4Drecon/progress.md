@@ -391,6 +391,14 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   folders.  Ziyun also asked for the phantom at 30 and 40 while the job ran: `iterations_30_40_zoom.png` there.
   The README of `experiments/nsi_scans/` has a section for 60 iterations (uncommitted, like the other changes).
   Greg's nightly burst job 17786680 was still pending with reason Priority at 03:32 EST, after both jobs had ended.
+- Viewer of the board (2026-11-11, 13:36 EST): Ziyun asked for an mbirtorch viewer of the circuit board at 20, 40
+  and 60 iterations with IPMR.  I first submitted a 1-GPU `ai` job (18325891, cancelled after 42 s), and Ziyun
+  stopped me: the viewer needs no GPU.  It now runs on a Gautschi login node with WebAgg, in one ssh connection
+  that also carries the tunnel to `localhost:8988`.  Scripts: `4Drecon/4d_viewer/serve_viewer3d.py` and
+  `serve_viewer3d_board.sh` (Gautschi copy in `~/PycharmProjects/scripts/2026/1111/board_viewer/`).  The IPMR
+  volume is `circ_stable/recon_3_2_horiz_mar_1800_alpha1_beta0.002_gamma0.1.npy` (363 x 363 x 251, mbirjax, auto
+  crop); its crop is centered on the 470 x 470 grid of the MBIR-BHC volumes (offset about 53 voxels), and the
+  orientation is the same.  Display window 0 to 0.0541 1/mm.
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 
