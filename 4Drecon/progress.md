@@ -399,6 +399,17 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   volume is `circ_stable/recon_3_2_horiz_mar_1800_alpha1_beta0.002_gamma0.1.npy` (363 x 363 x 251, mbirjax, auto
   crop); its crop is centered on the 470 x 470 grid of the MBIR-BHC volumes (offset about 53 voxels), and the
   orientation is the same.  Display window 0 to 0.0541 1/mm.
+- Board grid mismatch (2026-11-11): Ziyun saw in the viewer that MBIR-BHC (470 x 470 x 253) and the paper's IPMR
+  volume (363 x 363 x 251) differ in size and said that a baseline must match IPMR.  Cause: the paper's
+  `mar_recon.py` crops the sinogram with mbirjax's `auto_crop_sino_conebeam` (363 channels, 251 rows), and my
+  runner used `auto_crop=True` of the mbirtorch NSI reader (470 channels, 253 rows).  I had not checked the board
+  against the IPMR volume.  Offset measured on the Gautschi login node with the two MBIR volumes (RMS difference
+  over integer shifts): slices 2 (clear minimum), rows 53.5 and columns 53.5 (equal RMS at 53 and 54), so the two
+  grids are half a voxel apart in rows and columns, as expected for 363 against 470 voxels.  Crops of `bhc_20`,
+  `bhc_40`, `bhc_60` to 363 x 363 x 251 from (row 53, column 54, slice 2) are in
+  `~/Desktop/data/output/2026/1110/mbir_bhc/nsi_scans/circuit_board/ipmr_grid/`, and the viewer now shows those
+  beside IPMR.  An exact match needs a rerun of the board with `recon_shape` (363, 363, 251) and the one-slice
+  shift; not run, needs Ziyun's yes.  The NSI phantom differs by one slice only (803 against 804).
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 
