@@ -424,8 +424,10 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   and macOS had moved `data_for_MAR_paper/demo/recon_demo_mbir.npy` to iCloud only.  The download did not
   arrive in 10 minutes, so the MBIR panel of the phantom figure reads row 374 of the Gautschi copy
   (`0319/demo/mbir_recon_demo.npy`; the FDK row of that folder is equal to the local FDK file).  Drawn so far:
-  `nsi_phantom.png`, `board_axial.png`, `board_coronal.png`.  Not drawn: `single_metal` and `multi_metal`, which
-  need `Revision_data/MBIR-BHC_baseline/<two_rods|six_rods>/bhc_30.npy` from Delta.
+  `nsi_phantom.png`, `board_axial.png`, `board_coronal.png`.  After Ziyun logged in to Delta, `bhc_10.npy` and
+  `bhc_30.npy` of both simulations were copied to `Revision_data/MBIR-BHC_baseline/<two_rods|six_rods>/`, and
+  `single_metal.png` and `multi_metal.png` were drawn with MBIR-BHC at 30 iterations.  All five figures are
+  done.
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 
