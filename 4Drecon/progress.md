@@ -43,6 +43,30 @@
 
 ## Log
 
+### 2026-11-11 evening (SOR: interface redesigned to the blueprint notation; fork branch `sor`, uncommitted)
+Ziyun rejected the slide line "dejitter=True, with harmonics 1 to frames_per_rotation // 2".  Their points: the core
+concept is that SOR does not need the frames-per-rotation parameter, the notation must be that of the blueprint
+(https://claude.ai/artifact/648swpno4LjUtjvxwcf8jS: theta, p, P = I - Q_B Q_B^T), and the harmonics parameter is one
+number.  Changes in the working tree of the fork (still nothing staged or committed):
+- `view_angle_filter_matrix(frame_angles, harmonics=(1, 2, 3))` is now `sor_projector(angles, order)`.  `angles` is
+  theta, the sensor angle of each frame, and `order` is p, the highest harmonic removed.  These are the code names of
+  the blueprint's Software Architecture page.  `order` has no default.  The private helper is `_frame_angles`, and the
+  tolerance is `_HARMONIC_RANK_TOL` (1e-4).
+- MACE4DModel has the new parameter `sor_order` (p, default 3), recorded in the run settings.  The filter no longer
+  reads `frames_per_rotation`.  The default 3 gives the same filter as before at the default 6 frames per rotation,
+  and it is the value of Ziyun's harmonics slide.  The blueprint records p = 2 (Theory Q1) and 4 (Architecture) as
+  defaults, so the default is a choice of mine to confirm.  At 12 frames per rotation the earlier runs used p = 6,
+  which now needs `set_params(sor_order=6)`.
+- The guard no longer uses `frames_per_rotation` either.  The private method `_temporal_filter()` returns no matrix
+  when the projector would keep only the mean over the frames (or with one frame), and `recon` then warns and runs
+  with the filter off.
+- Tests: the four-frame test model sets `sor_order=1` (2 of 4 modes removed), and one new test covers the guard.
+  `tests/test_mace4d.py` and `tests/test_mace.py`: 10 passed in the fork, and 10 passed on a scratch clone merged
+  with upstream/prerelease (clean merge).  The model's matrix still equals the saved 10-20 matrix to 1.4e-8 (6 fpr,
+  order 3) and the wrapper formula to 2.6e-8 (12 fpr, order 6).
+- The slide was rebuilt (same folder and file names): function `P = sor_projector(angles, order)`, a row "Frames per
+  rotation: needed / not needed", and the blueprint symbols theta, p, m, N_t, Q_B.
+
 ### 2026-11-11 (SOR: one slide on the interface, for the 11-12 deck)
 Ziyun asked for one slide on the interface of the SOR function and the change from the DCT.  The 11-12 deck
 (`Slides/2026/Ziyun_26_1112.pptx`, open in PowerPoint) already had the slide "Interface of the SOR Code" (deck slide
