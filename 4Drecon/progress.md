@@ -290,8 +290,8 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   does not split a command kept in a variable, so I replaced them with one that uses a shell function.  The
   phantom job ended at 18:22 EST after 2 h 18 min (20 iterations at 403 to 448 s, peak 51.0 GB).  Phantom at
   iterations 10, 20, 30: cost 4.686e7, 4.498e7, 4.437e7; cost decrease in that iteration 0.94%, 0.21%, 0.10%; image
-  change 0.71%, 0.32%, 0.20%; coefficient of `p_L p_H` 0.446, 0.475, 0.487; about 225 labels change in each
-  iteration.  Neither scan has converged at 30 iterations.
+  change 0.71%, 0.32%, 0.20%; coefficient of `p_L p_H` 0.446, 0.475, 0.487; between 35 and 262 labels change in each
+  iteration after iteration 10.  Neither scan has converged at 30 iterations.
 - Images at 10, 20, 30 iterations (Ziyun asked for the comparison): slices added on the Gautschi login node with
   `extract_slices.py` and `add_reference_slices.py` (names `bhc_20`, `bhc_30`), figures
   `nsi_scans/<scan>/gautschi_h100_30it/iterations_zoom.png` and `nsi_scans/convergence_30it.png` on the Mac.
