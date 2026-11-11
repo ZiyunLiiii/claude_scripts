@@ -45,6 +45,15 @@
 
 ## Log
 
+### 2026-11-11 evening (SOR: `sor_projector` renamed to `sor_filter_matrix`; uncommitted on the fork)
+Ziyun: "dont call it projector, projector has a specific meaning in CT. call it sor something".  The function is now
+`sor_filter_matrix(angles, order)`, the name that parallels the removed `temporal_filter_matrix`.  The word
+"projector" is gone from its docstring, from the `_temporal_filter` docstring, and from the test names and test
+docstrings ("symmetric projection" became "symmetric and idempotent").  The exports in `mbirtorch/__init__.py` are the
+upstream lines with `temporal_filter_matrix` replaced by the new name, as Ziyun asked.  Tests: 10 passed in the fork
+and 10 passed on a scratch clone merged with upstream/prerelease.  The five files are changed against be944b2 and
+are not committed.  The slide was rebuilt with the new name (same folder and file names).
+
 ### 2026-11-11 evening (SOR: committed and pushed to the fork as be944b2)
 On Ziyun's yes, the five changed files were committed on `sor` as be944b2 ("Use the SOR projector as the temporal
 filter of MACE4DModel") and pushed to origin (ZiyunLiiii/mbirtorch_ziyun_fork), on top of d410389.  The branch was
