@@ -161,6 +161,10 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   radius goes from 100.7 to 100.0 voxels (default 100.2), so the six panels look the same, and the rods become
   small.  The blue line also showed 12 to 27 voxels next to the rods that carry the air label (12 in the default
   run, none when the threshold is lowered).
+- 2026-11-11: Ziyun had the fitted-function figure of the simulation removed (the former Fig. S3), because it does
+  not give much information.  Its two equations in the Metrics subsection and the "Beam-hardening parameters"
+  paragraph left with it.  The NSI slice figure is now Fig. S3, and the supplement compiles to 6 pages.  The figure
+  stays in `segmentation_robustness/figures/` and its copy in the Overleaf `supplement/figures/` folder is deleted.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
