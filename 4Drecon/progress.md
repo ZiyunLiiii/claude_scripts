@@ -374,8 +374,23 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   5 h 20, BUDGET_MIN=310, expected 3 h 27 min) and circuit_board 18274909 (limit 45 min, BUDGET_MIN=40, expected
   24 min, `afterany` on the phantom job).  Both continue from iteration 30 with `NUM_OUTER=60`, and the volumes of
   iterations 40, 50 and 60 stay.  `results_iteration_30.json` in each folder is a copy of the results file before
-  the continuation.  The phantom should end at about 03:10 EST on 2026-11-11, so Greg's nightly burst job (03:00,
-  under 1 min) will start a little late.  Results pending.
+  the continuation.
+- Results at 60 iterations (2026-11-11): both jobs COMPLETED with exit code 0.  The phantom took 3 h 26 min 36 s
+  (23:38 to 03:05 EST, 401 to 420 s per iteration, peak 51.0 GB), and the board took 23 min 22 s (03:06 to 03:29,
+  43 to 60 s per iteration, peak 11.4 GB).  Neither scan has converged at 60 iterations.  Phantom at iterations 40,
+  50, 60: cost 4.401e7, 4.377e7, 4.353e7; image change 0.20%, 0.14%, 0.13%; `p_L p_H` 0.494, 0.497, 0.499; 20 to
+  295 labels change in each iteration.  The phantom's cost falls by 0.83% from 30 to 40, 0.54% from 40 to 50 and
+  0.56% from 50 to 60, so it falls at a steady slow rate.  Board at iterations 40, 50, 60: cost 1.3708e7, 1.3596e7,
+  1.3522e7 (falls by 1.16%, 0.82%, 0.55% over each 10 iterations); image change 0.23%, 0.19%, 0.16%; `p_L p_H`
+  0.308, 0.297, 0.285; `p_L^2` -0.114, -0.125, -0.134; single iterations still change many labels (747 at 38,
+  1,152 at 40, 612 at 50, 193 at 57).  Change of the axial slice, 30 to 40 / 40 to 50 / 50 to 60: phantom 2.5%,
+  1.9%, 1.8%; board 2.6%, 2.2%, 1.7%.  Images: 40, 50 and 60 look almost the same as 30 in the display window.
+  The phantom's two speckled patches keep their outline, and the board's speckle stays.  Figures on the Mac:
+  `nsi_scans/convergence_60it.png` and `nsi_scans/<scan>/gautschi_h100_60it/iterations_zoom.png` (30, 40, 50, 60,
+  and IPMR for the phantom); `results.json` and `slices.npz` (with `bhc_40`, `bhc_50`, `bhc_60`) are in the same
+  folders.  Ziyun also asked for the phantom at 30 and 40 while the job ran: `iterations_30_40_zoom.png` there.
+  The README of `experiments/nsi_scans/` has a section for 60 iterations (uncommitted, like the other changes).
+  Greg's nightly burst job 17786680 was still pending with reason Priority at 03:32 EST, after both jobs had ended.
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 

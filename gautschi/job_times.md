@@ -309,5 +309,8 @@ a running burst job.
 
 | Job | Size | Resources | Estimate | Limit given | Actual |
 |---|---|---|---|---|---|
-| 18274908 nsi_phantom | NSI phantom (748 x 748 x 803, 450 views): MBIR-BHC iterations 31 to 60 | 1 H100 (ai, -n14, burst) | about 3 h 27 min (410 s per iteration) | 5 h 20 | pending |
-| 18274909 circuit_board | circuit board (470 x 470 x 253, 450 views): MBIR-BHC iterations 31 to 60 | 1 H100 (ai, -n14, burst) | about 24 min (45 s per iteration) | 45 min | pending |
+| 18274908 nsi_phantom | NSI phantom (748 x 748 x 803, 450 views): MBIR-BHC iterations 31 to 60 | 1 H100 (ai, -n14, burst) | about 3 h 27 min (410 s per iteration) | 5 h 20 | 3 h 26 min 36 s: 30 iterations at 401 to 420 s each, peak 51.0 GB |
+| 18274909 circuit_board | circuit board (470 x 470 x 253, 450 views): MBIR-BHC iterations 31 to 60 | 1 H100 (ai, -n14, burst) | about 24 min (45 s per iteration) | 45 min | 23 min 22 s: 30 iterations at 43 to 60 s each, peak 11.4 GB |
+
+Both jobs started without a wait.  The phantom started at 23:38:54, and the board started 32 s after the phantom ended
+at 03:05:30.  Both estimates were within 1 min of the actual times.
