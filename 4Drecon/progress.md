@@ -15,8 +15,9 @@
   centered harmonics 1 to p of the frame angles: P = I - Q_B Q_B^t.  p = 2 is implemented first (decided 10-21), and
   the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
   placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  view_angle_filter_matrix in the fork
-  (branch sor, the former svd_based_dejitter) holds the code: sor_projector(angles, order) and MACE4DModel with
-  sor_order (default 3), DCT removed, pushed to the fork as be944b2 on 11-11; the pull request into prerelease is
+  (branch sor, the former svd_based_dejitter) holds the code: sor_filter_matrix(angles, order) and MACE4DModel with
+  sor_order (default 3), DCT removed; be944b2 is pushed to the fork, and the rename from sor_projector is
+  uncommitted (11-11); the pull request into prerelease is
   not open yet, see the 11-11 log entries.  The random-center-angle test on SimRack-1 (per-frame MBIR,
   p = 3) was submitted on 10-27 and resubmitted on ai the same day: smoke 17354383, simulation array 17354384, MBIR 17354385_0 (periodic) and 17359405_1-2 (shuffled6, random).  SOR is separate
   from dl4dct; the two share only the simulation datasets.  See the 10-27 log entries.
