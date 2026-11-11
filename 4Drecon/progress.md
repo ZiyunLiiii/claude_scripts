@@ -43,6 +43,20 @@
 
 ## Log
 
+### 2026-11-11 (SOR: GIF of MACE-DCT and MACE-SOR on the measured phantom in 60 degree frames)
+Ziyun asked for the GIF of the 60 degree MACE4D reconstruction of Phantom_30s_Run1.  No GIF existed, and the notes
+held only the submission of 11-04.
+- All four Delta jobs of 11-04 completed: prep 23539419 (7 min 17 s), MACE-DCT 23539420 (1 h 35 min, ended 11-05
+  09:45), per-frame MBIR 23539422 (21 min, ended 11-05 15:14), and MACE-SOR 23539421 (1 h 30 min, ended 11-06 02:52).
+  Each run has its 39 GB volume, slices.npz (355 MB), gram.npz, and metrics in `/work/nvme/bjda/zli98/real60/`.
+- Copied to the Mac (MD5 of the two slices files match): gram.npz and the metrics of all four runs, and slices.npz of
+  mace_dct and mace_sor_p6, into `Slides/2026/1027/Claude outputs/sor_random_angle/results/real60/`.
+- GIF `real60_mace_dct_sor_yz_xy_12fps.gif` in that folder: MACE4D-DCT (period 12) above MACE4D-SOR (harmonics 1 to
+  6, 11 directions), y-z slice x = 130 and x-y slice z = 364, all 199 frames at 12 fps, gray 0 to 0.03, 60 MB.  It was
+  made with `Slides/2026/1020/Claude outputs/mace4d_theta/make_two_plane_gif.py` (a label must not hold "=").
+- Not done: no scores from the Gram matrices, no GIF with FDK and MBIR (their slices are still on Delta), and no
+  results section in the sor_random_angle README.  The SimRack-1 60 degree MACE runs of 11-04 were not checked.
+
 ### 2026-11-11 (SOR: check of the fork's `sor` branch before a pull request)
 Ziyun asked whether the branch `sor` of `repository/mbirtorch_ziyun_fork` is ready for a pull request.  The branch
 is the former `svd_based_dejitter`.  It holds one commit, d410389, on main d9e8933, and it is pushed.  Nothing was
