@@ -165,6 +165,10 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   not give much information.  Its two equations in the Metrics subsection and the "Beam-hardening parameters"
   paragraph left with it.  The NSI slice figure is now Fig. S3, and the supplement compiles to 6 pages.  The figure
   stays in `segmentation_robustness/figures/` and its copy in the Overleaf `supplement/figures/` folder is deleted.
+- 2026-11-11: Ziyun asked for a simpler, more compact "Results for the Single-Metal Disk Phantom" subsection.  It
+  now has three run-in paragraphs (segmentation method, thresholds, metal mask) in place of five.  Two kinds of
+  number left the text: the Dice coefficients of the Otsu masks (0.990 metal, 0.997 plastic) and the largest values
+  of the metal sinogram over the iterations.  Both stay in the README of the test.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
