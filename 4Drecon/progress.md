@@ -43,6 +43,17 @@
 
 ## Log
 
+### 2026-11-11 (SOR: one slide on the interface, for the 11-12 deck)
+Ziyun asked for one slide on the interface of the SOR function and the change from the DCT.  The 11-12 deck
+(`Slides/2026/Ziyun_26_1112.pptx`, open in PowerPoint) already had the slide "Interface of the SOR Code" (deck slide
+12) with a gap for the function name.  A one-slide copy of it was built from a copy of the deck, so the deck itself
+is unchanged: `Slides/2026/1112/Claude outputs/sor_interface/sor_interface_slide.pptx`, with a PNG preview and
+`build_sor_interface_slide.py` (python-pptx; run with the venv python of an earlier session's scratchpad).  The slide
+keeps Ziyun's two bullets, names `view_angle_filter_matrix` in the gap, and adds a table of DCT against SOR: function
+signature, input, what it removes, output, and the use in MACE4DModel.  It passes the pptx skill's validation and was
+checked as a LibreOffice render.  It states that `temporal_filter_matrix` is removed, which is true only for the
+uncommitted working tree of the fork.
+
 ### 2026-11-11 (SOR: MACE4DModel uses the view-angle filter in place of the DCT filter; fork branch `sor`, uncommitted)
 Ziyun asked to replace the DCT filter with SOR in the fork (`repository/mbirtorch_ziyun_fork`, branch `sor`), with one
 core function, to put it into MACE4D as the wrapper scripts did, and to test it for a pull request into prerelease.
