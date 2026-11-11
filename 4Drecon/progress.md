@@ -15,8 +15,9 @@
   centered harmonics 1 to p of the frame angles: P = I - Q_B Q_B^t.  p = 2 is implemented first (decided 10-21), and
   the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
   placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  view_angle_filter_matrix in the fork
-  (branch sor, the former svd_based_dejitter, d410389) already builds P; the branch was checked for a pull request
-  on 11-11 and has one fault (float32 angles against the rank tolerance), see the 11-11 log entry.  The random-center-angle test on SimRack-1 (per-frame MBIR,
+  (branch sor, the former svd_based_dejitter) holds the code: sor_projector(angles, order) and MACE4DModel with
+  sor_order (default 3), DCT removed, pushed to the fork as be944b2 on 11-11; the pull request into prerelease is
+  not open yet, see the 11-11 log entries.  The random-center-angle test on SimRack-1 (per-frame MBIR,
   p = 3) was submitted on 10-27 and resubmitted on ai the same day: smoke 17354383, simulation array 17354384, MBIR 17354385_0 (periodic) and 17359405_1-2 (shuffled6, random).  SOR is separate
   from dl4dct; the two share only the simulation datasets.  See the 10-27 log entries.
 - SOR prior art (2026-11-05): no published method builds a temporal nuisance basis from the view angle or removes
@@ -42,6 +43,15 @@
   see the 09-29 log entries
 
 ## Log
+
+### 2026-11-11 evening (SOR: committed and pushed to the fork as be944b2)
+On Ziyun's yes, the five changed files were committed on `sor` as be944b2 ("Use the SOR projector as the temporal
+filter of MACE4DModel") and pushed to origin (ZiyunLiiii/mbirtorch_ziyun_fork), on top of d410389.  The branch was
+not rebased: it sits on main d9e8933, 2 commits ahead of upstream/prerelease and 14 behind, and it merges without
+conflicts.  No pull request is open yet; `gh` is not installed on the Mac, so the pull request into
+cabouman/mbirtorch prerelease has to be opened on GitHub.  A `git status` in the fork hung once during the session
+(the untracked scan is slow there); stopping it left an empty `.git/index.lock`, which was moved aside.  Use
+`git status --untracked-files=no` in that repository.
 
 ### 2026-11-11 evening (SOR: interface redesigned to the blueprint notation; fork branch `sor`, uncommitted)
 Ziyun rejected the slide line "dejitter=True, with harmonics 1 to frames_per_rotation // 2".  Their points: the core
