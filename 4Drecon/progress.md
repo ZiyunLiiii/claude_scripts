@@ -410,6 +410,18 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   `~/Desktop/data/output/2026/1110/mbir_bhc/nsi_scans/circuit_board/ipmr_grid/`, and the viewer now shows those
   beside IPMR.  An exact match needs a rerun of the board with `recon_shape` (363, 363, 251) and the one-slice
   shift; not run, needs Ziyun's yes.  The NSI phantom differs by one slice only (803 against 804).
+- Volumes for the revision and figures for the professors (2026-11-11 afternoon): Ziyun said the crop is enough
+  for now, and asked for the 60-iteration board (cropped) and NSI phantom in `IPMR_paper/Revision_data`, and for
+  images of all four datasets with NMAR, NMAR+MBIR and MBIR-BHC at the paper's slices and gray windows (two rows,
+  not for the paper).  Phantom offset measured like the board's: slice k of MBIR-BHC is slice k + 1 of the paper's
+  grid (RMS 0.0007 against 0.0041 at the neighbours), rows and columns equal, so that grid match is exact.  New
+  files: `Revision_data/MBIR-BHC_baseline/circuit_board/bhc_60.npy` (363 x 363 x 251),
+  `nsi_phantom/bhc_60.npy` (748 x 748 x 804, one slice of zeros in front) and `README.md` there; the same two
+  files are on Gautschi in `<scan>/ipmr_grid/`.  Script `Revision_codes/baseline_comparison.py` draws one PNG per
+  paper figure into `Revision_figures/baseline_comparison/` (row 1 the paper's panels, row 2 NMAR, NMAR+MBIR,
+  MBIR-BHC).  The MBIR-BHC volumes of the two simulations (iterations 10 and 30) are only on Delta
+  (`/u/zli98/mbir_bhc/out/ipmr_simulation/<case>/`), and Delta needs Ziyun's login.  The Mac's disk is 97% full
+  and macOS had moved `data_for_MAR_paper/demo/recon_demo_mbir.npy` to iCloud only.
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 
