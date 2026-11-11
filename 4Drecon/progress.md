@@ -287,7 +287,22 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   -0.084, -0.101.  The label change still jumps (4 labels at iteration 20, 1232 at 21, 512 at 30).  Results file
   on the Mac: `mbir_bhc_baseline/nsi_scans/circuit_board/gautschi_h100_30it/results.json`.  The phantom job was
   at iteration 19 at 17:06 EST (about 407 s for each iteration).  My two background waiters failed because zsh
-  does not split a command kept in a variable, so I replaced them with one that uses a shell function.  At 30 iterations the simulations already
+  does not split a command kept in a variable, so I replaced them with one that uses a shell function.  The
+  phantom job ended at 18:22 EST after 2 h 18 min (20 iterations at 403 to 448 s, peak 51.0 GB).  Phantom at
+  iterations 10, 20, 30: cost 4.686e7, 4.498e7, 4.437e7; cost decrease in that iteration 0.94%, 0.21%, 0.10%; image
+  change 0.71%, 0.32%, 0.20%; coefficient of `p_L p_H` 0.446, 0.475, 0.487; about 225 labels change in each
+  iteration.  Neither scan has converged at 30 iterations.
+- Images at 10, 20, 30 iterations (Ziyun asked for the comparison): slices added on the Gautschi login node with
+  `extract_slices.py` and `add_reference_slices.py` (names `bhc_20`, `bhc_30`), figures
+  `nsi_scans/<scan>/gautschi_h100_30it/iterations_zoom.png` and `nsi_scans/convergence_30it.png` on the Mac.
+  Change of the axial slice, MBIR to 10 / 10 to 20 / 20 to 30: phantom 39.9%, 5.4%, 2.7%; board 10.7%, 4.2%, 2.9%.
+  Board: the streaks get weaker with every step, but a speckled texture of bright dots appears on the board at 20
+  iterations and grows at 30 (a second strip along the right edge of the board).  Phantom: the bright regions are
+  weaker at 20 and 30, and the speckle at the ends of the largest insert stays and gathers into two patches.  IPMR
+  is still the cleanest.  Ziyun did not like the log axis for the label change, so `plot_convergence.py` now draws
+  it on a linear axis, with a tick at every 5th iteration for a long run.  Uncommitted in the MBIR-BHC repo:
+  `run_nsi_scan.py`, `gautschi/nsi_scan.sbatch`, `plot_convergence.py`, and the README section for 30 iterations.
+  At 30 iterations the simulations already
   have MBIR-BHC below IPMR in plastic NRMSE on both phantoms (two_rods 0.1099 vs 0.1264, six_rods 0.8323 vs 0.8833).
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
