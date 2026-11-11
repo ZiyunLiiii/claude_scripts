@@ -15,7 +15,8 @@
   centered harmonics 1 to p of the frame angles: P = I - Q_B Q_B^t.  p = 2 is implemented first (decided 10-21), and
   the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
   placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  view_angle_filter_matrix in the fork
-  (svd_based_dejitter, d410389) already builds P.  The random-center-angle test on SimRack-1 (per-frame MBIR,
+  (branch sor, the former svd_based_dejitter, d410389) already builds P; the branch was checked for a pull request
+  on 11-11 and has one fault (float32 angles against the rank tolerance), see the 11-11 log entry.  The random-center-angle test on SimRack-1 (per-frame MBIR,
   p = 3) was submitted on 10-27 and resubmitted on ai the same day: smoke 17354383, simulation array 17354384, MBIR 17354385_0 (periodic) and 17359405_1-2 (shuffled6, random).  SOR is separate
   from dl4dct; the two share only the simulation datasets.  See the 10-27 log entries.
 - SOR prior art (2026-11-05): no published method builds a temporal nuisance basis from the view angle or removes
@@ -41,6 +42,23 @@
   see the 09-29 log entries
 
 ## Log
+
+### 2026-11-11 (SOR: check of the fork's `sor` branch before a pull request)
+Ziyun asked whether the branch `sor` of `repository/mbirtorch_ziyun_fork` is ready for a pull request.  The branch
+is the former `svd_based_dejitter`.  It holds one commit, d410389, on main d9e8933, and it is pushed.  Nothing was
+changed in this check.
+- The branch merges into upstream/prerelease (0d4ed66, 14 commits ahead) without conflicts.  The two new tests and
+  the DCT filter matrix test pass with PYTHONPATH set to the fork.  The full suite was not run on the Mac.
+- Fault found: models store the angles in float32, so the path of the docstring example
+  (`frame_center_angles(ct_model.get_params('angles'), mace4d.view_slices)`) can add a rounding direction to the
+  filter.  At 6 frames per rotation and 99 frames, unwrapped angles give a sixth relative singular value of 2.0e-7,
+  which is above `_ANGLE_CURVE_RANK_TOL = 1e-8`, so the filter removes 6 directions and not 5.  Angles stored mod
+  2 pi (the NSI loader) give 2.3e-9 and 5 directions, a margin of a factor of 4.  `gen_demo_data_4d` gives unwrapped
+  angles.  The test of the branch uses float64 angles, so it does not see this.
+- Open decision: MACE4DModel cannot use the filter.  `recon` always builds `temporal_filter_matrix`.  The MACE4D +
+  SOR runs of 10-20 and 11-04 replaced that function from a wrapper script, and that code is not on the branch.
+- Small points: no docs page lists the two functions, and a frame that spans 360 degrees has no defined center in
+  `frame_center_angles`.  `gh` is not installed on the Mac, so the state on GitHub was not read.
 
 ### 2026-11-11 (IPMR revision: status of all reviewer comments, two decisions)
 - Status check of the letter: 9 of 21 comments have finished responses (R1 major 3 and 6, R1 minor 1 to 5, R2-2,
