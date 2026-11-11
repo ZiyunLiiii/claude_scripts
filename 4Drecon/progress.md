@@ -169,6 +169,9 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
   now has three run-in paragraphs (segmentation method, thresholds, metal mask) in place of five.  Two kinds of
   number left the text: the Dice coefficients of the Otsu masks (0.990 metal, 0.997 plastic) and the largest values
   of the metal sinogram over the iterations.  Both stay in the README of the test.
+- 2026-11-11: Ziyun did not want the name "Metal mask offset" in Table S1.  The first test is now called "Metal mask
+  size" in Table S1 and in the run-in heading of the subsection on the changes.  The word "offset" no longer appears
+  in the supplement.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
