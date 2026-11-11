@@ -43,6 +43,34 @@
 
 ## Log
 
+### 2026-11-11 (SOR: MACE4DModel uses the view-angle filter in place of the DCT filter; fork branch `sor`, uncommitted)
+Ziyun asked to replace the DCT filter with SOR in the fork (`repository/mbirtorch_ziyun_fork`, branch `sor`), with one
+core function, to put it into MACE4D as the wrapper scripts did, and to test it for a pull request into prerelease.
+The changes are in the working tree only.  Nothing is staged, committed, or pushed.
+- `mbirtorch/mace4d.py`: `MACE4DModel.recon` builds its temporal filter with the new private method
+  `_view_angle_filter()`.  The method calls `view_angle_filter_matrix` with the center angle of each frame and the
+  harmonics 1 to `frames_per_rotation // 2`, as the wrappers of 10-20 and 11-04 did.  `frame_center_angles` is now the
+  private `_frame_center_angles` and is no longer exported, so `view_angle_filter_matrix` is the one public function.
+  `temporal_filter_matrix` (the DCT) stays in the package, exported and tested, but MACE4DModel no longer calls it.
+  Whether to delete it is open.
+- Two faults fixed.  `_ANGLE_CURVE_RANK_TOL` is 1e-4 (was 1e-8): the float32 angles of a model give rounding values of
+  up to 8.7e-6 (167 turns, 12 fpr, unwrapped), and the smallest real value is 0.54.  The angles are read with
+  `ct_model.get_all_params()`, because `get_params('angles')` raises NameError on a ConeBeamModel (the old docstring
+  example failed there).  An empty list of harmonics (one frame per rotation) gives the identity matrix.
+- Tests: `tests/test_mace4d.py` has one new test (the model's filter from float32 angles equals the filter of the
+  exact angles, unwrapped and mod 2 pi; it fails with the old tolerance) and one new assertion in the end-to-end test.
+  `tests/test_mace4d.py` and `tests/test_mace.py`: 10 passed in the fork, and 10 passed on a scratch copy of
+  upstream/prerelease (0d4ed66) with the whole branch diff applied (the patch applies, one hunk with fuzz).  The full
+  suite was not run.
+- Check against the wrapper: with the NSI angles ((-2.5 j) mod 360, 2400 views, cone beam) the model's matrix equals
+  the matrices saved by the 10-20 runs (`mace4d_theta/data/theta_filter_{real,simrack1}.npz`, 99 frames, 5 columns) to
+  1.4e-8, and the wrapper formula at 12 fpr (199 frames, 11 columns) to 2.6e-8.
+- Demo problem of demo_5 (240 views, 2 turns, 8 fpr, 15 frames, 10 iterations, seed 0, one MPS worker): NRMSE 0.2287
+  with the view-angle filter (7 of 15 modes removed), 0.2390 with the DCT filter (11 of 15 removed), 0.2660 with no
+  filter.  This is one problem and one seed.
+- Not done: commit, rebase onto prerelease, a run on a GPU, the docs page (unchanged).  The Delta scripts
+  run_mace60.py and run_real60.py call `mbirtorch.frame_center_angles`, so they need the archived code of d410389.
+
 ### 2026-11-11 (SOR: GIF of MACE-DCT and MACE-SOR on the measured phantom in 60 degree frames)
 Ziyun asked for the GIF of the 60 degree MACE4D reconstruction of Phantom_30s_Run1.  No GIF existed, and the notes
 held only the submission of 11-04.
