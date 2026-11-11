@@ -304,6 +304,13 @@ board too.  Scripts: `MBIR-BHC_reproduction/experiments/ipmr_simulation/` and `e
   `run_nsi_scan.py`, `gautschi/nsi_scan.sbatch`, `plot_convergence.py`, and the README section for 30 iterations.
   At 30 iterations the simulations already
   have MBIR-BHC below IPMR in plastic NRMSE on both phantoms (two_rods 0.1099 vs 0.1264, six_rods 0.8323 vs 0.8833).
+- To 60 iterations (2026-11-10, 23:38 EST): Ziyun asked "can you submit burst to continue running both phantom
+  and circuit till the 60th Iteration".  Gautschi jobs, one H100 each, burst QOS: nsi_phantom 18274908 (limit
+  5 h 20, BUDGET_MIN=310, expected 3 h 27 min) and circuit_board 18274909 (limit 45 min, BUDGET_MIN=40, expected
+  24 min, `afterany` on the phantom job).  Both continue from iteration 30 with `NUM_OUTER=60`, and the volumes of
+  iterations 40, 50 and 60 stay.  `results_iteration_30.json` in each folder is a copy of the results file before
+  the continuation.  The phantom should end at about 03:10 EST on 2026-11-11, so Greg's nightly burst job (03:00,
+  under 1 min) will start a little late.  Results pending.
 - Not done: a comparison of the circuit board with IPMR, and an agreed evaluation of the measured scans for the
   paper.
 

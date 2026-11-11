@@ -299,3 +299,15 @@ one runs at a time.  The two long jobs depend on the smoke job with `--dependenc
 | 18231582 smoke_nsi | circuit board at downsample 8, every 8th view: 2 MBIR-BHC iterations, then a second call that continues to 5 | 1 H100 (ai, -n14, burst) | about 5 min | 15 min | 1 min 55 s, passed |
 | 18231583 circuit_board | circuit board at downsample 4, every 4th view (470 x 470 x 253, 450 views): FDK, MBIR, 30 MBIR-BHC iterations | 1 H100 (ai, -n14, burst) | about 30 min (106 s per iteration on an A100, H100 taken as 2.1 x faster) | 50 min | 24 min 26 s: FDK 7 s, MBIR 58 s, 30 iterations at 43 to 47 s each, peak 11.4 GB |
 | 18231584 nsi_phantom | NSI phantom (748 x 748 x 803, 450 views): MBIR-BHC iterations 11 to 30 from the saved iteration 10 | 1 H100 (ai, -n14, burst) | about 2 h 15 min (400 s per iteration) | 3 h 30 | 2 h 18 min: 20 iterations at 403 to 448 s each, peak 51.0 GB |
+
+### Continuing both measured scans to 60 iterations (submitted 2026-11-10, 23:38 EST)
+
+Ziyun asked for both scans to continue from iteration 30 to iteration 60 with the burst QOS.  The group's three normal
+GPUs were in use.  The phantom runs first, and the board depends on it with `--dependency=afterany`, because burst runs
+one job of the group at a time.  Greg's nightly burst job 17786680 (4 GPUs, under 1 min) is due at 03:00 and waits for
+a running burst job.
+
+| Job | Size | Resources | Estimate | Limit given | Actual |
+|---|---|---|---|---|---|
+| 18274908 nsi_phantom | NSI phantom (748 x 748 x 803, 450 views): MBIR-BHC iterations 31 to 60 | 1 H100 (ai, -n14, burst) | about 3 h 27 min (410 s per iteration) | 5 h 20 | pending |
+| 18274909 circuit_board | circuit board (470 x 470 x 253, 450 views): MBIR-BHC iterations 31 to 60 | 1 H100 (ai, -n14, burst) | about 24 min (45 s per iteration) | 45 min | pending |
