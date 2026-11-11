@@ -70,6 +70,16 @@ The changes are in the working tree only.  Nothing is staged, committed, or push
   filter.  This is one problem and one seed.
 - Not done: commit, rebase onto prerelease, a run on a GPU, the docs page (unchanged).  The Delta scripts
   run_mace60.py and run_real60.py call `mbirtorch.frame_center_angles`, so they need the archived code of d410389.
+- Later the same day, on Ziyun's word ("Remove it"): `temporal_filter_matrix` (the DCT) is deleted from
+  `mbirtorch/mace4d.py` and from the exports.  The docstrings of `apply_temporal_filter` and `HyperplaneAgent`
+  (`mbirtorch/mace.py`) name `view_angle_filter_matrix` in its place.  The DCT test and its helper are deleted from
+  `tests/test_mace4d.py`; its checks of `apply_temporal_filter` moved into the view-angle test.  `tests/test_mace.py`
+  uses a zero matrix and the view-angle matrix of 12 frames.  Five files are changed against d410389, all uncommitted.
+  Tests: 9 passed in the fork and 9 passed on upstream/prerelease with the branch diff.  In a scratch clone, both a
+  merge of prerelease and a rebase onto prerelease ran without conflicts.  No tracked file names the DCT function.
+- Ziyun asked whether the filter costs the same as the DCT in the loop.  It does: the loop code is unchanged, and the
+  filter is one matrix of the same size.  Delta, 199 frames at full resolution: 1 h 35 min with DCT, 1 h 30 min with
+  SOR.
 
 ### 2026-11-11 (SOR: GIF of MACE-DCT and MACE-SOR on the measured phantom in 60 degree frames)
 Ziyun asked for the GIF of the 60 degree MACE4D reconstruction of Phantom_30s_Run1.  No GIF existed, and the notes
