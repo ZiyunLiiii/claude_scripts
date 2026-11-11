@@ -55,7 +55,7 @@ number.  Changes in the working tree of the fork (still nothing staged or commit
 - MACE4DModel has the new parameter `sor_order` (p, default 3), recorded in the run settings.  The filter no longer
   reads `frames_per_rotation`.  The default 3 gives the same filter as before at the default 6 frames per rotation,
   and it is the value of Ziyun's harmonics slide.  The blueprint records p = 2 (Theory Q1) and 4 (Architecture) as
-  defaults, so the default is a choice of mine to confirm.  At 12 frames per rotation the earlier runs used p = 6,
+  defaults.  Ziyun confirmed the default 3 the same evening.  At 12 frames per rotation the earlier runs used p = 6,
   which now needs `set_params(sor_order=6)`.
 - The guard no longer uses `frames_per_rotation` either.  The private method `_temporal_filter()` returns no matrix
   when the projector would keep only the mean over the frames (or with one frame), and `recon` then warns and runs
