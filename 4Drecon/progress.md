@@ -42,6 +42,28 @@
 
 ## Log
 
+### 2026-11-10 late (IPMR revision: segmentation table in the paper, shifts in percent, K-edge note, letter wording)
+- main.tex Section IV-D is now "Sensitivity Analysis" (Ziyun's retitle).  Ziyun added a red paragraph on the
+  segmentation test, and a red table `tab:segmentation` follows it.  Ziyun's design of the table: the default Otsu
+  run first as the baseline, one run per line, no ranges, group labels that span their rows (multirow; the
+  `multirow` package was added to the preamble), groups in this order: other method, plastic/metal threshold
+  lowered by / raised by, air/plastic threshold lowered by / raised by (5, 10, 20%), metal mask grown by / shrunk by
+  (1, 2, 3 voxels), no correction (FDK, MBIR).  It compiles without an overfull box at \small with 4 pt column gaps.
+- Threshold shifts are now written in percent of the gap between the two class means everywhere: the paper's table
+  and paragraph ("up to 20%"), the supplement text and Table S1 (also the watershed band, now 25%), and the labels
+  of Table S2 and Figs. S1 to S4.  The stored run names keep the fraction (`thr_metal_-0.2`).  Changed
+  `seg_results.amount_label`, `make_tables.amount_cell` (escapes %), and the threshold axis of `plot_curves.py`;
+  reran all figure and table scripts, copied the outputs to the Overleaf `supplement/` folder, and refreshed
+  `segmentation_robustness/supplementary_preview.pdf` (8 pages, compiles cleanly).
+- The new table makes the run-time table Table VIII.  The letter still writes "Table~VII" by hand in the responses
+  to Reviewer 1 major issue 6 and Reviewer 2 comment 2, and the response to Reviewer 3 comment 4 still quotes the
+  old title "Parameter sensitivity".  Not yet changed.
+- Mass attenuation figure caption: a red note that the jumps of Al, Ti and Cu at 1.56, 4.97 and 8.98 keV are
+  K-absorption edges, and that the K-edges of the elements of C2H4 and PET lie below 1 keV.
+- Letter, Reviewer 1 major issue 3 (multi-metal ground truth): Charlie's two sentences kept (grammar fixed) plus
+  the spectrum-weighted definition, the cause (polyethylene used instead of PET), and 0.0219 to 0.0345 /mm.  The
+  NRMSE versus SSIM part of that comment is still unanswered.
+
 ### 2026-11-10 (IPMR revision: Reviewer 3 comment 1, results in and supplementary file written)
 Ziyun asked for a supplementary material file in the Overleaf project that organizes the results of the segmentation
 perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed overnight without an error.
