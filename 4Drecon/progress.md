@@ -42,6 +42,18 @@
 
 ## Log
 
+### 2026-11-11 (IPMR revision: status of all reviewer comments, two decisions)
+- Status check of the letter: 9 of 21 comments have finished responses (R1 major 3 and 6, R1 minor 1 to 5, R2-2,
+  R3-4); 12 are TODO.  All requested experiments are done except the two-plastic simulation.  Left: the baseline
+  comparison in the paper (Table IV columns, images in supplement Section S-I), the Fig. 6 profile with the NMAR and
+  MBIR-BHC slices, and the writing of R1-2, R1-4, R1-5/R2-3, R1 minor 7, R3-5, and the NRMSE versus SSIM part of R1-3.
+- Watch: NMAR (0.0981) and MBIR-BHC at 30 iterations (0.1099) beat IPMR (0.1264) on the single-metal simulation, and
+  MBIR-BHC at 30 iterations beats it on the multi-metal one (0.8323 against 0.8833).  MBIR-BHC ran in mbirtorch, where
+  plain MBIR already scores better than in mbirjax (0.1456 against 0.1526).
+- Decision (Ziyun): no two-plastic simulation for R3-2, because the paper never claims IPMR handles several plastics;
+  the response states the scope.
+- Decision (Ziyun): after the whole revision is done, gather all data and plotting files into one folder.  Not before.
+
 ### 2026-11-11 (IPMR revision: segmentation figure in place of the table)
 - The paper compiled to 15 pages (the limit) with the 22-row segmentation table, with the references ending halfway
   down page 15, and the NMAR and MBIR-BHC comparisons are still to come.  On Ziyun's request for a balance between
