@@ -172,6 +172,14 @@ perturbation test.  All eight Gautschi jobs (18175212 to 18175219) had completed
 - 2026-11-11: Ziyun did not want the name "Metal mask offset" in Table S1.  The first test is now called "Metal mask
   size" in Table S1 and in the run-in heading of the subsection on the changes.  The word "offset" no longer appears
   in the supplement.
+- 2026-11-11: Ziyun asked that Fig. S3 and the tables follow the order of Fig. S2: segmentation method, metal mask
+  size, plastic/metal threshold, air/plastic threshold.  Fig. S3 (NSI slices) now has the layout of Fig. S2: the
+  first row holds FDK, MBIR, and IPMR with Otsu, ISO-50, and watershed, and each other row has a label and the runs
+  of one sweep.  Table S1, Table S2, the list of the tests, and the result paragraphs of the simulation follow the
+  same order.  Fig. S1 keeps its columns (metal mask, threshold, method), and the summary keeps its order from the
+  smallest to the largest effect.  The slice figures are now saved with their images at 300 dpi inside the PDF
+  (`PDF_IMAGE_DPI` in `seg_results.py`); before, the PDF held them at 100 dpi, below the resolution of the data.
+  The group label "Segmentation method" of Table S2, which was edited by hand in Overleaf, is now in `make_tables.py`.
 - Next: Ziyun reviews the supplement; then the response to Reviewer 3 comment 1 and a pointer to the supplement in
   main.tex.
 
