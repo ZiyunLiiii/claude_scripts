@@ -42,6 +42,18 @@
 
 ## Log
 
+### 2026-11-11 (IPMR revision: segmentation figure in place of the table)
+- The paper compiled to 15 pages (the limit) with the 22-row segmentation table, with the references ending halfway
+  down page 15, and the NMAR and MBIR-BHC comparisons are still to come.  On Ziyun's request for a balance between
+  "only mentioned" and "giant tables", the table in Section IV-D was replaced by a single-column figure
+  (`fig:segmentation`, Fig. 15, `Figures/segmentation/seg_paper_nrmse.pdf`, 3.5 x 1.5 in): plastic NRMSE against
+  the metal mask offset (left) and the threshold shift in percent (right), one point per run, with MBIR and FDK
+  lines.  One added sentence gives the true masks, ISO-50, and watershed NRMSE (0.1269, 0.1260, 0.1263 against
+  0.1264).  The paragraph points to Section S-I for the SSIM.  The references on page 15 now end 107 pt higher.
+  The `multirow` package was removed again.  Made by `segmentation_robustness/scripts/plot_paper_curves.py`.
+- Without the table, the run-time table is Table VII again, so the letter's "Table~VII" is correct.  The response to
+  Reviewer 3 comment 4 still quotes the old title "Parameter sensitivity".
+
 ### 2026-11-10 late (IPMR revision: segmentation table in the paper, shifts in percent, K-edge note, letter wording)
 - main.tex Section IV-D is now "Sensitivity Analysis" (Ziyun's retitle).  Ziyun added a red paragraph on the
   segmentation test, and a red table `tab:segmentation` follows it.  Ziyun's design of the table: the default Otsu
