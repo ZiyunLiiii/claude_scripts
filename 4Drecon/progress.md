@@ -45,6 +45,24 @@
 
 ## Log
 
+### 2026-11-11 night (IPMR revision: skeleton of Section S-I of the supplement, the baseline comparison)
+Ziyun asked for a rough structure of Section S-I of `supplementary.tex`, and will fill in the images of NMAR,
+NMAR+MBIR and MBIR-BHC.
+- Section S-I is now "Comparison of IPMR with Baseline Methods" (`sec:baseline`) with subsections A Baseline Methods,
+  B Datasets and Display, C to F one result subsection for each of the four datasets, and G Summary.  Labels start
+  with `base_`.
+- Each result subsection has one figure of four panels: NMAR, NMAR+MBIR, MBIR-BHC, IPMR (proposed).  The circuit
+  board has two figures (axial region, coronal slice), so the section has Figs. S1 to S5.  The IPMR panel is the file
+  of the paper's figure in `Figures/`.  A baseline panel is a box with its file name until the file is in
+  `supplement/figures/` (macro `\panel{folder}{file}{label}`).  The names are `base_<single|multi|nsi|axial|coronal>_
+  <nmar|nmar_mbir|bhc>.pdf`.
+- Table S1 has the plastic NRMSE and SSIM of both simulations for FDK, MBIR, NMAR, NMAR+MBIR, MBIR-BHC, IPMR.  The
+  three baseline columns hold "--".  Open: which MBIR-BHC iteration count the table uses (the README result is 10
+  iterations, the group figures show 30).
+- Missing text is marked with a red `\todo{...}`.  The supplement compiles to 10 pages with no warnings (build in
+  the session scratchpad, nothing written into the Overleaf folder).
+- The paper's IPMR panels have a colorbar and annotations, so the baseline panels need the same style to match.
+
 ### 2026-11-11 night (SOR: the docs check of the draft pull request fails; fix found, uncommitted)
 Ziyun sent a screenshot of the draft pull request's checks: CI / test (3.11) passed in 9 min, CI / versions passed,
 CI / floor was skipped (it does not run for prerelease), and CI / docs failed after 53 s.
