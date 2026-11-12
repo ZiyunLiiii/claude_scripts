@@ -71,6 +71,13 @@ NMAR+MBIR and MBIR-BHC.
 - Page count against that limit: a two-column 10 point copy (scratchpad only; every figure and table spans both
   columns, no \FloatBarrier) compiles to 7 pages, with about 1.2 pages of white space on the pages that hold only
   figures.  S-I still has placeholder text, so the final count is 7 unless something is cut.
+- On Ziyun's request, `supplementary.tex` itself is now two-column at 10 point, with no change to the content:
+  class option `[journal]`, every figure and table as `figure*` or `table*` at `[!t]`, and every `\FloatBarrier` and
+  the `\clearpage` between the sections removed (with them the two-column file has 11 pages, and with only the
+  `\clearpage` it has 8 pages and an empty column).  `placeins` is no longer loaded.  The file compiles to 7 pages
+  with no warnings.  The figures no longer stay inside their subsection: the S-I figures are on pages 2 and 3, and
+  the S-II figures are on pages 5 to 7.  Ziyun also reworded the paragraph on the metal mask and removed the scope
+  paragraph of S-II G.
 
 ### 2026-11-11 night (SOR: the docs check of the draft pull request fails; fix found, uncommitted)
 Ziyun sent a screenshot of the draft pull request's checks: CI / test (3.11) passed in 9 min, CI / versions passed,
