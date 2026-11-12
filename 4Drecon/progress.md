@@ -16,7 +16,8 @@
   the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
   placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  view_angle_filter_matrix in the fork
   (branch sor, the former svd_based_dejitter) holds the code: sor_filter_matrix(angles, order) and MACE4DModel with
-  sor_order (default 3), DCT removed; pushed to the fork through 5aaf7b4 on 11-11; the pull request into prerelease is
+  sor_order (default 3), DCT removed; pushed to the fork through 5aaf7b4 on 11-11; the pull request is on hold
+  until Ziyun says to open it; the pull request into prerelease is
   not open yet, see the 11-11 log entries.  The random-center-angle test on SimRack-1 (per-frame MBIR,
   p = 3) was submitted on 10-27 and resubmitted on ai the same day: smoke 17354383, simulation array 17354384, MBIR 17354385_0 (periodic) and 17359405_1-2 (shuffled6, random).  SOR is separate
   from dl4dct; the two share only the simulation datasets.  See the 10-27 log entries.
@@ -49,7 +50,8 @@ On Ziyun's yes, the rename was committed on `sor` as 5aaf7b4 ("Rename sor_projec
 to origin (ZiyunLiiii/mbirtorch_ziyun_fork), as a third commit with a normal push.  The branch is d410389, be944b2,
 5aaf7b4 on main d9e8933: 3 commits ahead of upstream/prerelease and 14 behind, with a clean merge.  The message of
 be944b2 still says "SOR projector"; Ziyun was offered one clean commit by force push and chose the third commit.  No
-pull request is open yet.
+pull request is open.  Ziyun, the same evening: "dont submit the PR yet".  Do not open the pull request, and do not
+push anything to cabouman/mbirtorch, until Ziyun says so.
 
 ### 2026-11-11 evening (SOR: `sor_projector` renamed to `sor_filter_matrix`; uncommitted on the fork)
 Ziyun: "dont call it projector, projector has a specific meaning in CT. call it sor something".  The function is now
