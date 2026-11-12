@@ -16,7 +16,7 @@
   the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
   placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  The fork
   (branch sor, the former svd_based_dejitter) holds the code: sor_filter_matrix(angles, order) and MACE4DModel with
-  sor_order (default 3), DCT removed; pushed to the fork through 5aaf7b4 on 11-11.  Ziyun opened a draft pull
+  sor_order (default 3), DCT removed; pushed to the fork through 2ed1aad on 11-11.  Ziyun opened a draft pull
   request into prerelease on 11-11 and will ask Charlie and Greg on 11-12 whether the DCT may be removed; see the
   11-11 log entries.  The random-center-angle test on SimRack-1 (per-frame MBIR,
   p = 3) was submitted on 10-27 and resubmitted on ai the same day: smoke 17354383, simulation array 17354384, MBIR 17354385_0 (periodic) and 17359405_1-2 (shuffled6, random).  SOR is separate
@@ -55,6 +55,9 @@ CI / floor was skipped (it does not run for prerelease), and CI / docs failed af
   changes in `mbirtorch/mace4d.py`.  With the fix, the same build exits 0 with no warnings.  The local build passes
   the extensions by hand, because the env lacks `sphinxext.opengraph`.
 - My readiness check of the branch had not built the docs.  The command is now in my notes.
+- On Ziyun's yes, the fix was committed as 2ed1aad ("Remove an unresolved reference from the set_params docstring")
+  and pushed to the fork.  The branch is d410389, be944b2, 5aaf7b4, 2ed1aad.  The push reruns the checks of the draft
+  pull request; their result was not read, because `gh` is not installed.
 
 ### 2026-11-11 night (SOR: Ziyun opened a draft pull request)
 Ziyun opened the draft pull request themself (from the fork's `sor` at 5aaf7b4 into cabouman/mbirtorch prerelease;
