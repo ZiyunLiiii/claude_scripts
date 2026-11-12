@@ -45,6 +45,17 @@
 
 ## Log
 
+### 2026-11-11 night (SOR: the docs check of the draft pull request fails; fix found, uncommitted)
+Ziyun sent a screenshot of the draft pull request's checks: CI / test (3.11) passed in 9 min, CI / versions passed,
+CI / floor was skipped (it does not run for prerelease), and CI / docs failed after 53 s.
+- Cause, reproduced on a scratch clone of 5aaf7b4 merged with upstream/prerelease: the docs job runs
+  `sphinx -W` with `nitpicky = True`, and `MACE4DModel.set_params` said "See :func:`sor_filter_matrix`".  No docs
+  page documents that function, so the reference does not resolve.  It was the only warning.
+- Fix in the fork's working tree, not committed: that sentence is removed from the `sor_order` entry.  One line
+  changes in `mbirtorch/mace4d.py`.  With the fix, the same build exits 0 with no warnings.  The local build passes
+  the extensions by hand, because the env lacks `sphinxext.opengraph`.
+- My readiness check of the branch had not built the docs.  The command is now in my notes.
+
 ### 2026-11-11 night (SOR: Ziyun opened a draft pull request)
 Ziyun opened the draft pull request themself (from the fork's `sor` at 5aaf7b4 into cabouman/mbirtorch prerelease;
 the number was not given).  They will ask Charlie and Greg on 11-12 whether the DCT filter may be removed now, since
