@@ -45,6 +45,20 @@
 
 ## Log
 
+### 2026-11-11 night (SOR: demo problem run end to end with the committed code 5aaf7b4)
+Ziyun asked whether the branch is ready for the pull request, and approved one run of the demo problem on the Mac.
+The problem is that of demo_5_mace4d.py (240 views, 2 turns, 8 frames per rotation, 15 frames, 10 iterations, seed 0,
+one MPS worker), run from the fork at 5aaf7b4.
+- Default settings (sor_order 3, 6 of 15 modes removed): NRMSE 0.2262, 82 s, all values finite.
+- sor_order 4 (7 of 15 modes removed): NRMSE 0.2287, which equals the earlier check with harmonics 1 to 4.
+- References from the earlier check, same seed and same loop code: DCT 0.2390, no filter 0.2660.  The default is
+  5.4% below the DCT and 15.0% below no filter.  This is one small problem and one seed.
+Readiness points given to Ziyun: the branch is mechanically ready; the pull request removes the DCT although the
+blueprint's Software Architecture page recommends keeping it through validation, and it has one function and
+`sor_order` where that page has a SensorSubspace class and `dejitter_method`; the history has three commits with two
+renames; 12 frames per rotation needs `sor_order=6` by hand.  A draft of the pull request message was given in the
+chat.  The pull request stays on hold until Ziyun says to open it.
+
 ### 2026-11-11 evening (SOR: the rename committed and pushed to the fork as 5aaf7b4)
 On Ziyun's yes, the rename was committed on `sor` as 5aaf7b4 ("Rename sor_projector to sor_filter_matrix") and pushed
 to origin (ZiyunLiiii/mbirtorch_ziyun_fork), as a third commit with a normal push.  The branch is d410389, be944b2,
