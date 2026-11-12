@@ -14,11 +14,11 @@
   (index, Theory, Theory 2, Software Architecture).  Theory removes from every voxel its least-squares fit to the
   centered harmonics 1 to p of the frame angles: P = I - Q_B Q_B^t.  p = 2 is implemented first (decided 10-21), and
   the fit is not regularized (decided 10-22).  Theory 2 (d < 2p directions chosen from X) is parked.  Open: the
-  placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  view_angle_filter_matrix in the fork
+  placement of P (Q2), and the Hardware Mapping, User API and Testing pages.  The fork
   (branch sor, the former svd_based_dejitter) holds the code: sor_filter_matrix(angles, order) and MACE4DModel with
-  sor_order (default 3), DCT removed; pushed to the fork through 5aaf7b4 on 11-11; the pull request is on hold
-  until Ziyun says to open it; the pull request into prerelease is
-  not open yet, see the 11-11 log entries.  The random-center-angle test on SimRack-1 (per-frame MBIR,
+  sor_order (default 3), DCT removed; pushed to the fork through 5aaf7b4 on 11-11.  Ziyun opened a draft pull
+  request into prerelease on 11-11 and will ask Charlie and Greg on 11-12 whether the DCT may be removed; see the
+  11-11 log entries.  The random-center-angle test on SimRack-1 (per-frame MBIR,
   p = 3) was submitted on 10-27 and resubmitted on ai the same day: smoke 17354383, simulation array 17354384, MBIR 17354385_0 (periodic) and 17359405_1-2 (shuffled6, random).  SOR is separate
   from dl4dct; the two share only the simulation datasets.  See the 10-27 log entries.
 - SOR prior art (2026-11-05): no published method builds a temporal nuisance basis from the view angle or removes
@@ -44,6 +44,13 @@
   see the 09-29 log entries
 
 ## Log
+
+### 2026-11-11 night (SOR: Ziyun opened a draft pull request)
+Ziyun opened the draft pull request themself (from the fork's `sor` at 5aaf7b4 into cabouman/mbirtorch prerelease;
+the number was not given).  They will ask Charlie and Greg on 11-12 whether the DCT filter may be removed now, since
+the blueprint recommends keeping it through validation.  Depending on the answer, the next change is either nothing
+or restoring `temporal_filter_matrix` as an option beside SOR.  Do not mark the pull request ready for review, and do
+not push more to the branch, without Ziyun's word.
 
 ### 2026-11-11 night (SOR: demo problem run end to end with the committed code 5aaf7b4)
 Ziyun asked whether the branch is ready for the pull request, and approved one run of the demo problem on the Mac.
