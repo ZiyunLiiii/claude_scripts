@@ -62,6 +62,15 @@ NMAR+MBIR and MBIR-BHC.
 - Missing text is marked with a red `\todo{...}`.  The supplement compiles to 10 pages with no warnings (build in
   the session scratchpad, nothing written into the Overleaf folder).
 - The paper's IPMR panels have a colorbar and annotations, so the baseline panels need the same style to match.
+- Later the same night: a paragraph in S-II G states that the metal mask is usually accurate in practice, because
+  beam hardening mainly distorts the plastic (Ziyun's statement, placed after the paragraph on the limit).
+- Format rules, from the SPS "Information for Authors" page (it does not name TCI, it covers the SPS Transactions):
+  no format is required for the supplement file, so one column is allowed.  The supplement should not exceed six
+  double-column pages at 10 point without approval of the Editor-in-Chief, and its equations, tables and figures
+  should be numbered consecutively to those of the manuscript (the supplement uses S-I, Fig. S1, Table S1).
+- Page count against that limit: a two-column 10 point copy (scratchpad only; every figure and table spans both
+  columns, no \FloatBarrier) compiles to 7 pages, with about 1.2 pages of white space on the pages that hold only
+  figures.  S-I still has placeholder text, so the final count is 7 unless something is cut.
 
 ### 2026-11-11 night (SOR: the docs check of the draft pull request fails; fix found, uncommitted)
 Ziyun sent a screenshot of the draft pull request's checks: CI / test (3.11) passed in 9 min, CI / versions passed,
