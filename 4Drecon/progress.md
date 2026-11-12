@@ -45,6 +45,25 @@
 
 ## Log
 
+### 2026-11-12 (MBIR-BHC: cost tables in the 11-12 deck, blueprint check, phantom figure over iterations)
+- Deck `Lilly/4DCT/Slides/2026/Ziyun_26_1112.pptx`: Ziyun's slide 4 now holds the run table of MBIR-BHC (shape, GPU,
+  iterations, time per iteration, total time, peak memory for the four datasets), and their slide 5 holds a new table
+  of the estimated full-size run (phantom about 104 h and 390 GB, board about 77 h and 330 to 580 GB, at 60 iterations
+  on one H100).  The deck before the change is `Slides/2026/_claude_tmp/Ziyun_26_1112_before_tables.pptx`.
+- Charlie's blueprint (https://claude.ai/artifact/KkFcGjkMhvdDfW5XSM5um9, pages Theory, Software Architecture, User
+  API) compared with the code.  The algorithm matches.  The code departs in the step size (preconditioner and
+  backtracking together, plus momentum), the threshold penalty (closed form shrinkage), the mask update (exact change
+  in cost, checkerboard halves), its own helper functions, a fixed number of iterations, and its location (a separate
+  repository, not `mbirtorch_applications`).
+- Memory: the differentiable projector saves only the pixel indices, so autograd is not the cause.  `update_image`
+  holds about 16 volumes and 16 sinograms at once (four states with two projections each, gradients, curvatures,
+  masked copies).  The high density copy is a full volume that is almost all zeros.  Possible savings, not made:
+  project only the pixels with metal, and get `p_L` as `Ax - p_H`.
+- New figure for the group: `IPMR_paper/Revision_figures/baseline_comparison/nsi_phantom_iterations.png`, the phantom
+  after 10 to 60 iterations at the slice and window of Fig. 5, from `Revision_codes/phantom_iterations.py`.  Row 374
+  of the six volumes is in `mbir_bhc_baseline/nsi_scans/nsi_phantom/gautschi_h100_60it/paper_row_374.npz`.
+- The board viewer on Gautschi login01 lost its tunnel after about 8 h, and the process was stopped.
+
 ### 2026-11-11 night (IPMR revision: skeleton of Section S-I of the supplement, the baseline comparison)
 Ziyun asked for a rough structure of Section S-I of `supplementary.tex`, and will fill in the images of NMAR,
 NMAR+MBIR and MBIR-BHC.
