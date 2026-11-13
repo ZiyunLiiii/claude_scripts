@@ -314,3 +314,19 @@ a running burst job.
 
 Both jobs started without a wait.  The phantom started at 23:38:54, and the board started 32 s after the phantom ended
 at 03:05:30.  Both estimates were within 1 min of the actual times.
+
+## IPMR paper method comparison table (submitted 2026-11-12)
+
+Scripts in `~/PycharmProjects/scripts/2026/1105/ipmr_timing/` (`methods.sbatch`, `bhc_board.sbatch`; see the timing
+README on the Mac).  Each method runs in its own process after a warm-up that compiles the jax code.  All three jobs use
+one H100 on ai with the burst QOS.  The phantom job and the MBIR-BHC job depend on the board job with
+`--dependency=afterok`.
+
+| Job | Size | Resources | Estimate | Limit given | Actual |
+|---|---|---|---|---|---|
+| 18441112 methods_board | circuit board at downsample 2, every 4th view (940 x 940 x 748, 450 views): prepare scan, then FDK, MBIR, NMAR+MBIR, IPMR, IPMR without constraints, each with a warm-up | 1 H100 (ai, -n14, burst) | about 40 min | 1 h | 35 min 46 s (warm-up about 135 s per method; MBIR 187 s, NMAR+MBIR 251 s, IPMR 512 s, IPMR without constraints 548 s; jax peak 26.1 GiB) |
+| 18441113 methods_phantom | NSI phantom at downsample 2, every 4th view (748 x 748 x 804, 450 views): FDK, MBIR, NMAR+MBIR, IPMR | 1 H100 (ai, -n14, burst) | about 25 min | 1 h | 16 min 5 s (warm-up about 113 s per method; MBIR 132 s, NMAR+MBIR 177 s, IPMR 239 s; jax peak 15.6 GiB) |
+| 18441114 bhc_board | circuit board (940 x 940 x 748, 450 views): FDK, MBIR, 50 MBIR-BHC iterations, budget 270 min | 1 H100 (ai, -n14, burst) | 3.6 h (wrong: taken from a smaller grid) | 4 h 40 | running; 525 to 580 s per iteration, peak 64.1 GiB, so the budget stops it near iteration 27 |
+
+The MBIR-BHC time per iteration again follows voxels x views: 45 s at 470 x 470 x 253 gives 530 s at 940 x 940 x 748
+(11.8 times the voxels).  Fifty board iterations at this size take about 8 h on one H100.
