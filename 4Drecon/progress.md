@@ -45,6 +45,30 @@
 
 ## Log
 
+### 2026-11-14 (SOR: blueprints of the 4D MACE temporal filter, DCT before and SOR after the pull request)
+Ziyun pointed to Charlie's Blueprinting starter kit (`~/Downloads/Blueprinting-starter-kit`: README.md, SKILL.md,
+templates, example; plain HTML and Markdown, no scripts) and asked for a blueprint of the DCT / SOR filter, with the
+focus on the user interface, how the interface changes after the pull request, and where the dejitter filter is in
+4D MACE.  The fork was unchanged (branch `sor` at 2ed1aad, equal to origin).
+- Folder: `Lilly/4DCT/Slides/2026/1114/Claude outputs/mace4d_temporal_filter_blueprints/` with `index.html`,
+  `theory.html`, `software-architecture.html`, `user-api.html`, and `decisions.md`, built from the kit's templates.
+  Hardware Mapping is marked not needed, and Testing and Verification is listed as not started.  The three pages
+  were written together, because the code exists already; the kit writes one page at a time.
+- Where the filter is (Software Architecture page): `MACE4DModel.recon` builds one matrix F before the loop
+  (prerelease `mace4d.py:543`, pull request `mace4d.py:550` through `_temporal_filter` at `:708`).  F is applied in
+  three places: to the initial image for the denoiser strength sigma_x (`:611` / `:612`), to the stack of data-fit
+  outputs in `_DataFitAgent.pieces` (`:287` / `:296`, folded by `mace.py:468`), and to each denoiser input in
+  `HyperplaneAgent._run_slab` (`mace.py:879`).  F is not applied to the denoiser outputs or to the returned
+  consensus image (`:692` / `:693`).
+- Counted for the Theory page: the DCT removes 8 of 99 modes at 6 frames per rotation, 17 of 199 at 12, and 11 of 15
+  at 8, and its rows do not sum to 1 (largest difference 0.037, 0.035, 0.188).  SOR removes 5, 6 (order 3) or 11
+  (order 6), and 6 (order 3) or 7 (order 4).
+- Open questions on the pages, each with a recommendation: keep the DCT as an option (remove it), the names
+  (keep), a public name for the frame angles (not in this pull request), filter the returned image (not in this
+  pull request), the module (keep `mace4d.py`), the rank tolerance 1e-4 (keep).  The answer of Charlie and Greg on
+  the DCT from 11-12 is not known to me.
+- The pages were checked as headless Chrome renders.  They are not published; nothing was sent over the network.
+
 ### 2026-11-12 (MBIR-BHC: cost tables in the 11-12 deck, blueprint check, phantom figure over iterations)
 - Deck `Lilly/4DCT/Slides/2026/Ziyun_26_1112.pptx`: Ziyun's slide 4 now holds the run table of MBIR-BHC (shape, GPU,
   iterations, time per iteration, total time, peak memory for the four datasets), and their slide 5 holds a new table
