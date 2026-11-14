@@ -67,7 +67,14 @@ focus on the user interface, how the interface changes after the pull request, a
   (keep), a public name for the frame angles (not in this pull request), filter the returned image (not in this
   pull request), the module (keep `mace4d.py`), the rank tolerance 1e-4 (keep).  The answer of Charlie and Greg on
   the DCT from 11-12 is not known to me.
-- The pages were checked as headless Chrome renders.  They are not published; nothing was sent over the network.
+- The pages were checked as headless Chrome renders.
+- Published on Ziyun's yes (2026-11-14) as a private artifact: https://claude.ai/artifact/6oTS5U8DMXmsULsPXESENM
+  (front page plus `theory.html`, `software-architecture.html`, `user-api.html`).  Only Ziyun can open it until they
+  share it from the page's Share menu.  The published front page differs from the local one in three ways: the
+  title is "4D MACE Temporal Filter Blueprints", the side padding follows the publish rules, and the foot points to
+  the Decisions section of each page, because `decisions.md` is not published.  The publish copy is made by
+  `make_publish_index.py` in the session scratchpad; to update the page, publish to the same URL.  The links between
+  the published pages were not clicked, because the browser pane is not signed in to claude.ai.
 
 ### 2026-11-12 (MBIR-BHC: cost tables in the 11-12 deck, blueprint check, phantom figure over iterations)
 - Deck `Lilly/4DCT/Slides/2026/Ziyun_26_1112.pptx`: Ziyun's slide 4 now holds the run table of MBIR-BHC (shape, GPU,
