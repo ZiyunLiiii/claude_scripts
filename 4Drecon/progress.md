@@ -45,6 +45,23 @@
 
 ## Log
 
+### 2026-11-18 (SOR: new interface slide for the 11-19 deck, written for a model user)
+Charlie found the slide "Interface of the SOR Code" of last week confusing.  It compared the signatures of
+`temporal_filter_matrix` and `sor_filter_matrix`, which a user never calls.  Ziyun asked for the slide to be redone
+the way Charlie thinks: what a user sees.
+- New slide "SOR in 4D MACE: What a User Sees": two bullets (the pull request replaces the DCT dejitter filter of
+  4D MACE with SOR; a user's script stays the same and one optional parameter is new), the three-line script with
+  `sor_order=3` marked in red, a table of what `dejitter=True`, `sor_order`, and `frames_per_rotation` do before and
+  after, and one sentence on `gen_sor_filter_matrix` inside the model.
+- Files in `Lilly/4DCT/Slides/2026/1119/Claude outputs/sor_interface/`: `sor_user_interface_slide.pptx` (one
+  slide, built from deck slide 3 of `Ziyun_26_1119.pptx`, so it has the deck's layout and table style),
+  `sor_user_interface_slide.png` (LibreOffice render), `build_sor_user_interface_slide.py`.
+- The deck `Slides/2026/Ziyun_26_1119.pptx` was open in PowerPoint (lock file), so I did not write to it.  The old
+  slide is deck slide 3 (Ziyun's slide 2).  Ziyun pastes the new slide, or closes the deck and tells me to write
+  it in.
+- python-pptx 1.0.2 is in the `mbirtorch` conda env.  The env has no PyMuPDF and the Mac has no `pdftoppm`; a
+  one-page PDF from LibreOffice converts to PNG with `sips -s format png`.
+
 ### 2026-11-18 (SOR: `frame_views` named back to `view_slices`, committed as a315886)
 Ziyun asked who came up with the name `view_slices`, and said to name it back if it was Charlie.
 - In mbirtorch the name first appears in Ziyun's port commit 3c6236a (2026-09-14).  It was carried over unchanged
