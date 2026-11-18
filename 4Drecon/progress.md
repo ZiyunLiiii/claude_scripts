@@ -56,7 +56,9 @@ Ziyun asked who came up with the name `view_slices`, and said to name it back if
   pull request is back to five files.  `_get_frame_center_angles`, `center_angles`, and `gen_sor_filter_matrix`
   are unchanged.
 - Checked: no `frame_views` left, the files compile, the three tests that run no reconstruction pass, the docs
-  build with `-W` passes.  The tests that run reconstructions were not run again.
+  build with `-W` passes.  On Ziyun's word the two MACE test files were run again: 10 passed in 169 s, with 36
+  warnings (35 in the run before; the lines I saw are the partition-subset warning, and I did not capture the
+  full list).
 - Nothing is staged or committed.  The blueprint still describes the pushed commit b5790c9 with `frame_views`;
   update it after the commit (User API row and bullets, Software Architecture rename bullet and file table,
   decisions).
