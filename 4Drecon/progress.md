@@ -45,6 +45,21 @@
 
 ## Log
 
+### 2026-11-18 (SOR: two renames on `sor`, not committed)
+Ziyun found the names around the frame angles unclear and asked for two renames in the fork, on `sor` after the
+merge commit ab20ac8.
+- `view_slices` is now `frame_views` (Ziyun accepted my proposal; it follows `frame_agents` and `frame_devices`,
+  and it drops the word slice, which elsewhere in mbirtorch means a slice of the volume).  It is a public attribute
+  of `MACE4DModel` and the second return value of `construct_time_frame_models`, and it was in `prerelease`
+  already, so the rename breaks scripts that use `mace4d.view_slices`.
+- `_frame_angles` is now `_get_frame_center_angles` (Ziyun's name).
+- 25 and 4 places in `mbirtorch/mace4d.py`, `mbirtorch/utilities.py`, `tests/test_mace4d.py`, and
+  `demo/demo_5_mace4d.py`.  The local `view_slice` in `construct_time_frame_models` and the test name
+  `test_frame_angles_are_the_middle_of_each_frame` are unchanged.
+- Checks: no old name left in the tracked files, the four files compile, the three tests that run no
+  reconstruction pass, and the docs build with `-W` passes (23 s, no warnings).  The other MACE tests were not run.
+- Nothing is staged or committed.  The blueprint pages and the published artifact still use the old names.
+
 ### 2026-11-18 (SOR: Ziyun merged upstream/prerelease into `sor` in PyCharm)
 - Ziyun merged `upstream/prerelease` (dfd0c2b, 16 new commits) into `sor` of the fork in PyCharm.  The first try
   at 10:32 failed after 42 s with `fatal: stash failed`, and the second try at 10:35 succeeded in 0.6 s.  The merge
