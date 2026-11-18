@@ -45,6 +45,23 @@
 
 ## Log
 
+### 2026-11-18 (SOR: `_temporal_filter` removed, not committed, recon tests not run)
+Ziyun asked three times why the model needs `_temporal_filter` next to `gen_sor_filter_matrix`, and then said to
+remove it.
+- `MACE4DModel._temporal_filter` is deleted.  `recon` now gets the frame center angles, calls
+  `gen_sor_filter_matrix`, applies the turn-off rule (trace of 1 or less, or one frame), and writes the note, all
+  inline (`mace4d.py:549` to `569`), as `prerelease` did for the DCT filter.  Nothing a user sees changes.
+- Tests: the float32-angles test builds the matrix with the same two calls as `recon` and no longer checks the note.
+  The turn-off test now runs a one-iteration `recon` and checks the warning and the note.
+- Checked: the three tests that run no reconstruction pass, `mace4d.py` has no undefined name, and the docs build
+  with `-W` passes.  NOT checked: the three tests that run reconstructions (end to end, turn-off, two workers).
+  My run of the two test files was blocked by the permission check, because it runs reconstructions on the Mac
+  without Ziyun's word.  Ask before running them, or let the CI run them after a push.
+- Two files are modified on `sor` (`mbirtorch/mace4d.py`, `tests/test_mace4d.py`); nothing is staged or committed.
+- The blueprint still describes the pushed commit 65c9734, which has `_temporal_filter`.  Update the Software
+  Architecture page after this change is committed: the method is gone, and the cited lines move (`:612` to
+  `:625`, `:693` to `:706`, the build is at `:549` to `:569`).
+
 ### 2026-11-18 (SOR: two renames on `sor`, not committed)
 Ziyun found the names around the frame angles unclear and asked for two renames in the fork, on `sor` after the
 merge commit ab20ac8.
