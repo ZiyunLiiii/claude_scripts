@@ -56,9 +56,12 @@ the way Charlie thinks: what a user sees.
 - Files in `Lilly/4DCT/Slides/2026/1119/Claude outputs/sor_interface/`: `sor_user_interface_slide.pptx` (one
   slide, built from deck slide 3 of `Ziyun_26_1119.pptx`, so it has the deck's layout and table style),
   `sor_user_interface_slide.png` (LibreOffice render), `build_sor_user_interface_slide.py`.
-- The deck `Slides/2026/Ziyun_26_1119.pptx` was open in PowerPoint (lock file), so I did not write to it.  The old
-  slide is deck slide 3 (Ziyun's slide 2).  Ziyun pastes the new slide, or closes the deck and tells me to write
-  it in.
+- The deck `Slides/2026/Ziyun_26_1119.pptx` was open in PowerPoint (lock file), so I first built the slide as a
+  separate file.  Ziyun then closed the deck and said to write it in.  Deck slide 3 (Ziyun's slide 2) is now
+  the new slide.  `write_slide_into_deck.py` copies every part of the deck unchanged and replaces only
+  `ppt/slides/slide3.xml`; of 112 parts, only that one differs.  The deck before the change is
+  `Slides/2026/_claude_tmp/Ziyun_26_1119_before_sor_slide.pptx`.  Checked: validation passes, and a
+  LibreOffice render of slide 3 of the deck looks the same as the one-slide render.  Not checked in PowerPoint.
 - python-pptx 1.0.2 is in the `mbirtorch` conda env.  The env has no PyMuPDF and the Mac has no `pdftoppm`; a
   one-page PDF from LibreOffice converts to PNG with `sips -s format png`.
 
