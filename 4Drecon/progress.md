@@ -45,6 +45,22 @@
 
 ## Log
 
+### 2026-11-18 (4D MACE demo: what the data of demo_5_mace4d.py looks like)
+Ziyun asked what is in `demo/demo_5_mace4d.py`, when it was added, and what its data looks like.
+- The demo was added by Charlie on 2026-10-08 (commit 26061b1, changed once in 21b1098), merged into `prerelease`
+  as pull request #20 and into `main` as #21.  The file is the same on `sor` and `4dbhc`, and the SOR pull request
+  does not change it.  The demo sets neither `dejitter` nor `sor_order`, so it runs the default temporal filter.
+- Data (generated on the Mac with the demo's own call, 7 s, no reconstruction): a rack and pinion in a 64 x 64 x 64
+  volume, 24 time steps, 240 views over 2 rotations (10 views per step, 3 degrees per view), 64 x 64 detector.  The
+  bar has value 1.0 and the wheel 0.7, and both are 12 voxels thick (rows 26 to 37).  2.4% of the voxels change
+  over the scan.  The largest sinogram value is 29.6.
+- Outputs in `Lilly/4DCT/Slides/2026/1118/Claude outputs/demo5_data/`: `demo5_data.npz` (phantom_4d, sinogram,
+  angles, step_of_view), `demo5_data.png`, `demo5_data_12fps.gif` (24 frames, loops forever), and the two scripts
+  `gen_demo5_data.py` and `plot_demo5_data.py`.
+- Found on the way: `gen_demo_data_4d(devices=[...])` fails, on `prerelease` too.  `utilities.py:2289` calls
+  `ct_model.configure_devices(devices)`, and the first positional argument of that method is `num_devices`.  Not
+  fixed and not reported; it is Charlie's code.
+
 ### 2026-11-14 (SOR: blueprints of the 4D MACE temporal filter, DCT before and SOR after the pull request)
 Ziyun pointed to Charlie's Blueprinting starter kit (`~/Downloads/Blueprinting-starter-kit`: README.md, SKILL.md,
 templates, example; plain HTML and Markdown, no scripts) and asked for a blueprint of the DCT / SOR filter, with the
