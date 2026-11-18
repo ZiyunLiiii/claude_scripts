@@ -45,6 +45,16 @@
 
 ## Log
 
+### 2026-11-18 (SOR: Ziyun merged upstream/prerelease into `sor` in PyCharm)
+- Ziyun merged `upstream/prerelease` (dfd0c2b, 16 new commits) into `sor` of the fork in PyCharm.  The first try
+  at 10:32 failed after 42 s with `fatal: stash failed`, and the second try at 10:35 succeeded in 0.6 s.  The merge
+  commit is ab20ac8.  It is local only: `sor` is 17 commits ahead of `origin/sor` (2ed1aad).
+- The failed try is in `~/Library/Logs/JetBrains/PyCharm2025.3/idea.log`.  `git merge` saves the state with
+  `git stash create` before a real merge, and that step failed.  PyCharm started two fetches and a re-index of the
+  project during the same merge.  The log does not say which process blocked the stash.
+- The merge has no conflict.  Only `mbirtorch/__init__.py` changed on both sides.  The merged branch differs from
+  `prerelease` only in the five SOR files.  The tests and the docs build have not been run on ab20ac8.
+
 ### 2026-11-18 (4D MACE demo: what the data of demo_5_mace4d.py looks like)
 Ziyun asked what is in `demo/demo_5_mace4d.py`, when it was added, and what its data looks like.
 - The demo was added by Charlie on 2026-10-08 (commit 26061b1, changed once in 21b1098), merged into `prerelease`
