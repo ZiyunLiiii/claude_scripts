@@ -45,7 +45,7 @@
 
 ## Log
 
-### 2026-11-18 (SOR: `frame_views` named back to `view_slices`, not committed)
+### 2026-11-18 (SOR: `frame_views` named back to `view_slices`, committed as a315886)
 Ziyun asked who came up with the name `view_slices`, and said to name it back if it was Charlie.
 - In mbirtorch the name first appears in Ziyun's port commit 3c6236a (2026-09-14).  It was carried over unchanged
   from mbirjax, where `git blame` gives Charlie's commit bb4244c, "MBIRJAX v0.7.3 (#229)", 2026-09-08.  That commit
@@ -59,9 +59,13 @@ Ziyun asked who came up with the name `view_slices`, and said to name it back if
   build with `-W` passes.  On Ziyun's word the two MACE test files were run again: 10 passed in 169 s, with 36
   warnings (35 in the run before; the lines I saw are the partition-subset warning, and I did not capture the
   full list).
-- Nothing is staged or committed.  The blueprint still describes the pushed commit b5790c9 with `frame_views`;
-  update it after the commit (User API row and bullets, Software Architecture rename bullet and file table,
-  decisions).
+- Committed and pushed on Ziyun's word (2026-11-18): commit a315886, "Name frame_views back to view_slices",
+  four files.  `origin/sor` is a315886, and the pull request differs from `prerelease` in five files.  I have
+  not seen the CI result.
+- Blueprint version 7: the User API page no longer lists a rename (table row and bullet removed, a bullet
+  says that no name a model user writes or reads is changed, the decision says `view_slices` keeps its name);
+  the Software Architecture page has no rename bullet, lists five files, and cites a315886; `decisions.md` has
+  the entry that replaces the rename; the foot of the front page cites a315886.
 - The pull request message must not have a bullet on the rename of `view_slices`.
 
 ### 2026-11-18 (SOR: `_temporal_filter` removed, committed as b5790c9)
