@@ -45,7 +45,7 @@
 
 ## Log
 
-### 2026-11-18 (SOR: `_temporal_filter` removed, not committed, recon tests not run)
+### 2026-11-18 (SOR: `_temporal_filter` removed, committed as b5790c9)
 Ziyun asked three times why the model needs `_temporal_filter` next to `gen_sor_filter_matrix`, and then said to
 remove it.
 - `MACE4DModel._temporal_filter` is deleted.  `recon` now gets the frame center angles, calls
@@ -59,10 +59,12 @@ remove it.
   without Ziyun's word.  Ask before running them, or let the CI run them after a push.
 - Ziyun then said to run them: `tests/test_mace4d.py` and `tests/test_mace.py` give 10 passed in 173 s on the
   Mac, with the method removed.  The 35 warnings are the partition-subset warning of the toy problem.
-- Two files are modified on `sor` (`mbirtorch/mace4d.py`, `tests/test_mace4d.py`); nothing is staged or committed.
-- The blueprint still describes the pushed commit 65c9734, which has `_temporal_filter`.  Update the Software
-  Architecture page after this change is committed: the method is gone, and the cited lines move (`:612` to
-  `:625`, `:693` to `:706`, the build is at `:549` to `:569`).
+- Committed and pushed on Ziyun's word (2026-11-18): commit b5790c9, "Build the temporal filter in recon and
+  remove _temporal_filter", two files.  `origin/sor` is b5790c9.  I have not seen the CI result.
+- Blueprint version 6: the Software Architecture page now says that `recon` calls `_get_frame_center_angles`
+  and `gen_sor_filter_matrix` directly, cites b5790c9 and the moved lines (build `:549` to `:569`, use 1 `:625`,
+  returned image `:706`), and has the decision "No builder method".  `decisions.md` has the matching entry, and
+  the foot of the front page cites b5790c9.
 
 ### 2026-11-18 (SOR: two renames on `sor`, not committed)
 Ziyun found the names around the frame angles unclear and asked for two renames in the fork, on `sor` after the
