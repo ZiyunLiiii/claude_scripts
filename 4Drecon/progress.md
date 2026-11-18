@@ -85,6 +85,13 @@ merge commit ab20ac8.
   the merge and the renames.  The full MACE tests were not run locally; the three light tests and the docs
   build passed before the commit.  I have not seen the CI result.  The blueprint now cites 65c9734 (version 4
   of the artifact).
+- Blueprint version 5 (2026-11-18, on Ziyun's word): the Theory page has a new section 3, "How the SOR matrix
+  is built" (the four steps, the properties, P does not depend on the data and is built once, the two filters
+  cost the same in the loop: 1 h 35 min with the DCT and 1 h 30 min with SOR for Phantom_30s_Run1 at 199
+  frames on Delta).  The Software Architecture page lists the seven files of the pull request.  The User API
+  page says that `view_slices` is not documented and that only demo 5 reads it.
+- A new pull request message was drafted for Ziyun in the chat.  It leads with what a model user sees.  I did
+  not change the pull request.
 
 ### 2026-11-18 (SOR: Ziyun merged upstream/prerelease into `sor` in PyCharm)
 - Ziyun merged `upstream/prerelease` (dfd0c2b, 16 new commits) into `sor` of the fork in PyCharm.  The first try
