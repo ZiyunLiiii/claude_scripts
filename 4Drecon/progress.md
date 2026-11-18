@@ -45,6 +45,23 @@
 
 ## Log
 
+### 2026-11-18 (SOR: `frame_views` named back to `view_slices`, not committed)
+Ziyun asked who came up with the name `view_slices`, and said to name it back if it was Charlie.
+- In mbirtorch the name first appears in Ziyun's port commit 3c6236a (2026-09-14).  It was carried over unchanged
+  from mbirjax, where `git blame` gives Charlie's commit bb4244c, "MBIRJAX v0.7.3 (#229)", 2026-09-08.  That commit
+  is a squashed release, so git does not show who typed the line inside it.  Charlie's demo 5 reads
+  `mace4d.view_slices`.
+- Named back in the working tree of `sor`: 26 places in `mbirtorch/mace4d.py`, `mbirtorch/utilities.py`,
+  `tests/test_mace4d.py`, `demo/demo_5_mace4d.py`.  The demo and `utilities.py` equal `prerelease` again, so the
+  pull request is back to five files.  `_get_frame_center_angles`, `center_angles`, and `gen_sor_filter_matrix`
+  are unchanged.
+- Checked: no `frame_views` left, the files compile, the three tests that run no reconstruction pass, the docs
+  build with `-W` passes.  The tests that run reconstructions were not run again.
+- Nothing is staged or committed.  The blueprint still describes the pushed commit b5790c9 with `frame_views`;
+  update it after the commit (User API row and bullets, Software Architecture rename bullet and file table,
+  decisions).
+- The pull request message must not have a bullet on the rename of `view_slices`.
+
 ### 2026-11-18 (SOR: `_temporal_filter` removed, committed as b5790c9)
 Ziyun asked three times why the model needs `_temporal_filter` next to `gen_sor_filter_matrix`, and then said to
 remove it.
