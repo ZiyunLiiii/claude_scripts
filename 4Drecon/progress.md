@@ -74,6 +74,12 @@ merge commit ab20ac8.
   Republished as version 2 of https://claude.ai/artifact/6oTS5U8DMXmsULsPXESENM; the artifact is now shared
   with Ziyun's organization (Ziyun changed the sharing).  The publish copy and `make_publish_index.py` are in
   the scratchpad of the session, so pass the URL when publishing again.
+- Ziyun then explained what Charlie means by the interface: what a user of `MACE4DModel` sees, since a user
+  does not call the dejitter function.  The User API page was rewritten in that order (version 3 of the
+  artifact): 1 the short answer (the calls stay the same, one optional parameter `sor_order` is added), 2 what
+  a model user sees, 3 what can change for a model user (the result, the harmonics no longer follow
+  `frames_per_rotation`, and `view_slices` to `frame_views`, the only change that can stop a model script),
+  4 the functions that a model user does not call.  The card of the front page was updated to match.
 
 ### 2026-11-18 (SOR: Ziyun merged upstream/prerelease into `sor` in PyCharm)
 - Ziyun merged `upstream/prerelease` (dfd0c2b, 16 new commits) into `sor` of the fork in PyCharm.  The first try
