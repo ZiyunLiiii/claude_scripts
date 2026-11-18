@@ -58,7 +58,17 @@ merge commit ab20ac8.
   `test_frame_angles_are_the_middle_of_each_frame` are unchanged.
 - Checks: no old name left in the tracked files, the four files compile, the three tests that run no
   reconstruction pass, and the docs build with `-W` passes (23 s, no warnings).  The other MACE tests were not run.
-- Nothing is staged or committed.  The blueprint pages and the published artifact still use the old names.
+- Later the same day, two more changes on Ziyun's word: `sor_filter_matrix` is now `gen_sor_filter_matrix`
+  (16 places in `mbirtorch/__init__.py`, `mace.py`, `mace4d.py`, `tests/test_mace.py`, `tests/test_mace4d.py`),
+  and the local in `MACE4DModel._temporal_filter` is `center_angles`.  One comment in `mace4d.py` was rewrapped for
+  the longer name.  Checks after all four renames: no old name left, every name in `mbirtorch.__all__` resolves,
+  the three tests that run no reconstruction pass, and the docs build with `-W` passes (20 s).
+- Found on the way: `~/Desktop` is synced by iCloud, and four test files of the fork were offloaded (`dataless`
+  in `ls -lO`).  `git grep` and `git diff` failed on them with `short read` until they were read once.  This is
+  the likely cause of the `stash failed` merge error and of the hung `git status` on 11-11.
+- Nothing is staged or committed: seven files are modified on `sor`.  The blueprint pages and the published
+  artifact still use the old names (`sor_filter_matrix` in many places, `_frame_angles` and `view_slices` on the
+  Software Architecture page).
 
 ### 2026-11-18 (SOR: Ziyun merged upstream/prerelease into `sor` in PyCharm)
 - Ziyun merged `upstream/prerelease` (dfd0c2b, 16 new commits) into `sor` of the fork in PyCharm.  The first try
