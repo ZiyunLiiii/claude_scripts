@@ -57,6 +57,8 @@ remove it.
   with `-W` passes.  NOT checked: the three tests that run reconstructions (end to end, turn-off, two workers).
   My run of the two test files was blocked by the permission check, because it runs reconstructions on the Mac
   without Ziyun's word.  Ask before running them, or let the CI run them after a push.
+- Ziyun then said to run them: `tests/test_mace4d.py` and `tests/test_mace.py` give 10 passed in 173 s on the
+  Mac, with the method removed.  The 35 warnings are the partition-subset warning of the toy problem.
 - Two files are modified on `sor` (`mbirtorch/mace4d.py`, `tests/test_mace4d.py`); nothing is staged or committed.
 - The blueprint still describes the pushed commit 65c9734, which has `_temporal_filter`.  Update the Software
   Architecture page after this change is committed: the method is gone, and the cited lines move (`:612` to
