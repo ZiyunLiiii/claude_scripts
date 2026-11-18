@@ -80,6 +80,11 @@ merge commit ab20ac8.
   a model user sees, 3 what can change for a model user (the result, the harmonics no longer follow
   `frames_per_rotation`, and `view_slices` to `frame_views`, the only change that can stop a model script),
   4 the functions that a model user does not call.  The card of the front page was updated to match.
+- Committed and pushed on Ziyun's word (2026-11-18): commit 65c9734, "Rename the SOR filter function, the frame
+  views, and the frame angle helper", seven files.  `origin/sor` is 65c9734, so the draft pull request holds
+  the merge and the renames.  The full MACE tests were not run locally; the three light tests and the docs
+  build passed before the commit.  I have not seen the CI result.  The blueprint now cites 65c9734 (version 4
+  of the artifact).
 
 ### 2026-11-18 (SOR: Ziyun merged upstream/prerelease into `sor` in PyCharm)
 - Ziyun merged `upstream/prerelease` (dfd0c2b, 16 new commits) into `sor` of the fork in PyCharm.  The first try
