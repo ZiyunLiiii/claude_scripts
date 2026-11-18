@@ -54,6 +54,8 @@
   project during the same merge.  The log does not say which process blocked the stash.
 - The merge has no conflict.  Only `mbirtorch/__init__.py` changed on both sides.  The merged branch differs from
   `prerelease` only in the five SOR files.  The tests and the docs build have not been run on ab20ac8.
+- Pushed on Ziyun's word (2026-11-18): `origin/sor` is ab20ac8, so the draft pull request holds the merge.
+  The tests and the docs build were not run locally before the push; the CI of the pull request runs them.
 
 ### 2026-11-18 (4D MACE demo: what the data of demo_5_mace4d.py looks like)
 Ziyun asked what is in `demo/demo_5_mace4d.py`, when it was added, and what its data looks like.
