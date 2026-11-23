@@ -45,6 +45,339 @@
 
 ## Log
 
+### 2026-11-23 (SOR: pull request 32 is green at a315886; blueprint matches the branch)
+- The draft pull request is https://github.com/cabouman/mbirtorch/pull/32, "SOR - Sensor Orthogonal
+  Reconstruction", from `ZiyunLiiii:sor` into `prerelease`.  Its head is a315886, with 8 commits and 5 changed
+  files.  GitHub reports it mergeable with no conflict, and it has no comments or review comments.
+- CI on a315886 (run of 2026-11-18): `docs` success, `test (3.11)` success, `versions` success, `floor` skipped
+  (it is skipped for `prerelease`).  Read from GitHub's public API without a login; `gh` is not installed.
+- The published blueprint (version 7) cites a315886 and `prerelease` at dfd0c2b.  Every cited line number, name
+  and value was checked against both branches and holds.  The published pages equal the local files.
+- The fork has nothing to commit or push: `sor` equals `origin/sor`, no tracked changes, no stash.
+  `upstream/prerelease` has not moved since 11-18.
+
+### 2026-11-23 (IPMR revision: why main.tex went from 16 to 15 pages)
+Local build (TeX Live 2023) of the Dropbox state of 14:06: 15 pages, page 15 all references, about 4 lines free in
+its right column.  This morning's main.tex (rebuilt from the session transcript) gives 16 pages, about a quarter
+column of references on page 16.  Of Ziyun's 27 edits today, only the merge of the two sentences at L96-97 (Jin et
+al. / 2D beam-hardening function) matters: alone it gives 15 pages, and without it all the other edits still give 16.
+It moves Eqs. (15)-(16) from page 5 to 4 and Table III from page 10 to 9.  The margin is about 4 reference lines.
+
+### 2026-11-20 evening (IPMR revision: full read of main.tex, supplement and letter for errors; nothing changed)
+Dropbox state of 11-20 15:21.  Scratch build: no undefined refs; main 16 pages, supplement 5, letter 7.
+- Table IV: every cell reproduced from the saved volumes (scratchpad check_table4.py), but the rows use different
+  metrics: single-metal = whole 3D volume (Figures/v2_code/simulation_2_metal.py), multi-metal = slice 128 only
+  (simulation_6_metal.py).  Multi-metal in 3D: FDK 1.2412/0.9551, MBIR 1.1459/0.9700, NMAR+MBIR 1.0754/0.9709,
+  MBIR-BHC(30) 0.8323/0.9795, IPMR 0.9116/0.9752; ranking unchanged.  The paper does not say which.
+- Fig. 4 caption "MBIR-BHC roughly 50 times slower": not measured on the simulation (BHC 30 it. ~14 min on A100 vs
+  IPMR 108 s on H100); Table VII gives 55-86x on the scans.
+- Table II vs runs: NSI phantom volume beta 0 (file name), multi-metal sim order 2 (settings.json).  IV-D says Table II
+  is "essentially optimal" on the single-metal phantom, but the sweep's beta 0 gave 0.099 vs 0.126 (left out of S-III).
+- Table VI: SOD 173.38 / SDD 400 (nominal, .nsipro) gives mag 2.31 and 55.05 um; 2.37 and 53.48 um come from the
+  calibrated geometry (source 166.24 mm, detector 228.25 mm, SDD 394.5 mm).  Also in the original submission.
+- Letter gaps: R1-3 no answer to NRMSE>1 vs SSIM; R1-4 no answer on thresholds/registration (paper has it) and
+  "partly chance" vs paper's "three orders of magnitude"; R1-6 asked a per-step breakdown (timing/results/
+  timing_table.md has it, Table S2 does not; R2-2's 1.7-9.1 s is only in the letter); R1 minor 7 cropping sentence
+  still in IV-C; R3-5 scatter discussion kept out of the paper; R3-4 "not shown in the paper"; R3-1 no controlled
+  boundary offset or volume error.  II-A "K materials" but sum k=0..K.  1.8-2.7x vs Table S2's 2.2-3.4x.
+
+### 2026-11-20/21 (IPMR revision: cause of the MBIR line artifacts in Fig. 5, axial padding, padded Fig. 5 panels b-f)
+Greg suggested reconstructing a larger volume with mbirtorch and cropping it back to the paper's grid.  Findings:
+- Feature: `axial_pad_fraction` of `ConeBeamModel` (mbirtorch, every branch since 2026-09; mbirjax since v0.7.1,
+  not in 0.6.15, the version of the paper volumes).  The parameter is read only by `auto_set_recon_geometry`, so
+  call that method after `set_params`.  A float pads both ends; a (top, bottom) pair pads each end, top = low slice
+  indices.  1 pads out to the farthest point that any measured ray reaches inside the support radius.  The lateral
+  equivalent is `resize_recon_fov(s, s)`.
+- NSI phantom geometry (the paper grid, mbirtorch on the Mac, geometry only): pad 0 gives 748 x 748 x 804 and
+  recon_slice_offset 4.3231, the paper grid exactly.  Bottom pad (0, 1) gives 879 slices (+75 at the high indices,
+  +9.3% voxels), offset 7.0568, and slices 0-803 are the paper grid.  Pad 1.0 at both ends gives 935 (+56 top).
+- Where the artifacts sit (Fig. 5 shows `rot90(vol, -1, (1, 2))[374]`, so the image row is the slice index): the V
+  lines are in slices ~750-803, below the bottom of the phantom (~slice 745), and peak between the boundary of the
+  region that every view measures and the last slice.  Axial slices 760-803 show a bright cone-shaped shell that
+  narrows to the last slice.  They are in MBIR, NMAR+MBIR, MBIR-BHC, IPMR iter 0 and iter 15 and the no-metal MBIR
+  scan alike, and not in FDK.  The top end (object ends inside the volume) is clean.  FDK shows a small object on
+  the rotation axis in the last slices, possibly the top of the mount.
+- Hypothesis (not tested): material below the volume, seen by the bottom detector rows, is not in the forward model,
+  so MBIR puts mass in the partly measured end slices.  This is a reconstruction-geometry effect, not beam hardening
+  or the IPMR loop.  The letter (R1 minor 7) says the artifacts are "not related to specific geometry", and IV-C says
+  "slightly adjusting the reconstruction position" removes them; both need rewording.
+  Ziyun: "not related to specific geometry" was meant as "not a problem special to cone beam".  My reply: the
+  general cause (unmodeled material outside the volume) is not special to cone beam, but this axial-end form needs
+  the cone angle (in parallel beam, row k sees only slice k), so the sentence still reads as an answer of "no" to
+  the reviewer's geometry question.
+- Proposed (waiting for Ziyun): one controlled MBIR run with the bottom pad, against the paper MBIR, then pad and
+  crop the other MBIR-based panels.  Caveat: Table V and the VG renderings (Lilly) use the unpadded volumes.
+  Diagnostic images in the session scratchpad only (bottom.png, axial.png).
+- Ziyun's plan: reconstruct 10% more slices at the top and the bottom, crop back to the paper grid, and if it works
+  regenerate Fig. 5 panels b-f.  Test on plain MBIR first.  Job 19006550 (Gautschi, 1 H100, 45 min limit, burst QOS; 19005989 on normal sat in AssocGrpGRES and was
+  cancelled, see gautschi/job_times.md), code
+  ~/PycharmProjects/scripts/2026/1120/mbir_axial_pad/ (run_mbir_pad.py, compare_mbir_pad.py, submit_mbir_pad.sbatch),
+  output ~/Desktop/data/output/2026/1120/mbir_axial_pad/.  mbirjax 0.6.15 (~/venvs/nmar), recipe of the paper MBIR
+  (scripts/2026/0219/gen_result_mbir_fdk_mar.py with every 4th view).  Control = paper grid 748 x 748 x 804; padded =
+  748 x 748 x 964 (80 slices each end, same offset and voxel size, checked on the login node), crop [80:884].
+  SSH from the Mac works with the key: `ssh -o BatchMode=yes li5273@gautschi.rcac.purdue.edu` (no `gautschi` alias).
+- Result of job 19006550 (COMPLETED in 8 min 18 s on h002; load 17 s, MBIR control 200 s, MBIR padded 220 s, FDK 8 s):
+  the padding works.  At the Fig. 5 window (0-0.08) the padded crop looks like the paper panel without the lines.
+  Beside the phantom in slices 750-803 (inside the Fig. 5 crop, row 374): max 0.0130 -> 0.0063, p99 0.0115 -> 0.0050,
+  mean 0.00129 -> 0.00071 (control -> padded crop).  A faint X stays below about 0.006, visible only at a 10x narrower
+  window; it crosses at the axis at the original last slice, where every bottom edge ray passes.  The phantom is
+  unchanged: padded crop vs control 0.36% relative RMS over the object (slices 0-744, > 0.0104); per-slice RMS
+  difference 1e-5 to 1e-4 in slices 0-600 (a bump at the metal slices, MBIR stopping differences), rising to 5e-4 in
+  700-744; Fig. 6 ROI mean 0.047419 vs 0.047411.  The control rerun is 0.70% relative RMS from the paper volume (same
+  recipe, not bit-exact).  In the added slices the padded MBIR puts a bright patch (max 0.048, slice 944) at the lower
+  edge of the field of view where the padded FDK also shows faint material: something real lies below the paper grid,
+  which supports the out-of-volume hypothesis.  80 slices exceed the farthest-ray reach at both ends (56 top, 75 bottom).
+  Results, figures (compare.png, zoom.png, added.png) and code: IPMR_paper/Revision_figures/axial_padding_test/.
+  Volumes on Gautschi: mbir_control.npy, mbir_padded_full.npy (964 slices), mbir_padded_crop.npy (the new panel b),
+  fdk_padded_full.npy.  Next (waiting for Ziyun): pad and crop c-f (NMAR+MBIR, MBIR-BHC, IPMR no constraints, IPMR),
+  then regenerate Fig. 5 and Fig. 6 (same volumes).
+- Ziyun: rerun c-f with the padding, burst QOS.  Job chain on Gautschi (all burst, one runs at a time):
+  19007218 smoke (c/e/f code at downsample 8, every 8th view) -> 19007219 c/e/f full (afterok) -> 19007220 MBIR-BHC
+  part 1 (afterany, 8 h, BUDGET_MIN 455) -> 19007221 part 2 (afterany, 3 h, continues only if needed).  Code
+  ~/PycharmProjects/scripts/2026/1120/fig5_pad/ (run_cef_pad.py, compare_pad.py, crop_bhc_pad.py, two sbatch files,
+  code/NMAR_reproduction snapshot of the Mac repo's nmar package at 662a63b), outputs
+  ~/Desktop/data/output/2026/1120/fig5_pad/{smoke,cef,mbir_bhc}/.  Design: each of c, e, f has an unpadded control.
+  (c) NMAR runs on the paper grid in both; only the final 15-iteration MBIR of the corrected sinogram is padded, then
+  cropped and the FDK metal voxels put back.  (e)/(f) recon_plastic_metal with num_constraint_update_iter 0 / 15,
+  order 3, alpha 1, beta 0, gamma 0.1, 3 passes (scripts/2026/mar/mar_recon.py recipe); in the padded runs the 0.6.15
+  segmentation margins are widened from 10 to 90 slices so IPMR segments the same slices as on the paper grid.
+  (d) MBIR-BHC runner and code snapshot of 2026-11-10 with --recon_shape 748 748 963 (803 + 2 x 80), 50 iterations;
+  paper grid = padded slices 79-882 (old file: a zero slice + the 803 grid).  mbirtorch snapshot keeps
+  recon_slice_offset when recon_shape changes (checked on the login node).  Paper panel volumes: b
+  data_for_MAR_paper/demo/recon_demo_mbir.npy (Mar 31; NOT 0319/demo/mbir_recon_demo.npy, which the plain MBIR test
+  compared against), e/f data_for_MAR_paper/demo/recon_3_1_demo_alpha1_beta0_gamma0.1_*_iter_{0,15}.npy (Apr 1).
+  fig5_nsi_phantom.py got a --padded option (volumes from Revision_data/axial_padding/nsi_phantom/, panels to
+  Revision_figures/fig5_nsi_phantom_padded/).
+- Smoke 19007218 COMPLETED in 7 min 5 s (h010): grid 187 x 187 x 216, padded 260 (pad 22), same offset.  Padded
+  crop vs control over the object: NMAR+MBIR 0.05%, IPMR no constraints 2.6%, IPMR 1.65% relative RMS; mean of the
+  last 8 slices 0.00117 -> 0.00052 in all three.  The IPMR change is larger, probably from the outer loop (re-segmentation,
+  refit) and the 0.5% change threshold of each MBIR pass (the padded volume has more near-empty slices); the full run's
+  control vs paper difference will show whether it is within IPMR's run-to-run spread.  c/e/f full 19007219 started on h010.
+- c/e/f full 19007219 COMPLETED in 1 h 25 min (NMAR+MBIR 451 / 438 s, IPMR no constraints 945 / 1133 s, IPMR
+  976 / 1084 s, control / padded).  Lines beside the phantom (slices 750-803, Fig. 5 crop), max / p99, control ->
+  padded: NMAR+MBIR 0.0134 / 0.0117 -> 0.0065 / 0.0051; IPMR no constraints 0.0122 / 0.0110 -> 0.0058 / 0.0047; IPMR
+  0.0123 / 0.0110 -> 0.0058 / 0.0048.  Plastic-only relative RMS (0.0104 < control < 0.06, slices 0-744), padded vs
+  control / control vs paper: MBIR 0.63% / 0.32%; NMAR+MBIR 0.60% / (paper volume not on Gautschi); IPMR no
+  constraints 1.4% / 6.4% (metal 1.9% / 9.7%); IPMR 1.37% / 1.36%.  So the padding changes each panel about as much as
+  a rerun does, and the unconstrained IPMR reproduces the paper volume worst (fits the paper's claim that it is
+  unstable).  Fig. 6 ROI means within 0.15%.  Results in Revision_figures/axial_padding_test/fig5_pad_cef/.
+- CORRECTION: the padding does not remove the lines, it halves them.  At the Fig. 5 window (0-0.08) a fainter V is
+  still visible when zoomed in (fig5_bottom_zoom.png); earlier I said they were gone at that window.  The residual V
+  sits where the first V was (crossing at the original last slice).  More axial padding cannot help (80 > ray reach).
+  Test 2 (job 19015239, burst, queued behind MBIR-BHC): axial 80 + lateral x1.2 (rows/cols 898, hypothesis: the stage
+  below is wider than the reconstruction cylinder; the padded MBIR shows a bright ring at the field-of-view edge in the
+  added bottom slices), and axial 80 + zero weights on the first and last 8 detector rows.  Code
+  scripts/2026/1120/mbir_axial_pad/run_mbir_pad2.py, output .../mbir_axial_pad/test2/.
+- MBIR-BHC part 1 (19007220, h002, started 17:40): 17 iterations by 19:58 at about 460 s each, metal threshold 0.128231
+  (unpadded 0.128232), peak 58.6 GB; expected to finish 50 iterations around 00:15 EST.
+- The Mac has 13 GB free (97% full) and the drive ziyun is not connected: padded volumes not downloaded yet (asked
+  Ziyun).  fig5_bcef_old_vs_padded.png (old vs padded b, c, e, f from the row-374 cross-sections) in axial_padding_test/.
+- 2026-11-21: MBIR-BHC 19007220 COMPLETED in 6 h 29 min (50 iterations; 19007221 found nothing left, 47 s).  Metal
+  threshold 0.128231 (unpadded 0.128232).  Padded crop vs the unpadded run (object > 0.0104, metal included): MBIR
+  start 0.49%, bhc_50 1.9% (max abs 0.21, in the metal); per-slice RMS difference in slices 1-599 1.1e-4.  Lines beside
+  the phantom max / p99: bhc_50 0.0216 / 0.0175 -> 0.0080 / 0.0060.  Fig. 6 ROI mean 0.055901 -> 0.055941 (+0.07%).
+  Results in axial_padding_test/fig5_pad_bhc/.
+- Test 2 (19015239, 11 min).  Lines beside the phantom p99 / max: unpadded 0.0115 / 0.0130, axial only 0.0050 / 0.0063,
+  axial + lateral x1.2 0.0034 / 0.0043, axial + zero weight on 8 edge rows 0.0045 / 0.0054.  Neither removes the
+  residual V; the full padded cross-sections show an X of lines below the phantom in both.  Lateral padding also
+  changes the phantom: 2.0% plastic RMS vs axial only, mostly in the wide top plate layer (image rows 250-340, mean
+  -1%); Fig. 6 ROI mean 0.047411 -> 0.047164 (-0.5%), upper metal box of Fig. 5 -2.3%.  The lateral grid shows
+  material at its left and right edges in the bottom slices.  Hypothesis (untested): the wide plates reach beyond the
+  748 x 748 grid in some direction, so the paper grid truncates them.  Edge rows: 0.3% plastic change, ROI unchanged.
+  Results in axial_padding_test/test2/ (test2_compare.png, test2_full_rows.png).
+- Padded Fig. 5 panels b-f drawn: Revision_figures/fig5_nsi_phantom_padded/{mbir,nmar_mbir,mbir_bhc,
+  ipmr_no_constraint,ipmr}.pdf, from row 374 only (Revision_data/axial_padding/nsi_phantom/<panel>_row374.npy,
+  748 x 804, extracted on Gautschi by scripts/2026/1120/fig5_pad/extract_rows.py; sources.json has volume paths and
+  md5; README.md there).  fig5_nsi_phantom.py --padded reads the row files (row path draws the same image as the
+  volume path, checked).  Padded vs paper panels at row 374 (rows < 700, plastic): b 0.44%, c 0.34%, d 1.3%, e 6.5%,
+  f 2.2%; line p99 down by a half to two thirds in every panel.  Comparison images: axial_padding_test/
+  fig5_bf_old_vs_padded.png, fig5_bf_bottom_zoom.png.  Full volumes stay on Gautschi.  Open: whether the residual V
+  is acceptable (or lateral padding, which changes the region the paper analyzes), Fig. 6, the letter wording.
+- 2026-11-23: preview of Fig. 5 with the padded panels for Ziyun, typeset with the manuscript's Fig. 5 block
+  (IEEEtran, 2 x 3 at 0.30\textwidth, same caption): Revision_figures/previews/fig5_nsi_phantom_padded.pdf/.png, and
+  fig5_nsi_phantom_current_paper.png (same layout, Overleaf panels) to flip between.  (a) FDK is the paper's.  Overleaf
+  not touched.  Template in previews/fig5_padded_tex/.
+- 2026-11-23: Fig. 6 redrawn with the padded volumes: fig6_nsi_phantom_roi_profile.py got --padded (MBIR,
+  NMAR+MBIR, MBIR-BHC, both IPMR from the row-374 files; FDK, NMAR, metal-free reference unchanged), panels in
+  Revision_figures/fig6_nsi_phantom_roi_profile_padded/, preview previews/fig6_nsi_phantom_roi_profile_padded.pdf and
+  _current_vs_padded.png (manuscript layout).  Mean absolute deviation from the metal-free profile, paper -> padded:
+  MBIR 39.3 -> 39.2%, NMAR+MBIR 31.0 -> 30.3%, MBIR-BHC 30.8 -> 30.6%, IPMR no constraints 24.2 -> 24.9%, IPMR 9.9 ->
+  8.1% (FDK 57.3%), so the text's claim (IPMR closest to the metal-free profile) holds.  Visually the same; the IPMR
+  no-constraints spike near voxel 66-69 moves by about two voxels (profile max diff 0.057).  Found: the current
+  Fig. 6 (c) NMAR+MBIR (Revision_data/fig6/fig6_row374.npz, table run 18441113) is a different reconstruction from
+  Fig. 5 (c) (Revision_data/nmar_baseline, max diff 0.09 at row 374); the padded figures use one volume for both.
+- 2026-11-23, Ziyun approved: padded Fig. 5 (b)-(f) and Fig. 6 panels copied into Overleaf Figures/demo_object/
+  (mbir, nmar_mbir, mbir_bhc, ipmr_no_constraint, ipmr; mbir_roi, nmar_mbir_roi, mbir_bhc_roi, mar_noconstraint_roi,
+  mar_iterative_roi, demo_cross_section_plot; byte-identical to Revision_figures).  fdk.pdf / fdk_roi.pdf not
+  touched.  The supplement's NSI NMAR+MBIR panel uses the same nmar_mbir.pdf, so it changed too.  The 13 previous
+  Overleaf files are in Revision_figures/overleaf_backup_2026-11-23_unpadded/demo_object/.  Revision_figures:
+  fig5_nsi_phantom and fig6_nsi_phantom_roi_profile now hold the padded panels; the old ones moved to
+  *_unpadded (with READMEs).  Revision_codes: fig5_nsi_phantom.py and fig6_nsi_phantom_roi_profile.py draw the padded
+  panels by default, --unpadded for the old ones; make_previews.py fig6 entry no longer needs the old
+  demo_cross_section_plot_with_nmar_mbir.pdf; previews refreshed (Fig. 5/6 panels 0.00 from Overleaf, FDK 0.26 as
+  before).  Not yet: letter R1 minor 7 and section IV-C wording about the line artifacts; Table V and VG renderings
+  still from unpadded volumes; baseline_comparison.py, profile_style_trials.py and plot_demo_cross_section.py
+  (not paper figures) still read the unpadded volumes.
+- 2026-11-23: the five padded panel volumes downloaded to Revision_data/axial_padding/nsi_phantom/<panel>.npy
+  (748 x 748 x 804, md5 match sources.json; Mac now 34 GB free).  Row files moved to nsi_phantom/row374/.  The test
+  data (JSON/NPZ/NPY) moved from Revision_figures/axial_padding_test/ to Revision_data/axial_padding/checks/{mbir,
+  cef,mbir_bhc,lateral_edge_rows}/; images, job code and logs stay in Revision_figures/axial_padding_test/ (README).
+  fig5_nsi_phantom.py and fig6_nsi_phantom_roi_profile.py now read the full volumes; redrawn panels are pixel-
+  identical, and the files that Overleaf has were kept byte-identical.
+- 2026-11-23, Ziyun decided: Table V and the VG renderings stay on the unpadded volumes (no VG access, and the
+  results do not need to be perfect; padding changes the phantom about as much as a rerun).  Do not redo them.
+  Still open: letter R1 minor 7 and section IV-C wording about the line artifacts.
+
+### 2026-11-20 (IPMR revision: check of every section, figure, table and equation pointer in the response letter; nothing changed)
+Compiled main.tex and supplementary.tex from a scratch copy (Dropbox state of 11-19 18:35) and checked each pointer
+of revision-v1/response_letter.tex against the .aux numbers and the text.  Wrong: R2-2 "Table~S3" (the supplement
+has only S1 and S2; run time is S2); cover-letter bullet 2 still says S-II tests "shifted thresholds" (dropped
+11-19); R3-3 has "[and 12--13]" in brackets; R1-5 gives K per dataset (1: single-metal, NSI; 2: multi-metal, board)
+and the board classes, but the paper does not (Table II still "Dataset specific"); R3-4 says the nine Lilly
+datasets are "not shown in the paper", but IV-D reports them.  Inconsistent: 0.4% (letter R1-5, main IV-D, vs Otsu)
+against 0.7% (S-II, vs true masks); R2-3 "not updated in each IPMR iteration" is true of K only, the masks and
+Otsu thresholds are recomputed every pass.  Content flags: IV-C still says the line artifacts "can be removed by
+cropping" (R1 minor 7); R1-4 letter says 0.0004% is partly chance, paper still claims three orders of magnitude.
+Verified: all section numbers (II-B, III-A, IV-A to IV-F, S-II to S-IV), Figs. 3-6 and 12-13, Fig. 6(g), Eq. (10)
+and (25), Table VII, Fig. 1 at 90 kV (SpekPy at 90 kV reproduces 46.172 / 15.448 keV), no GDT left, R2-2 numbers
+(1.7-9.1 s = parameter estimation from timing/results/timing_table.md; 4.2e9 = 2 x 900 x 1588 x 1467).
+- Later the same day Ziyun revised the letter and main.tex (Dropbox 15:02): Table S2, "shifted thresholds" removed,
+  brackets removed, K per dataset now in IV-A (red sentence) with "$K$" in the Table II row, R1-5 points to IV-A
+  and the last paragraph of II-B, R2-3 drops "not updated" and points to IV-A.  Recheck: all pointers now correct;
+  numbering unchanged.  Still open: 0.4% (letter, IV-D) vs 0.7% (S-II); R2-3 no longer says whether the masks are
+  updated per iteration; R3-4 still "not shown in the paper" without pointing to IV-D.  Page count: a local build
+  (TeX Live 2023) gives 16 pages, refs [52]-[58] on page 16, both with and without today's edit, so the overflow
+  predates it; not checked on Overleaf.
+
+### 2026-11-19 (IPMR: explained the fit and the correction; code vs paper differences found, nothing changed)
+Read mbirjax 0.7.3 `preprocess/mar.py` (nmar env on the Mac) against main.tex Section III.  Differences to check
+against the mbirjax version of the paper's results (not checked):
+- The gamma floor uses the mean of G_p (code comment: mean is a cross-device all-reduce); the paper says median.
+- The rescale c = <y, p'>/<p', p'> is fitted only on rays with plastic and no metal, so p_hat = y exactly on those
+  rays and p_hat = r G_p(0)/G_p(m) elsewhere; the paper says it matches "the global magnitude of the measured
+  sinogram".
+- p = plastic_scale * A(plastic mask), plastic_scale = LS fit of the mask to the recon (about the plastic mean), and
+  then p and each m are divided by their max before the fit; the paper says p is in cm.
+- H column order [p, p m, p m^2, m, m^2, m^3].  Sim default pass 3: G_p falls to 0.23 of G_p(0) at the largest m;
+  S_m(1) = 1.67 while max m = 1.20; the gamma floor was never active.
+
+### 2026-11-19 (IPMR: why the true masks give a higher plastic NRMSE than Otsu; analysis only, nothing changed)
+Ziyun asked why the true masks give a higher NRMSE (0.1269) than the estimated masks (Otsu 0.1264, ISO-50 0.1260,
+watershed 0.1263) in Supp S-II.  From segmentation_robustness/results/sim (metrics.json, extra_metrics.json):
+- Over the interior plastic (true plastic eroded by 5 voxels, 6.07M of 7.19M voxels) the true masks are the best:
+  NRMSE 0.0348 vs Otsu 0.0354 (-1.5%), ISO-50 0.0351, watershed 0.0350; interior std 2.98% vs 3.04%.
+- The other 15.5% of the plastic voxels (within 5 voxels of air or metal) carry about 93% of the squared error
+  (derived RMS about 0.31 for all runs); there the true-mask run is about 0.6% worse, which outweighs the interior
+  gain.  SSIM ranks the true masks best (0.9721 vs 0.9717).
+- The masks are nearly equal anyway: Otsu metal Dice vs truth 0.990 at pass 1 and 0.995 at pass 3, metal mask
+  1-2% larger than the true one; fitted theta nearly the same (theta_1 0.8787 for both at pass 3).
+- Why the boundary layer moves the other way was not tested (the volumes are on Gautschi only).  The metal sweep
+  is not monotone (+1 voxel +7%, -1 voxel 0%), so no simple mask-size story.
+- Correction, same day: the interior NRMSE is noisier than the whole-mask NRMSE.  Air/plastic threshold -0.05 and
+  +0.05 (nearly the same masks) give interior +11.4% and -2.8% against the default; four perturbed runs beat the true
+  masks there (thr_plastic +0.05 0.0344, thr_metal +0.05 0.0346, thr_plastic -0.2 0.0347, plastic_+2 0.0330).  So the
+  true masks' -1.4% is within the noise.  Recommended to Ziyun: do not add the interior NRMSE to the supplement.
+
+### 2026-11-19 (IPMR revision: Supp Fig S6 redesign proposed; nothing changed in the paper yet)
+Ziyun asked to drop the threshold-shift test from S-II (the segmentation methods stand in for it), plot only the
+NRMSE, and use the true masks as the baseline in the figure and Table S2.  Fig. S6 is `seg_sim_curves.pdf`.
+- Draft (session scratchpad only): horizontal bars of plastic NRMSE from 0, rows true masks (baseline), Otsu,
+  ISO-50, watershed, MBIR, FDK, each labeled with its value and change against the true masks: Otsu -0.44%,
+  ISO-50 -0.69%, watershed -0.47%, MBIR +20.0%, FDK +47.4%.  SSIM against true masks: -0.04, -0.02, -0.01, -0.96,
+  -4.61%.
+- Consequences: main.tex IV-D says "at most 0.4%" (against Otsu); against the true masks it is 0.7%.  The letter
+  (key revisions list and R3-1) still says "two perturbation tests ... shift the thresholds".
+- Flagged: the methods are a much smaller perturbation than the sweep.  ISO-50 moves the thresholds by 0.3% and 1.2%
+  of the class gap; every method's metal mask is within 1.2% of the Otsu voxel count (metal Dice vs truth >= 0.995).
+  The sweep reached a metal mask +10.6% (Dice 0.944) and the largest NRMSE change, +6.3%.  With the metal sweep
+  already gone (11-12), dropping it leaves R3-1 without a controlled perturbation.  The true masks are not the best
+  run, but the 0.7% spread is below the ~2% run-to-run spread seen between nearly identical masks.
+- Waiting for Ziyun's approval and two choices (SSIM in Table S2; threshold rows out of Figs. S7 and S8).
+- Ziyun then dropped MBIR and FDK from the plot (the paper already shows IPMR beats them): Fig. S6 becomes one
+  panel, NRMSE of the four segmentations as points, true masks first, dashed line at the baseline, title
+  "Reconstruction quality vs. segmentation method".  Drafts at y ranges of +-5% and +-2% of the baseline;
+  +-5% recommended, because a tighter range makes the 0.7% spread look like a real effect.
+- Ziyun chose +-5% and asked to replace only the image, with no text change.  New script
+  segmentation_robustness/scripts/plot_sim_nrmse.py writes figures/seg_sim_nrmse.pdf at 5.71 in, the include
+  width (0.8 \textwidth, \textwidth = 516 pt), so the text is not scaled.  It is copied into the Overleaf folder
+  as supplement/figures/seg_sim_curves.pdf (the old file there was identical to the repo's seg_sim_curves.pdf,
+  which stays), so supplementary.tex is unchanged.  A scratch compile gives 6 pages with only the two old
+  warnings.  README updated (figure list, copy command).  Still stale: the Fig. S6 caption (top/bottom,
+  left/right, MBIR/FDK lines), the S-II C paragraph, Table S1, Table S2 baseline, Figs. S7/S8 threshold rows,
+  main.tex 0.4% -> 0.7%, the letter's threshold wording.
+- Later the same day, on Ziyun's request, the supplement text, figures and table were updated (supplement only).
+  Scripts: `SHOWN_SWEEP_KEYS = []` in seg_results.py (SWEEPS kept for the old figure scripts); make_tables.py puts
+  the true masks first with the change columns against them (`BASELINE`; NSI table keeps Otsu) and uses two label
+  columns when no sweep is shown; plot_sim_slices.py shows true masks before Otsu; both slice scripts use
+  squeeze=False and save cropped (`R.save(..., tight=True)`).  Figs. S7 and S8 are one row each.  supplementary.tex
+  S-II: intro, A (now "Segmentation Methods", true masks named as the simulation baseline), C, D, the S6/S7/S8 and
+  table captions, and the summary (now a paragraph) rewritten; the table of the two tests removed.  Table numbers:
+  the simulation table is now Table S1, the run-time table Table S2.  Backups of the replaced Overleaf files are
+  in the session scratchpad only.  A scratch compile gives 5 pages with the two old warnings.  Still to do, outside
+  the supplement: main.tex IV-D 0.4% -> 0.7%, the letter's threshold wording (key revisions, R3-1), and the
+  letter's "Table~S3" (R2, run time) -> Table~S2.
+- Then Ziyun had the red metal mask outlines removed from Fig. S7 (plot_sim_slices.py passes metal_line=False for
+  the method row) and the caption sentence on the red line removed.  Copied to Overleaf; 5 pages, two old warnings.
+- Check of Table S1 (simulation table): every cell matches metrics.json / extra_metrics.json after rounding; the
+  IPMR rows are the 3rd iteration.  FDK and MBIR recomputed from data_for_MAR_paper/simulation/two_rods with the
+  definitions of Figures/v2_code/simulation_2_metal.py: 0.187113/0.927263 and 0.152303/0.962763, equal to the table and
+  to Table IV.  The paper's IPMR volume gives 0.126394/0.971687 and the study's Otsu run 0.126360/0.971653; both
+  round to Table IV's 0.1264/0.9717.  True masks, ISO-50 and watershed cannot be recomputed on the Mac (volumes only
+  on Gautschi).  Issue: two SSIM change cells are computed from unrounded values and do not follow from the shown
+  SSIMs: ISO-50 -0.02 (shown values give -0.03), watershed 0.00 (shown values give -0.01).  ISO-50's NRMSE change
+  is -0.69% unrounded but -0.71% from the shown values, against the text's "within 0.7%".  Ziyun decided to leave the table and
+  the text as they are (changes stay computed from the unrounded values).
+- Ziyun asked whether S-II explains why the true masks give a slightly higher NRMSE than the other segmentations.  It
+  does not.  Evidence that the <1% gap is not a ranking: threshold runs with metal masks of the true masks' size gave
+  0.1262 and 0.1264; air/plastic +-5% (plastic mask +0.1% / -0.25%) gave 0.1291 and 0.1255.  A one-sentence addition
+  (difference below 1%, small against the IPMR-MBIR gap of Table IV) was drafted; Ziyun chose to leave the text as is.
+
+### 2026-11-18 (IPMR revision: Reviewer 3 comment 2, check of Ziyun's claims and a plan; nothing changed in the paper)
+Greg found the response to Reviewer 3 comment 2 (several plastics) insufficient: the reviewer asks for changes to the
+paper, and the paper says nothing beyond "we assume a single plastic material" (Section II-B).  Ziyun asked for a
+check of five claims and a plan.  The check ran the mbirjax 0.7.3 segmentation (`segment_plastic_metal`, default
+margins) on the saved volumes in data_for_MAR_paper (board at full size; autoinjectors and NSI phantom at a 2x
+subsample).  The scripts were in the session scratchpad and are not saved.
+- IPMR was NOT run.  Only its segmentation step was applied to saved volumes (CPU, mbirjax 0.7.3, nmar env).  The
+  intermediate volumes of IPMR passes are not saved, so the pass statements below are inferences.
+- Board, plain MBIR, IPMR final, and unconstrained IPMR final (the `_iter0` file, `mar_noconstraint` in
+  Figures/v2_code/plot_circ.py; not the output of pass 1): the case (mean 0.016 /mm) and the PCB substrate (0.035
+  /mm, 18% of the plastic voxels) are both in the plastic class.  Merging them is the cheapest Otsu merge (cost 65),
+  ahead of merging the two metal classes (94).  Board, FDK (the input of pass 1 in mbirjax 0.7.3; the paper's run
+  used an older version, not checked): the substrate is in metal class 1 (mean 0.037) and all real metal is in metal
+  class 2.  So the claim likely holds for passes 2 and 3 only; a board run that saves the masks of each pass would
+  confirm it.
+- cai (Connected_Autoinjector_Vertical): the housing (0.016) and a denser part (0.031) are both in the plastic class,
+  in FDK and MBIR.  ai: one broad plastic class up to 0.08, spring near 0.16.  NSI phantom: one plastic; an extra
+  Otsu class splits the metal.
+- Synthetic test (air, two plastics, one metal, 3 Otsu classes): the plastics merge when the denser one is at most
+  about 2x the lighter one and the metal is far away given its voxel count.  A close, rare metal (0.06 /mm) takes the
+  denser plastic; plastics 3x apart put the lighter one with air.  The merge cost n1 n2 / (n1 + n2) (mu1 - mu2)^2
+  predicted 33 of 36 cases.
+- Boundary flash: MBIR only, at the volume boundary.  Rim voxels above the plastic/metal threshold: ai 9,032 and cai
+  15,364 (2x subsample) against 0 and 2 in FDK; board and NSI flash is at plastic level only.  The mask leaves the
+  thresholds nearly unchanged; it mainly removes wrong labels.  Some plastic-level flash survives just inside the
+  end-slice margin (ai about 2% of the plastic voxels).
+- The code comment of `segment_plastic_metal` calls the flash "flash"; the paper does not mention the mask, and its
+  sentence "The only parameter of the segmentation is K" is not exact.
+- Correction step: p' = (y - S_m) / G_p uses the measured sinogram, so merged plastics keep their contrast; they
+  share only G_p and S_m.  This is an argument, not a test.
+- Page budget: main.pdf is 15 pages; page 15 has about 110 pt free in the right column (about 9 lines).
+- Open for Ziyun: case and substrate materials (FR-4?), whether to name the autoinjectors, where the scope text
+  goes, and whether to run a two-plastic simulation after all.
+- Later: Ziyun wants no new supplement material, only changes to main.tex and the letter.  Drafts were tested in a
+  scratchpad copy, not applied.  The III-A boundary-layer sentence fits at no cost.  A new subsection IV-G "Scope and
+  Limitations" (about 85 words) fits 15 pages only with two trims: the Conclusion sentence "By exploiting an
+  efficient active-constraint approach..." removed, and the MBIR-BHC sentence of IV-F shortened to "It also takes 55
+  to 86 times as long as IPMR (Table VII)."  The same text as a Conclusion paragraph needs only the first trim.  With
+  either, page 15 is full to the last line.  The letter draft for R3-2 compiles (7 pages).
+- Later: Ziyun wrote an own version.  It puts the MBIR boundary artifact (already called "model mismatch" in Section
+  IV-C, line 1057) into IV-D, and the letter points R3-2 to it.  Review: the boundary artifact is not a
+  several-plastics failure, so the paper still lacks the scope that R3-2 asks for.  It fits Reviewer 3 comment 1
+  better.  Ziyun's IV-D text alone gives 16 pages by 2 lines; either trim fixes it.  A compact IV-D (boundary
+  artifact plus three sentences on several plastics, with "in the MBIR reconstruction") fits 15 pages only with both
+  trims.  Not applied.
+
 ### 2026-11-18 (SOR: new interface slide for the 11-19 deck, written for a model user)
 Charlie found the slide "Interface of the SOR Code" of last week confusing.  It compared the signatures of
 `temporal_filter_matrix` and `sor_filter_matrix`, which a user never calls.  Ziyun asked for the slide to be redone
