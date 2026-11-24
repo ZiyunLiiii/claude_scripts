@@ -45,6 +45,18 @@
 
 ## Log
 
+### 2026-11-24 (SOR: the sensor angle diagram as a GIF, deck v3 for Charlie)
+- Ziyun asked for the diagram of "Jitter Follows the Sensor Angle" as a GIF.  Ziyun had saved v2 in PowerPoint at
+  15:43 (the model slide's equation shape was touched: a space added, fallback redrawn), so v3 is made from that
+  saved v2: `for_charlie/4DCT_slides_SOR_theory_v3.pptx`; v2 is unchanged.
+- `gifs/sensor_angle.gif` (`make_angle_gif.py`; 76 frames, 9.7 s per loop, 0.12 MB, loops forever, pure white
+  background): the sensor turns once and leaves a trail of views; each complete 120 deg window adds its arc, center
+  dot, an arrow to theta_t, and its list row; after the turn the brace, arrow and "SOR filter" box appear and hold
+  3 s.  `add_angle_gif.py` swaps it in for the native-shape diagram; title and bullets stay.
+- Pillow maps colors to a given palette at reduced precision, so white landed on a near-white entry (an off-white
+  box on the slide); the script now maps each frame to its exact nearest palette entry.
+- Not yet seen in PowerPoint; LibreOffice shows only the first GIF frame.
+
 ### 2026-11-24 (SOR: slide "Jitter Follows the Sensor Angle", deck v2 for Charlie)
 - Ziyun saved `for_charlie/4DCT_slides_SOR_theory.pptx` with "Why 4D CT?" deleted (plus the scan caption on slide 2
   and the "Neighboring windows share part of their views." line removed), and asked to show what theta is and to
