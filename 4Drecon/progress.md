@@ -45,6 +45,25 @@
 
 ## Log
 
+### 2026-11-24 (SOR: two theory slides added to the deck for Charlie)
+- Ziyun asked for extra SOR theory in `Slides/2026/for_charlie/4DCT_slides.pptx` (the FuSe2 deck, 12 slides, no
+  speaker notes), in the style of the math slides of `FuSe2_workshop/reference.pptx`: a bullet, a centered equation,
+  a "where" list, and no complicated figures.  A first design of three slides with a four-panel figure was dropped.
+- New deck `Slides/2026/for_charlie/4DCT_slides_SOR_theory.pptx` (14 slides); the input deck is unchanged.  Deck
+  slide 10, "SOR: A Model of the Sensor Artifacts": x_v(t) = s_v(t) + sum over m = 1..p of a_{v,m} cos m theta_t +
+  b_{v,m} sin m theta_t, with one plot of a static voxel and its fit.  Deck slide 11, "SOR: Remove the Least-Squares
+  Fit": C* = argmin ||X - C B_c^T||_F^2, X~ = X - C* B_c^T = X P, P = I - Q_B Q_B^T; P needs only theta and p; in
+  4D MACE, P acts on the output of the data-fitting model and the input of each denoiser.  Slide 9's bridge line is
+  now "Next: how SOR works"; "Next: results on a real scan" moved to slide 11.
+- The plot: Phantom_30s_Run1, 4D MACE without dejitter (`1020/.../real_nofilter.npz`), slice z = 364, row 70,
+  column 304 (top edge of a static block).  Harmonics 1 to 3 of theta give 5 directions and hold 97.7% of the
+  voxel's change over all 99 frames (98.6% over frames 12 to 85).
+- The equations are native OMML (Cambria Math) with a plain text fallback.  LibreOffice shows the fallback, so the
+  native equations have not been seen in PowerPoint.  The file passes the pptx skill's validate.py against the input.
+- LibreOffice was gone from /Applications (Ziyun removed it, not knowing I had installed it); reinstalled on Ziyun's
+  word with `brew reinstall --cask libreoffice`.
+- Scripts, plot and README: `Slides/2026/1124/Claude outputs/sor_theory_slides/`.
+
 ### 2026-11-23 (SOR: pull request 32 is green at a315886; blueprint matches the branch)
 - The draft pull request is https://github.com/cabouman/mbirtorch/pull/32, "SOR - Sensor Orthogonal
   Reconstruction", from `ZiyunLiiii:sor` into `prerelease`.  Its head is a315886, with 8 commits and 5 changed
