@@ -50,13 +50,18 @@
   and the "Neighboring windows share part of their views." line removed), and asked to show what theta is and to
   connect the jitter to theta, that is, to the sensor.  PowerPoint kept the native equations, so the OMML is valid.
 - New file `for_charlie/4DCT_slides_SOR_theory_v2.pptx` (14 slides; the saved deck is unchanged).  New deck slide 8,
-  "Jitter Follows the Sensor Angle", after "4D MACE on a Real Scan": a native-shape diagram (sensor path, the 120 deg
-  window of views of frame t, its center angle theta_t), the same static voxel (z = 364, row 70, column 304) plotted
-  against theta_t for all 99 frames (six groups, one per angle; the first and last frames are the two outliers), and
-  three bullets ending "Frames with the same theta_t agree, so the jitter follows the sensor."  The model slide
-  dropped its own definition of theta_t; the shapes below its equation moved up 0.4 in.
+  "Jitter Follows the Sensor Angle", after "4D MACE on a Real Scan".  A native-shape diagram in the frames, colors and
+  angles of "From Views to 4D Frames": a circle with the views of frame 2 as dots, its 120 deg window and an arrow to
+  its center angle theta_2; a list with one angle per frame (theta_1 = 60 deg, theta_2 = 120 deg, ...); a brace and
+  an arrow into a red "SOR filter" box.  Bullets: each frame t has one sensor angle theta_t, the center angle of its
+  views; frames with the same theta_t have the same jitter, so the jitter follows the sensor; the SOR filter is built
+  from these angles alone.  The model slide dropped its own definition of theta_t; the shapes below its equation
+  moved up 0.4 in.
+- Ziyun dropped a first version's plot of the static voxel against theta_t: the voxel plot on the model slide has the
+  same purpose.  Ziyun asked for a more detailed diagram that stresses "center angle, one angle per frame" and that
+  this angle is what the SOR filter uses.
 - Checked as a LibreOffice render (fallback text) and with validate.py; not yet seen in PowerPoint.
-- Script `sor_theory_slides/scripts/add_theta_slide.py` (reads the saved deck), plot `make_theta_plot.py`.
+- Script `sor_theory_slides/scripts/add_theta_slide.py` (reads the saved deck, writes v2).
 
 ### 2026-11-24 (SOR: two theory slides added to the deck for Charlie)
 - Ziyun asked for extra SOR theory in `Slides/2026/for_charlie/4DCT_slides.pptx` (the FuSe2 deck, 12 slides, no
