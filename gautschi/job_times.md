@@ -244,6 +244,12 @@ The burst QOS (`scontrol update jobid=<id> qos=burst`) gets a job past the group
 from AssocGrpGRES to Resources at once.  It doubles the GPU-hours charged, allows 8 h at most, and allows one burst
 job per account.
 
+Submit burst jobs with `-q burst` from the start (2026-11-20).  A job submitted on the normal QOS gets
+`gres/hp_gpu=1` added at submission, and the group cap is `GrpTRES gres/hp_gpu=3`.  `scontrol update qos=burst`
+does not remove that GRES, so the job stays in AssocGrpGRES while the group's three hp_gpu are in use (job
+19005989; resubmitted with `-q burst` as 19006550, which started at once).  Jobs submitted on burst carry no
+hp_gpu.  Check with `sacct -j <id> -X --format=JobID,QOS,ReqTRES%90`.
+
 ## IPMR segmentation robustness test (submitted 2026-11-09)
 
 Scripts in `~/PycharmProjects/scripts/2026/1109/ipmr_segmentation/` (see IPMR_paper/segmentation_robustness/README.md on
@@ -331,3 +337,15 @@ one H100 on ai with the burst QOS.  The phantom job and the MBIR-BHC job depend 
 
 The MBIR-BHC time per iteration again follows voxels x views: 45 s at 470 x 470 x 253 gives 530 s at 940 x 940 x 748
 (11.8 times the voxels).  Fifty board iterations at this size take about 8 h on one H100.
+
+### Circuit board with every 6th view (submitted 2026-11-12, 23:00 EST)
+
+Ziyun asked for all figure methods of the board with 300 views and no crop (dataset board_300 of paper_scans.py,
+same grid 940 x 940 x 748 as board).  The scan was made on a login node first (prepare_scan.py with
+`taskset -c 0-15`, 50 s), so the two jobs do not depend on each other.  Normal QOS, because the burst QOS was busy
+with the 450-view MBIR-BHC (18441114, then 18451611).
+
+| Job | Size | Resources | Estimate | Limit given | Actual |
+|---|---|---|---|---|---|
+| 18456090 methods_board_300 | board 300 views, 940 x 940 x 748: FDK, MBIR, NMAR+MBIR, IPMR, IPMR without constraints, each with a warm-up | 1 H100 (ai, -n14, normal) | about 27 min (the 450-view job scaled by views) | 50 min | |
+| 18456091 bhc_board_300 | the same scan: FDK, MBIR, 50 MBIR-BHC iterations, budget 485 min | 1 H100 (ai, -n14, normal) | about 5.4 h (about 385 s per iteration) | 8 h 15 | |

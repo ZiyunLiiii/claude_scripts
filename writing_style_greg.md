@@ -32,12 +32,20 @@ information" is legitimate and "fresh pool" is not.  Say the literal
 fact: a new ThreadPoolExecutor is constructed, used once, and
 destroyed.)
 
-**Math mode in Claude app output:**
+**Math mode in Claude app output** (rules confirmed by screenshot tests in the Claude app, 2026-11-20):
  * Display math goes in a $$ block with the delimiters on their own lines. 
  * Inline math uses \( ... \) and stays under 58 characters. Anything longer becomes a display block. 
+ * The app renders a \( ... \) span only if the span contains a brace, `^`, `+`, `=`, `<`, `|`, or a letter command such as `\alpha`.  Underscore, minus, slash, digits, commas, parentheses, and `\,` do not count.  So \( r_i \), \( i \), and \( a-b \) show as literal text.  The fix is to wrap the whole span in braces: \( {r_i} \), \( {i} \), \( {(0,1)} \).  Never fall back to Unicode characters such as rᵢ or x₀. 
  * Single-dollar inline and \[ ... \] display are banned, since neither renders. 
  * Escaping-safe macros only inside math: \cr for row separators, \lbrace and \rbrace for set braces, \lVert and \rVert for norms, \quad or backslash-space for spacing. 
  * For long or publication-quality derivations, Claude should offer a KaTeX widget, an HTML artifact, or local typesetting with your MacTeX install.
+
+**Math in standalone files.**  A Markdown or LaTeX file is not Claude app output, so the rules above do not apply to it.  For a document the user wants to read locally, write LaTeX and compile it to a PDF.  The user's Markdown viewer, MacDown, does not render Markdown math.
+
+**Math in HTML pages** (blueprints, findings pages, reports):
+ * Write equations and math symbols in MathML.  Browsers typeset MathML without any script, so the page opens with no network connection.  Do not use MathJax or KaTeX.
+ * Put an equation with several parts on several lines, as an `mtable` with one row per part, aligned at the equals sign.
+ * Use the notation of the mbirtorch documentation, `docs/source/theory.rst` in the mbirtorch repository.  There `y` is the sinogram, `x` the image, `A` the projector, `Λ` the sinogram weights, `σ_y` the noise level, `h` the prior, `ρ` the qGGMRF potential, and `b_{s,r}` its pair weights.  Define any other symbol where it first appears.
 
 ## Structure
 

@@ -21,6 +21,7 @@ Slurm how-to for the Purdue RCAC **Gautschi** cluster, as actually used in
 | Slurm account | `bouman` (`-A bouman`) |
 | QOS available | `normal`, `preemptible`, `standby` |
 | Usual partition | `ai` (H100) |
+| QOS to use | **`burst`, from the start** (Ziyun, 2026-11-20). `normal` waits behind the group cap `gres/hp_gpu=3`, and `scontrol update qos=burst` on a pending normal job does not drop its `hp_gpu`, so cancel and resubmit with `-q burst`. Burst: 8 h max, one running burst job per account, double charge. See job_times.md. |
 | CPU-partition allocation | **0 cores** (`gres/hp_cpu=0`; `slist` shows CPU Total 0). A `cpu` job on QOS `normal` is rejected with `AssocGrpGRES` — use `-q standby` (4 h max) instead. Checked 2026-10-02. |
 | Memory per core | `cpu`: ~1.9 GB default, 2.0 GB max (128 GB needs ~64 cores). `ai`: 9.2 GB/core → 14 cores per GPU ≈ 129 GB per GPU. |
 | Conda env | `mbirjax` (`/home/li5273/.conda/envs/mbirjax`) |
@@ -154,6 +155,9 @@ sbatch --job-name="matrix_${JOB_TAG}" $EXCLUDE_ARG "$SCRIPT_DIR/submit_matrix.sb
 ---
 
 ## 4. Submitting, watching, killing
+
+Before you set `-t`, read [job_times.md](job_times.md): it lists what past jobs of each kind took and the limit
+to request (1.5 x the expected time + 5 min).
 
 ```bash
 cd /home/li5273/PycharmProjects/scripts/2026/0813

@@ -32,6 +32,9 @@ def main():
                         help="one line per volume, shown in the volume's data dict")
     parser.add_argument('--title', default='', help='figure title')
     parser.add_argument('--vmax', type=float, required=True, help='the display maximum')
+    parser.add_argument('--vmin', type=float, default=0, help='the display minimum')
+    parser.add_argument('--slice-axis', type=int, default=None,
+                        help='the axis that the slider moves along; defaults to the last axis')
     parser.add_argument('--dpi', type=float, default=100, help='figure dpi on the web page')
     parser.add_argument('--port', type=int, default=8988,
                         help='first port to try; WebAgg tries others if it is taken')
@@ -60,7 +63,8 @@ def main():
     notes = args.notes or [''] * len(volumes)
     data_dicts = [{'file': path, 'notes': note} for path, note in zip(args.volumes, notes)]
     viewer = mbirtorch.slice_viewer(*volumes, data_dicts=data_dicts, title=args.title,
-                                    vmin=0, vmax=args.vmax, slice_label=args.labels, block=False)
+                                    vmin=args.vmin, vmax=args.vmax, slice_label=args.labels,
+                                    slice_axis=args.slice_axis, block=False)
 
     # The server starts here under a random prefix, and pyplot's show below reuses it.
     WebAggApplication.initialize(url_prefix='/' + secrets.token_hex(16))

@@ -45,6 +45,32 @@
 
 ## Log
 
+### 2026-11-25 (IPMR: drive copy brought up to date, now Paper_Materials_2026-11-25; June copy compared)
+- Ziyun chose to update the 11-11 drive copy in place, Overleaf included.  Every file new or changed on the Mac
+  since 11-11 was copied with rsync (no --delete) into the folder of the README's mapping table; changed files
+  replaced their 11-11 versions.  494 files, 11.4 GB, all byte-identical to the source afterwards; a second rsync pass finds nothing left.  New on the
+  drive: 3_Revision_experiments/Revised_figures/Revision_data/ (axial_padding, board_x2_300, board_x2, board_crop,
+  fig6) and 3_Revision_experiments/Table4_NRMSE_check/.  Folder renamed Paper_Materials_2026-11-11 ->
+  Paper_Materials_2026-11-25; README.md rewritten for the current main.tex and supplementary.tex (13 figures; the
+  board coronal figure is now Fig. 12 and the axial Fig. 13, while the panel folders keep the old numbers;
+  sensitivity and segmentation figures moved to the supplement as S6 to S9).
+- Every panel the paper and supplement include matches a Mac file: by MD5, or (multi-metal GT/FDK/MBIR/IPMR, all
+  board x2_300 panels, 3 supplement board panels) by the same bytes except the matplotlib CreationDate.
+  Fig. 5(a) FDK is still Figures/v2/demo/fdk.pdf; the revised script's fdk.pdf differs only by matplotlib version
+  (3.9.2 vs 3.10.8) and looks the same.
+- June copy (/Volumes/ziyun/IPMR_paper/{data_for_MAR_paper,Figures,Draft,pseudo_code}): holds nothing that the
+  new copy lacks.  Its data_for_MAR_paper (20 files, 11 GB) is a subset of 2_Original_experiments/data_for_MAR_paper
+  (36 files), all 20 byte-identical (cmp); the new copy adds mar_for_slides/ and simulation/six_rods_pet_rerun/.
+  recon_demo_mbir.npy matches trivially (the 11-11 copy took it from the June copy).  Draft, pseudo_code and
+  MBIRJAX_MAR_theory.pptx identical; Figures differs only in 5 files where June has the older version, plus .idea.
+- On Ziyun's go-ahead, the June data_for_MAR_paper (11 GB) was moved to the drive Trash with Finder
+  (/Volumes/ziyun/.Trashes/502/data_for_MAR_paper; restorable until the Trash is emptied, space freed only then).
+  README, paths.md updated.
+- Revision_figures/final/ (named in paths.md, 2026-11-23) does not exist on the Mac; not found anywhere.
+- Three Fig. 6 PDFs of 11-11 remain in the drive's padded fig6 folder (now duplicates of the _unpadded ones), and
+  revision-v1/response_letter.pdf of 11-11 remains (no longer in Overleaf).  Nothing was deleted.
+- axial_padding/nsi_phantom/nmar_mbir.npy was iCloud-only on the Mac; the copy downloaded it.
+
 ### 2026-11-24 (SOR: the sensor angle diagram as a GIF, deck v3 for Charlie)
 - Ziyun asked for the diagram of "Jitter Follows the Sensor Angle" as a GIF.  Ziyun had saved v2 in PowerPoint at
   15:43 (the model slide's equation shape was touched: a space added, fallback redrawn), so v3 is made from that
