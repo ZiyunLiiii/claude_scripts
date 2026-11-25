@@ -45,6 +45,34 @@
 
 ## Log
 
+### 2026-11-25 (Blueprints: 4D CT reconstruction set created; math of the temporal filter set in MathML)
+Ziyun asked me to read the math section of `writing_style_greg.md`, to create a 4DCT blueprint set like the SOR
+blueprints (https://claude.ai/artifact/648swpno4LjUtjvxwcf8jS) that they can modify and track, and to update the
+SOR and 4DCT blueprints.
+- The math rules for HTML pages: equations and symbols in MathML, no MathJax or KaTeX, an equation with several
+  parts as an `mtable` aligned at the equals sign, and the notation of `docs/source/theory.rst` of mbirtorch
+  (y, x, A, Lambda, sigma_y, h, rho, b_{s,r}).
+- The kit is now Greg's repository `repository/blueprints` (github gbuzzard/blueprints; `BASE.md`, `KINDS.md`,
+  kinds software, experiment, paper).  It merges Charlie's starter kit v6.  I followed its software kind.
+- New set: `Lilly/4DCT/Blueprints/4dct_reconstruction/` (`index.html`, `theory.html`, `decisions.md`), published
+  as a private artifact, https://claude.ai/artifact/Td949iq4D9ZhLnQfsxCxd2.  Front page: Theory for review;
+  Software Architecture, Hardware Mapping, User API, and Testing and Verification not started; linked sets are
+  the temporal filter set and the SOR blueprints.  The Theory page describes `mace4d.py` and `mace.py` on
+  `prerelease` at dfd0c2b: the frames, the data-fit agent (one proximal map per frame), the three qGGMRF prior
+  agents (XY-t, YZ-t, XZ-t), the iteration (z = sum mu_k (2 v_k - w_k), w_k <- w_k + 2 rho_Mann (z - v_k),
+  x_bar = sum mu_k v_k), the three places of the filter F, and the automatic parameters.  It has four open
+  questions (review, which code, the fixed point, the symbol rho_Mann).  Only the Theory page is written; the
+  kit writes one page at a time.
+- Temporal filter set (https://claude.ai/artifact/6oTS5U8DMXmsULsPXESENM, version 8): the math of the Theory
+  page is MathML, the symbols F, P, p, theta, N_t on the other two pages are inline MathML, and the front page
+  links the 4DCT set.  The sentence that used x for one voxel now speaks of the rows of X, because x is the image
+  in the mbirtorch notation.  The copy before the change is in the session scratchpad only.
+- The SOR blueprints 648 were not changed.  They are owned outside Ziyun's organization, so I cannot publish to
+  them.  Their math is plain HTML, not MathML.  Offered: an own copy with the math in MathML.
+- Chrome on the Mac is version 105 and does not typeset MathML (it needs 109).  I checked the pages with headless
+  Firefox 161.  Safari 18.6 typesets MathML too.
+- Tools: `Claude_scripts/4Drecon/blueprints_tools/` (publish helper, the two one-time scripts, README).
+
 ### 2026-11-25 (IPMR: drive copy brought up to date, now Paper_Materials_2026-11-25; June copy compared)
 - Ziyun chose to update the 11-11 drive copy in place, Overleaf included.  Every file new or changed on the Mac
   since 11-11 was copied with rsync (no --delete) into the folder of the README's mapping table; changed files
