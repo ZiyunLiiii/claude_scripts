@@ -45,6 +45,29 @@
 
 ## Log
 
+### 2026-11-25 (Blueprints: Greg's review, placement of P decided, SOR filter in the 4DCT set)
+- Greg answered Ziyun's email, which linked only the temporal filter set.  His specific comments are on the October
+  SOR blueprints (648), which that set links to: the sentence "a function of theta alone, and it must be periodic"
+  (Theory 1.3) needs its assumption stated; he agrees with the placement of P (he writes Q1, the page labels it Q2);
+  he agrees with Q2 and Q3 of Software Architecture (keep the DCT through validation, the sor_ names); for Q4
+  (apply P to the returned image) he wants examples both ways; he suggests a check for evenly spaced angles, to be
+  discussed.  He has not answered the question of the pull request, which removes the DCT now.  A reply was drafted
+  in the chat; I do not know whether Ziyun sent it.
+- Ziyun: the placement of P is not an open question, because all combinations were tried before and the current
+  one was agreed on.  Done: the SOR copy's Theory page has no open question, Q2 is a decision of 2026-11-25, and
+  the placement study is gone from its Testing card; the temporal filter set no longer mentions a placement study.
+- The 4DCT Theory page now describes the SOR filter: F = I - Q_B Q_B^T from the frame angles and p (`sor_order`),
+  the assumption that two frames with the same sensor angle have the same artifact, and the three places of F.
+  The set follows the branch `sor` at a315886 (decision Q2); `decisions.md` has two entries.  Open on that page:
+  Q1 review, Q3 the fixed point, Q4 the symbols rho_Mann and p.
+- Published: 4DCT version 3 (https://claude.ai/artifact/Td949iq4D9ZhLnQfsxCxd2), SOR copy version 2
+  (https://claude.ai/artifact/GF7x5MCc174NFPFxSmZxkT), temporal filter version 9
+  (https://claude.ai/artifact/6oTS5U8DMXmsULsPXESENM).
+- State of the sets, as told to Ziyun: the 4DCT set is the main set (Theory current; the other pages not started);
+  the temporal filter set is current for pull request 32 and is needed until the pull request is merged; the SOR
+  copy has current theory, and its Software Architecture page describes the October design (SensorSubspace,
+  `dejitter_method`, `sor_rank`) that was not built; the original 648 is superseded by the copy.
+
 ### 2026-11-25 (Blueprints: 4D CT reconstruction set created; math of the temporal filter set in MathML)
 Ziyun asked me to read the math section of `writing_style_greg.md`, to create a 4DCT blueprint set like the SOR
 blueprints (https://claude.ai/artifact/648swpno4LjUtjvxwcf8jS) that they can modify and track, and to update the

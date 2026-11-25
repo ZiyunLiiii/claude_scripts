@@ -84,6 +84,13 @@ xbar = '<mover accent="true"><mi>x</mi><mo>&#x203E;</mo></mover>'
 x0 = sup(x, paren(mn('0')))
 wtilde_k = sub('<mover accent="true"><mi>w</mi><mo>~</mo></mover>', k)
 argmin = '<munder>' + mtext('arg min') + x + '</munder>'
+theta, p_order, m_index, Q, B, I = mi('θ'), mi('p'), mi('m'), mi('Q'), mi('B'), mi('I')
+theta_t = sub(theta, t)
+QB, QBT = sub(Q, B), subsup(Q, B, mi('T'))
+
+
+def fn(name, *argument):
+    return mi(name, normal=True) + '<mo>&#8289;</mo>' + row(*argument)
 
 
 def pair(a, b):
@@ -110,6 +117,7 @@ EQ_ITERATION = eq(
     (xbar, mo('=') + sum_over(k, mn('0'), mn('3')) + mu_k + vk))
 EQ_FILTER_FIT = eq((sub(v, pair(mn('0'), t)),
                     mo('=') + sum_over(s, mn('1'), Nt) + sub(F, pair(t, s)) + sub(u, s)))
+EQ_SOR = eq((F, mo('=') + I + mo('−') + QB + QBT))
 EQ_FILTER_PRIOR = eq(
     (sub('<mover accent="true"><mi>w</mi><mo>~</mo></mover>', pair(k, t)),
      mo('=') + sum_over(s, mn('1'), Nt) + sub(F, pair(t, s)) + sub(w, pair(k, s))),
@@ -135,7 +143,8 @@ The symbols follow the theory page of the mbirtorch documentation. The table lis
   <td>the array that <code>recon</code> returns</td></tr>
 <tr><td>Run state</td><td>the input {m(wk)} and the output {m(vk)} of agent {m(k)}, and the consensus image {m(xbar)}</td>
   <td><code>MACE.W</code>, <code>MACE.x_bar</code></td></tr>
-<tr><td>Temporal filter</td><td>the {m(Nt, mo('×'), Nt)} matrix {m(F)}</td><td><code>filter_matrix</code></td></tr>
+<tr><td>Temporal filter</td><td>the {m(Nt, mo('×'), Nt)} matrix {m(F)}, built from the sensor angle {m(theta_t)} of
+  each frame and the highest harmonic {m(p_order)}</td><td><code>filter_matrix</code>, <code>sor_order</code></td></tr>
 <tr><td>Reconstruction parameters</td>
   <td>the agent weights {m(mu_k)}, the step size {m(rho)}, and the strengths {m(sp)}, {m(sn)}, {m(sx)}</td>
   <td><code>mace_prior_weight</code>, <code>rho_mann</code>, <code>sigma_prox</code>, <code>sigma_noise</code>,
@@ -196,9 +205,21 @@ default is 0.5, the data-fit agent has the weight {m(mn('1'), mo('−'), mi('c')
 earlier when {m(xbar)} changes by less than <code>stop_threshold_change_pct</code> percent in one iteration.</p>
 
 <h2>4. The temporal filter</h2>
-<p>The overlapping frames produce a change from frame to frame that the object does not have. The temporal filter
-removes it. The filter is one {m(Nt, mo('×'), Nt)} matrix {m(F)} that acts along the frame axis. When
-<code>dejitter</code> is on, {m(F)} is applied in three places.</p>
+<p>The overlapping frames produce a change from frame to frame that the object does not have. This change follows
+the sensor angle {m(theta_t)} of the frame, which is the center angle of its views. The temporal filter removes it.
+The filter is one {m(Nt, mo('×'), Nt)} matrix {m(F)} that acts along the frame axis.</p>
+<p><b>How the filter is built.</b> {m(F)} is the matrix of Sensor Orthogonal Reconstruction (SOR). The change at
+one voxel is modeled as a sum of the harmonics {m(fn('cos', m_index, theta))} and {m(fn('sin', m_index, theta))} for
+{m(m_index, mo('='), mn('1'))} to {m(p_order)}. Here {m(p_order)} is the parameter <code>sor_order</code>, whose
+default is 3. Let the columns of {m(QB)} be an orthonormal basis of these harmonics at the frame angles, with their
+means removed. Then</p>
+{EQ_SOR}
+<p>Applying {m(F)} subtracts from each voxel the least-squares fit of the harmonics, and it keeps the mean over the
+frames. {m(F)} depends only on the frame angles and {m(p_order)}, so <code>recon</code> builds it once, before the
+iteration. The method assumes that two frames with the same sensor angle have the same artifact. This holds when
+every rotation uses the same view angles. The derivation is in the linked
+<a href="https://claude.ai/artifact/GF7x5MCc174NFPFxSmZxkT">Sensor Orthogonal Reconstruction blueprints</a>.</p>
+<p><b>Where the filter is applied.</b> When <code>dejitter</code> is on, {m(F)} is applied in three places.</p>
 <ul>
   <li><b>The outputs of the data-fit agent.</b> The output of agent 0 is the filtered stack of the proximal maps:</li>
 </ul>
@@ -211,8 +232,8 @@ removes it. The filter is one {m(Nt, mo('×'), Nt)} matrix {m(F)} that acts alon
 <ul>
   <li><b>The initial image</b>, once, before the strength {m(sx)} of the prior is estimated from it.</li>
 </ul>
-<p>{m(F)} is not applied to the outputs of the prior agents or to the returned image {m(xbar)}. How {m(F)} is
-built is the subject of a linked set of blueprints, the
+<p>{m(F)} is not applied to the outputs of the prior agents or to the returned image {m(xbar)}. What pull request 32
+changes in the code and in the user interface is in the linked
 <a href="https://claude.ai/artifact/6oTS5U8DMXmsULsPXESENM">4D MACE Temporal Filter blueprints</a>.</p>
 
 <h2>5. The initial image and the automatic parameters</h2>
@@ -232,21 +253,25 @@ built is the subject of a linked set of blueprints, the
   <li><input type="checkbox" id="q1"><label for="q1"><b>Q1. Review.</b> Should someone else, such as an advisor or
   a collaborator, review the design before it is settled?  Recommendation: yes, Greg or Charlie, because the page
   restates the method of their paper and code.</label></li>
-  <li><input type="checkbox" id="q2"><label for="q2"><b>Q2. Which code.</b> The page describes
-  <code>mbirtorch/mace4d.py</code> and <code>mbirtorch/mace.py</code> on <code>prerelease</code> at
-  <code>dfd0c2b</code>. Should it follow the branch <code>sor</code> of pull request 32 instead?  Recommendation:
-  keep <code>prerelease</code>. The two branches differ only in how {m(F)} is built, and the linked set covers
-  that.</label></li>
   <li><input type="checkbox" id="q3"><label for="q3"><b>Q3. The fixed point.</b> The page gives the iteration and
   not the image that it converges to. With {m(F)} inside the agents, that image is not stated in the code or in
-  the paper. Should the page state it?  Recommendation: leave it open here, and settle it with the question of
-  where to place the filter in the Sensor Orthogonal Reconstruction blueprints.</label></li>
-  <li><input type="checkbox" id="q4"><label for="q4"><b>Q4. The step size symbol.</b> The mbirtorch documentation
-  uses {m(mi('ρ'))} for the qGGMRF potential, so this page writes the step size of the iteration as {m(rho)}.
-  Keep this symbol?  Recommendation: yes.</label></li>
+  the paper. Should the page state it?  Recommendation: no. The page describes the iteration as the code runs
+  it.</label></li>
+  <li><input type="checkbox" id="q4"><label for="q4"><b>Q4. Two symbols.</b> The mbirtorch documentation uses
+  {m(mi('ρ'))} for the qGGMRF potential, so this page writes the step size of the iteration as {m(rho)}. The
+  documentation uses {m(p_order)} for a parameter of the qGGMRF prior, and this page uses {m(p_order)} for the
+  highest harmonic, as the Sensor Orthogonal Reconstruction blueprints do. Keep both?  Recommendation: yes. This
+  page does not write the qGGMRF parameter.</label></li>
 </ol>
 <h2>7. Decisions</h2>
-<p>No decision is recorded yet.</p>
+<ol class="questions">
+  <li class="decided"><input type="checkbox" checked disabled><label><span class="chip done">decided 2026-11-25</span>
+  <b>Q2. Which code.</b> The set follows the branch <code>sor</code> of pull request 32, in which the temporal
+  filter is the SOR filter.</label></li>
+  <li class="decided"><input type="checkbox" checked disabled><label><span class="chip done">decided 2026-11-25</span>
+  <b>Placement of the filter.</b> {m(F)} stays where the code applies it: after the proximal maps of the data-fit
+  agent and before each denoiser. All combinations were tried before, and this placement was agreed on.</label></li>
+</ol>
 '''
 
 INDEX_BODY = f'''<h1>{TITLE}</h1>
@@ -260,7 +285,7 @@ for the people who use it and extend it. One blueprint per component. Start at t
     <h3><a href="theory.html">1. Theory</a></h3>
     <span class="status todo">for review</span>
     <p>One volume per time frame is the consensus of one data-fit agent and three qGGMRF prior agents. The page
-    gives the frames, the agents, the consensus iteration, and where the temporal filter is applied.</p>
+    gives the frames, the agents, the consensus iteration, and the SOR temporal filter.</p>
   </div>
   <div class="item">
     <h3>2. Software Architecture</h3>
@@ -293,17 +318,19 @@ for the people who use it and extend it. One blueprint per component. Start at t
   <div class="item">
     <h3><a href="https://claude.ai/artifact/6oTS5U8DMXmsULsPXESENM">4D MACE Temporal Filter</a></h3>
     <span class="status todo">for review</span>
-    <p>How the temporal filter matrix is built before and after pull request 32: the DCT filter and the SOR filter.</p>
+    <p>What pull request 32 changes: the DCT filter before and the SOR filter after, in the code and in the user
+    interface.</p>
   </div>
   <div class="item">
-    <h3><a href="https://claude.ai/artifact/648swpno4LjUtjvxwcf8jS">Sensor Orthogonal Reconstruction</a></h3>
+    <h3><a href="https://claude.ai/artifact/GF7x5MCc174NFPFxSmZxkT">Sensor Orthogonal Reconstruction</a></h3>
     <span class="status todo">for review</span>
-    <p>The derivation of the SOR filter, and the open question of where to place it in the MACE loop.</p>
+    <p>The derivation of the SOR filter.</p>
   </div>
 </div>
 
 <p class="foot">Code: <code>mbirtorch/mace4d.py</code> and <code>mbirtorch/mace.py</code> on branch
-<code>prerelease</code> of <code>cabouman/mbirtorch</code>, at commit <code>dfd0c2b</code>. Documentation and
+<code>sor</code> of <code>ZiyunLiiii/mbirtorch_ziyun_fork</code>, at commit <code>a315886</code>. This branch is pull
+request 32 into <code>prerelease</code> of <code>cabouman/mbirtorch</code>. Documentation and
 release follow the procedures of mbirtorch. Decisions and rejected alternatives are recorded, with dates, in
 <code>decisions.md</code>.</p>
 '''
@@ -314,7 +341,18 @@ One entry per decision, newest last.  Each entry gives the date, the
 blueprint, the question, what was decided, and any alternative that was
 rejected.  Rejected alternatives live here, not on the blueprints.
 
-No decision is recorded yet.
+## 2026-11-25, Theory
+
+- **Question.** Which code does the set describe?
+- **Decided.** The branch `sor` of pull request 32, in which the temporal filter is the SOR filter.
+- **Rejected.** `prerelease`, in which the temporal filter is the DCT filter.
+
+## 2026-11-25, Theory
+
+- **Question.** Where is the temporal filter applied in the MACE loop?
+- **Decided.** Where the code applies it: after the proximal maps of the data-fit agent and before each denoiser.
+  All combinations were tried before, and this placement was agreed on.
+- **Rejected.** The other placements that were tried.
 '''
 
 
