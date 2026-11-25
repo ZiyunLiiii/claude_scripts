@@ -72,6 +72,19 @@ SOR and 4DCT blueprints.
 - Chrome on the Mac is version 105 and does not typeset MathML (it needs 109).  I checked the pages with headless
   Firefox 161.  Safari 18.6 typesets MathML too.
 - Tools: `Claude_scripts/4Drecon/blueprints_tools/` (publish helper, the two one-time scripts, README).
+- Later the same day, on Ziyun's yes: an own copy of the SOR blueprints with the math in MathML.  Folder
+  `Lilly/4DCT/Blueprints/sensor_orthogonal_reconstruction/` (`index.html`, `theory.html`, `theory2.html`,
+  `software-architecture.html`), published as a private artifact, https://claude.ai/artifact/GF7x5MCc174NFPFxSmZxkT.
+  `blueprints_tools/copy_sor_blueprints_mathml.py` made it from the four pages read from artifact 648.  It
+  converted 382 pieces of inline math (9, 191, 112, 70 on the four pages) and set the 11 displayed equations as
+  aligned `mtable`s, with their equation numbers.  The text, the diagrams, and the pseudo-code are unchanged.
+  The front page foot says that the set is a copy and that `decisions.md` of the original is not in it (it was
+  not published).  Checked: no broken tags, no old sub or sup markup left outside the diagrams, and Firefox
+  renders of Theory, Theory 2, and Software Architecture.  Two false matches were found and fixed (the d of
+  `mace4d`).  The copy keeps the symbols of the original; h, H, L, and D mean other things in the mbirtorch
+  docs (prior, denoiser) and were not renamed.
+- The 4DCT front page now links the copy (version 2 of its artifact).  The temporal filter set still links the
+  original 648 in two places.
 
 ### 2026-11-25 (IPMR: drive copy brought up to date, now Paper_Materials_2026-11-25; June copy compared)
 - Ziyun chose to update the 11-11 drive copy in place, Overleaf included.  Every file new or changed on the Mac

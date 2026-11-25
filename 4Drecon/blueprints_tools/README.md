@@ -9,6 +9,9 @@ are the record.  After a page is edited by hand, do not run its build script aga
   Its MathML helper functions can be reused for a new page.
 - `convert_temporal_filter_math.py` rewrote the math of the temporal filter set in MathML
   (2026-11-25).
+- `copy_sor_blueprints_mathml.py` made the copy of the Sensor Orthogonal Reconstruction blueprints
+  from the four pages of artifact 648 (2026-11-25).  It scans the text for math written with sub
+  and sup tags and rewrites it in MathML, and it prints every piece that it converted.
 
 Chrome 105 on the Mac does not typeset MathML.  Check a page with Firefox:
 `firefox --headless --no-remote --profile <scratch folder> --window-size=1000,3600 --screenshot out.png file://<page>`.

@@ -28,6 +28,7 @@ swap('padding-inline: 16px; padding-block: 36px 64px;',
      'padding-left: max(16px, env(safe-area-inset-left, 0px)); '
      'padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 36px 64px;')
 # The published set has no decisions.md beside it, so the foot points to the section on each page.
-swap('Decisions and rejected alternatives are recorded, with dates, in\n<code>decisions.md</code>.',
-     'Decisions and rejected alternatives are recorded, with dates, at the end of each page.')
+foot = 'Decisions and rejected alternatives are recorded, with dates, in\n<code>decisions.md</code>.'
+if foot in text:
+    swap(foot, 'Decisions and rejected alternatives are recorded, with dates, at the end of each page.')
 open(out, 'w', encoding='utf-8').write(text)
